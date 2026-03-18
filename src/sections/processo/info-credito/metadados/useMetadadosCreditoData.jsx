@@ -95,8 +95,8 @@ export function useMetadadosCreditoData(dados) {
         titulo: 'Cálculos (Valores)',
         dados: [
           { title: 'Valor do juro', value: fCurrency(dados?.valor_juro) },
-          { title: 'Valor da comissão', value: fCurrency(dados?.valor_comissao) },
-          { title: 'Valor do imposto selo', value: fCurrency(dados?.valor_imposto_selo) },
+          { title: 'Comissões', value: fCurrency(dados?.valor_comissao) },
+          { title: 'Imposto selo', value: fCurrency(dados?.valor_imposto_selo) },
           { title: 'Prestação s/ desconto', value: fCurrency(dados?.valor_prestacao_sem_desconto) },
         ],
       },
