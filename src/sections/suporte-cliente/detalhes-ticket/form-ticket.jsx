@@ -51,7 +51,7 @@ export function ActionForm({ dados, item = '', onClose: onClose1, closeTicket })
       values?.attachments?.forEach((file) => formData.append('attachments', file));
     }
 
-    const onClose = item === 'change-department' ? closeTicket : onClose1;
+    const onClose = closeTicket;
     const params1 = { id: dados?.id, patch: true, status: dados?.status, getItem: 'selectedItem' };
     const msg = (item === 'assign' && 'atribuido') || (item === 'change-department' && 'encaminhado') || '';
     const params = { value: values?.item, resolved: values.resolved, message: hasMsg ? formData : null, ...params1 };

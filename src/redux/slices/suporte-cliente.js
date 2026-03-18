@@ -62,9 +62,9 @@ const slice = createSlice({
 
     changeProp(state, action) {
       const { id, value, assign } = action.payload;
-      const prop = assign ? 'current_user_name' : 'status';
+      const prop = assign ? 'current_user_id' : 'status';
       const index = state.tickets.findIndex(({ id: idRow }) => idRow === id);
-      if (index !== -1) state.tickets[index][prop] = assign ? value?.label : value?.id;
+      if (index !== -1) state.tickets[index][prop] = value?.id;
     },
 
     changeCustomer(state, action) {
@@ -192,12 +192,17 @@ export function updateInSuporte(item, body, params) {
 
       if (item === 'core-validation') {
         // const response = await axios.patch(`${API_SUPORTE_CLIENTE_URL}${apiUrl}`, body, options);
-        body = JSON.stringify({ coreBankingAccountValidation: false, coreBankingEmailValidation: false, ...body });
+        // body = JSON.stringify({ coreBankingAccountValidation: false, coreBankingEmailValidation: false, ...body });
       }
 
       if (params?.message && (item === 'assign' || item === 'change-department' || item === 'change-status')) {
         const opt = headerOptions({ accessToken, mail: '', cc: true, ct: true, mfd: true });
         await axios.post(`${API_SUPORTE_CLIENTE_URL}/api/v1/ticket-messages/create/${params?.id}`, params.message, opt);
+        if (item === 'change-status' && params?.value?.id === 'IN_PROGRESS') {
+          dispatch(slice.actions.changeProp({ assign: item === 'assign', value: params?.value, id: params?.id }));
+          doneSucess(params, dispatch, slice.actions.getSuccess);
+          return;
+        }
       }
 
       const apiUrl =
