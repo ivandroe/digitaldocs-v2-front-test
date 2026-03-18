@@ -28,15 +28,15 @@ import Logo from '@/components/Logo';
 import Image from '@/components/Image';
 import SvgIconStyle from '@/components/SvgIconStyle';
 import { IconButtonAnimate } from '@/components/animate';
-import { Id, AjudaIcon, DenunciaIcon, LinksIcon, DefinicoesIcon, NotificacoesIcon } from '@/assets';
+import { Id, AjudaIcon, AppsIcon, DenunciaIcon, DefinicoesIcon, NotificacoesIcon } from '@/assets';
 //
 import Definicoes from './Definicoes';
-import LinksUteis from './LinksUteis';
 import Notificacoes from './Notificacoes';
 import ProcuraAvancada from './ProcuraAvancada';
 import AjudaDialog from '@/sections/home/Ajuda';
 import ConsultarDocumento from './ConsultarDocumento';
 import Felicitacoes from '@/sections/home/Felicitacoes';
+import AppLauncher from '@/sections/app-launcher/AppLauncher';
 import { FormSugestao, DenunciaForm } from '@/sections/home/HomeForm';
 // guards
 import RoleBasedGuard from '@/guards/RoleBasedGuard';
@@ -100,6 +100,7 @@ export default function DashboardHeader({ onOpenSidebar, isCollapse = false, ver
           <Box sx={{ flexGrow: 1 }} />
 
           <Stack direction="row" alignItems="center" spacing={{ xs: 0.25, sm: 0.75 }}>
+            <AppLauncher />
             <RoleBasedGuard roles={['Admin', 'pdex']}>
               <IconButtonHeader
                 title="Consultar documento"
@@ -107,7 +108,6 @@ export default function DashboardHeader({ onOpenSidebar, isCollapse = false, ver
                 setOpen={() => setModal('documento')}
               />
             </RoleBasedGuard>
-            <LinksUteis />
             <Notificacoes />
             <IconButtonHeader title="Denúncia" open={modal === 'denuncia'} setOpen={() => setModal('denuncia')} />
             <Definicoes />
@@ -189,7 +189,7 @@ export function IconButtonHeader({ title, open, setOpen, total }) {
     <Tooltip arrow title={title}>
       <IconButtonAnimate
         color={open ? 'primary' : 'default'}
-        onClick={(event) => setOpen(event.currentTarget)}
+        onClick={title === 'Aplicações & Links úteis' ? setOpen : (event) => setOpen(event.currentTarget)}
         sx={{
           padding: 0,
           color: '#fff',
@@ -205,10 +205,10 @@ export function IconButtonHeader({ title, open, setOpen, total }) {
         ) : (
           <Box sx={{ width: { xs: 20, sm: 28 }, height: { xs: 20, sm: 28 } }}>
             {title === 'Ajuda' && <AjudaIcon />}
-            {title === 'Links úteis' && <LinksIcon />}
             {title === 'Denúncia' && <DenunciaIcon />}
             {title === 'Consultar documento' && <Id />}
             {title === 'Definições' && <DefinicoesIcon />}
+            {title === 'Aplicações & Links úteis' && <AppsIcon />}
           </Box>
         )}
       </IconButtonAnimate>

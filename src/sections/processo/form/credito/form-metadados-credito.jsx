@@ -42,15 +42,15 @@ import { DialogTitleAlt } from '@/components/CustomDialog';
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-export default function MetadadosCreditoForm({ onClose, dados = null, ids }) {
+export default function MetadadosCreditoForm({ onClose, dados = null, outros, ids }) {
   const dispatch = useDispatch();
   const { activeStep, dadosStepper } = useSelector((state) => state.stepper);
   const { precario, isLoading } = useSelector((state) => state.parametrizacao);
 
   useEffect(() => {
     dispatch(getFromGaji9('tiposImoveis'));
-    dispatch(getFromParametrizacao('pesquizar-precario', { ...ids, item: 'precario' }));
-  }, [dispatch, ids]);
+    if (!dados) dispatch(getFromParametrizacao('pesquizar-precario', { ...ids, item: 'precario' }));
+  }, [dados, dispatch, ids]);
 
   const handleClose = useCallback(() => {
     onClose();
@@ -58,7 +58,12 @@ export default function MetadadosCreditoForm({ onClose, dados = null, ids }) {
     dispatch(getSuccess({ item: 'precario', dados: null }));
   }, [onClose, dispatch]);
 
-  const commonProps = { dados, dadosStepper, dispatch, precario: precario?.precario };
+  const commonProps = {
+    dispatch,
+    dadosStepper,
+    dados: { ...dados, ...outros },
+    precario: dados ? null : precario?.precario,
+  };
 
   return (
     <Dialog open fullWidth maxWidth="md">
@@ -208,7 +213,7 @@ function Taxas({ dados, dadosStepper, precario }) {
           <RHFNumberField name="taxa_juro_precario" label="Taxa juros precário" tipo="%" />
         </GridItem>
         <GridItem xs={6} md={3}>
-          <RHFNumberField name="taxa_juro_desconto" label="Taxa juros desconto" tipo="%" />
+          <RHFNumberField name="taxa_juro_desconto" label="Spread" tipo="%" />
         </GridItem>
         <GridItem xs={6} md={3}>
           <RHFNumberField name="taxa_mora" label="Taxa de mora" tipo="%" />

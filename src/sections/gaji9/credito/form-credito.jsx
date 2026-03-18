@@ -41,13 +41,13 @@ export default function CreditoForm({ onClose }) {
     finalidade: Yup.string().required().label('Finalidade'),
     taxa_taeg: Yup.number().min(0).required().label('TAEG'),
     tipo_titular_id: Yup.mixed().required().label('Tipo de titular'),
+    taxa_juro_desconto: Yup.number().min(0).required().label('Spread'),
     conta_do_renda: Yup.number().min(0).required().label('Conta DO débito'),
     valor_juro: Yup.number().min(0).required().label('Valor total de juros'),
     taxa_imposto_selo: Yup.number().min(0).required().label('Taxa imposto de selo'),
     prazo_contratual: Yup.number().positive(0).required().label('Prazo contratual'),
     valor_comissao: Yup.number().min(0).required().label('Valor total de comissões'),
     taxa_juro_precario: Yup.number().min(0).required().label('Taxa de juros preçário'),
-    taxa_juro_desconto: Yup.number().min(0).required().label('Taxa de juros desconto'),
     valor_imposto_selo: Yup.number().min(0).required().label('Valor total de imposto selo'),
     taxa_comissao_abertura: Yup.number().min(0).required().label('Taxa comissão de abertura'),
     data_vencimento_prestacao1: Yup.date().typeError().required().label('Venc. 1ª prestação'),
@@ -137,7 +137,7 @@ export default function CreditoForm({ onClose }) {
               <RHFNumberField label="Taxa de juros preçário" name="taxa_juro_precario" tipo="%" />
             </GridItem>
             <GridItem xs={6} md={3}>
-              <RHFNumberField label="Taxa de juros desconto" name="taxa_juro_desconto" tipo="%" />
+              <RHFNumberField label="Spread" name="taxa_juro_desconto" tipo="%" />
             </GridItem>
             <GridItem xs={6} md={3}>
               <RHFNumberField label="Taxa comissão de abertura" name="taxa_comissao_abertura" tipo="%" />

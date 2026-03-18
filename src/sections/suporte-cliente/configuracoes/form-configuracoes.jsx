@@ -14,10 +14,17 @@ import { applyList, rolesList, phasesList } from '../utils';
 import { useSelector, useDispatch } from '@/redux/store';
 import { createInSuporte, updateInSuporte } from '@/redux/slices/suporte-cliente';
 // components
+import {
+  RHFSwitch,
+  RHFEditor,
+  FormProvider,
+  RHFTextField,
+  RHFNumberField,
+  RHFAutocompleteObj,
+} from '@/components/hook-form';
 import { DialogButons } from '@/components/Actions';
 import { FormLoading } from '@/components/skeleton';
 import { SearchNotFoundSmall } from '@/components/table/SearchNotFound';
-import { RHFSwitch, FormProvider, RHFTextField, RHFNumberField, RHFAutocompleteObj } from '@/components/hook-form';
 
 // ---------------------------------------------------------------------------------------------------------------------
 
@@ -447,7 +454,7 @@ export function RespostaForm({ onClose }) {
           <ItemComponent item={selectedItem} rows={1}>
             <Stack spacing={3} sx={{ pt: 3 }}>
               <RHFTextField name="subject" label="Assunto" />
-              <RHFTextField name="content" label="Conteúdo" multiline rows={8} />
+              <RHFEditor name="content" label="Conteúdo" simple />
               <RHFAutocompleteObj name="phase" label="Fase" options={phasesList} />
             </Stack>
             <DialogButons edit={isEdit} isSaving={isSaving} onClose={onClose} />

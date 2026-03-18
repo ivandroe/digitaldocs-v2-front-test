@@ -54,11 +54,25 @@ export function getDefaultsCondicoes({ dadosStepper, dados, precario }) {
 
 export function getDefaultsTaxas({ dadosStepper, dados, precario }) {
   const resolve = (key, fallback = '') => resolveField(key, { dadosStepper, dados, precario, fallback });
+
+  let taxaJuroDesconto = resolveField('taxa_juro_desconto', { dadosStepper, dados, precario, fallback: null });
+
+  if (taxaJuroDesconto === null) {
+    const taxaDados = dados?.taxa_juros;
+    const taxaPrecario = precario?.taxa_juro_precario?.default;
+
+    if (taxaPrecario !== undefined && taxaPrecario !== null && taxaDados !== undefined && taxaDados !== null) {
+      taxaJuroDesconto = taxaPrecario - taxaDados;
+    } else {
+      taxaJuroDesconto = '';
+    }
+  }
+
   return {
     modo_taxa_equivalente: resolveField('modo_taxa_equivalente', { dadosStepper, dados, precario, fallback: false }),
     taxa_mora: resolve('taxa_mora', 2),
+    taxa_juro_desconto: taxaJuroDesconto,
     taxa_imposto_selo: resolve('taxa_imposto_selo', 3.5),
-    taxa_juro_desconto: resolve('taxa_juro_desconto', 0),
     taxa_juro_precario: resolve('taxa_juro_precario', 11),
     taxa_comissao_abertura: resolve('taxa_comissao_abertura', 1.75),
     taxa_comissao_imobilizacao: resolve('taxa_comissao_imobilizacao', 0),
@@ -102,7 +116,7 @@ export const schemaRegime = Yup.object().shape({
 
 export const schemaTaxas = Yup.object().shape({
   taxa_mora: Yup.number().min(0).max(100).required().label('Taxa de mora'),
-  taxa_juro_desconto: Yup.number().min(0).max(100).required().label('Taxa de juros desconto'),
+  taxa_juro_desconto: Yup.number().min(0).max(100).required().label('Spread'),
   taxa_imposto_selo: Yup.number().positive().max(100).required().label('Taxa de imposto selo'),
   taxa_juro_precario: Yup.number().positive().max(100).required().label('Taxa de juros precário'),
   taxa_comissao_abertura: Yup.number().min(0).max(100).required().label('Taxa de comissão abertura'),

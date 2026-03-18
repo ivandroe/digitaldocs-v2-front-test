@@ -17,6 +17,7 @@ import useTable, { getComparator, applySort } from '@/hooks/useTable';
 import { useDispatch, useSelector } from '@/redux/store';
 import { getInSuporte, updateInSuporte, setModal } from '@/redux/slices/suporte-cliente';
 // Components
+import Markdown from '@/components/Markdown';
 import Scrollbar from '@/components/Scrollbar';
 import { DefaultAction } from '@/components/Actions';
 import { SkeletonTable } from '@/components/skeleton';
@@ -169,9 +170,7 @@ export default function TableConfiguracoes({ item }) {
                       {/* RESPOSTAS */}
                       {item === 'respostas' && (
                         <TableCell>
-                          <Typography variant="body2" sx={{ whiteSpace: 'pre-line' }}>
-                            {row?.content}
-                          </Typography>
+                          <Markdown variant="body2">{row?.content}</Markdown>
                         </TableCell>
                       )}
                       {item === 'respostas' && <TableCell align="center">{getPhasesLabel(row?.phase)}</TableCell>}

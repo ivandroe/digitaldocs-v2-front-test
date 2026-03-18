@@ -19,7 +19,7 @@ import MetadadosCreditoForm from '../../form/credito/form-metadados-credito';
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-export default function MetadadosCredito({ dados, prazo = '', modificar = false, ids = null }) {
+export default function MetadadosCredito({ dados, outros, modificar = false, ids = null }) {
   const theme = useTheme();
   const { toggle: open, onOpen, onClose } = useToggle();
   const { financeiroPrincipal, cardsVisible } = useMetadadosCreditoData(dados);
@@ -110,7 +110,7 @@ export default function MetadadosCredito({ dados, prazo = '', modificar = false,
         </Stack>
       )}
 
-      {open && <MetadadosCreditoForm onClose={onClose} dados={{ ...dados, prazo }} ids={ids} />}
+      {open && <MetadadosCreditoForm onClose={onClose} dados={dados} ids={ids} outros={outros} />}
     </Box>
   );
 }

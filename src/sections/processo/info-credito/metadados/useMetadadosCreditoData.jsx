@@ -76,7 +76,7 @@ export function useMetadadosCreditoData(dados) {
           },
           { title: 'Juro precário', value: fPercent(dados?.taxa_juro_precario) },
           ...(dados?.taxa_juro_desconto && Number(dados?.taxa_juro_desconto) > 0
-            ? [{ title: 'Juro desconto', value: fPercent(dados?.taxa_juro_desconto), bold: true }]
+            ? [{ title: 'Spread', value: fPercent(dados?.taxa_juro_desconto), bold: true }]
             : []),
 
           { title: 'Comissão de abertura', value: fPercent(dados?.taxa_comissao_abertura) },

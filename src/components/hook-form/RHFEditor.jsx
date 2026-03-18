@@ -17,9 +17,9 @@ export default function RHFEditor({ name, ...other }) {
       render={({ field, fieldState: { error } }) => (
         <Editor
           id={name}
+          error={!!error}
           value={field.value}
           onChange={field.onChange}
-          error={!!error}
           helperText={
             <FormHelperText error sx={{ px: 2 }}>
               {error?.message}

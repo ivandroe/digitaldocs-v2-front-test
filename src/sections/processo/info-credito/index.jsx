@@ -38,7 +38,7 @@ export default function InfoCredito({ dados }) {
         <MetadadosCredito
           modificar={modificar}
           dados={dados?.gaji9_metadados}
-          prazo={dados?.prazo_amortizacao}
+          outros={{ prazo: dados?.prazo_amortizacao || '', taxa_juro: dados?.taxa_juro || '' }}
           ids={{
             creditoId: dados?.id,
             linhaId: dados?.linha_id,

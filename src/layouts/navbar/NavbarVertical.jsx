@@ -9,7 +9,6 @@ import { styled, useTheme } from '@mui/material/styles';
 // utils
 import cssStyles from '@/utils/cssStyles';
 import { NAVBAR, ambiente } from '@/config';
-import { useSelector } from '@/redux/store';
 // hooks
 import useResponsive from '@/hooks/useResponsive';
 import useCollapseDrawer from '@/hooks/useCollapseDrawer';
@@ -20,7 +19,6 @@ import { NavSectionVertical } from '@/components/nav-section';
 import { Iso9001Icon, Iso27001Icon } from '@/theme/overrides/CustomIcons';
 //
 import NavConfig from './NavConfig';
-import Aplicacoes from './Aplicacoes';
 import NavbarAcount from './NavbarAcount';
 import CollapseButton from './CollapseButton';
 
@@ -38,7 +36,6 @@ const RootStyle = styled('div')(({ theme }) => ({
 export default function NavbarVertical({ isOpenSidebar, onCloseSidebar }) {
   const theme = useTheme();
   const isDesktop = useResponsive('up', 'lg');
-  const { minhasAplicacoes } = useSelector((state) => state.intranet);
 
   const { isCollapse, collapseClick, collapseHover, onToggleCollapse, onHoverEnter, onHoverLeave } =
     useCollapseDrawer();
@@ -74,15 +71,7 @@ export default function NavbarVertical({ isOpenSidebar, onCloseSidebar }) {
         <NavbarAcount isCollapse={isCollapse} />
       </Stack>
 
-      <NavSectionVertical
-        isCollapse={isCollapse}
-        navConfig={[
-          ...NavConfig,
-          ...(minhasAplicacoes?.length === 0
-            ? []
-            : [{ subheader: 'Aplicações', items: Aplicacoes({ minhasAplicacoes }) }]),
-        ]}
-      />
+      <NavSectionVertical isCollapse={isCollapse} navConfig={[...NavConfig]} />
 
       {!isCollapse && (
         <Stack spacing={3} alignItems="center" sx={{ mt: 'auto', px: 3, py: 6, width: 1, textAlign: 'center' }}>

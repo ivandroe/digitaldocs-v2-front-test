@@ -3,15 +3,11 @@ import { memo } from 'react';
 import AppBar from '@mui/material/AppBar';
 import { styled } from '@mui/material/styles';
 import Container from '@mui/material/Container';
-import GridViewOutlinedIcon from '@mui/icons-material/GridViewOutlined';
 // utils
 import { HEADER } from '@/config';
-import { useSelector } from '@/redux/store';
+import NavConfig from './NavConfig';
 // components
 import { NavSectionHorizontal } from '@/components/nav-section';
-//
-import NavConfig from './NavConfig';
-import Aplicacoes from './Aplicacoes';
 
 // ---------------------------------------------------------------------------------------------------------------------
 
@@ -32,30 +28,10 @@ const RootStyle = styled(AppBar)(({ theme }) => ({
 // ---------------------------------------------------------------------------------------------------------------------
 
 function NavbarHorizontal() {
-  const { minhasAplicacoes } = useSelector((state) => state.intranet);
-
   return (
     <RootStyle>
       <Container maxWidth={false}>
-        <NavSectionHorizontal
-          navConfig={[
-            ...NavConfig,
-            ...(minhasAplicacoes?.length === 0
-              ? []
-              : [
-                  {
-                    items: [
-                      {
-                        path: '#',
-                        title: 'Aplicações',
-                        children: Aplicacoes({ minhasAplicacoes }),
-                        icon: <GridViewOutlinedIcon sx={{ width: 1, height: 1 }} />,
-                      },
-                    ],
-                  },
-                ]),
-          ]}
-        />
+        <NavSectionHorizontal navConfig={[...NavConfig]} />
       </Container>
     </RootStyle>
   );

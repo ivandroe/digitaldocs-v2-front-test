@@ -44,8 +44,6 @@ export default defineConfig(({ mode }) => {
 
       minify: 'esbuild',
 
-      chunkSizeWarningLimit: 500,
-
       rollupOptions: {
         output: {
           entryFileNames: 'assets/js/[name]-[hash].js',
