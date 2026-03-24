@@ -43,7 +43,9 @@ export function ActionForm({ dados, item = '', onClose: onClose1, closeTicket })
 
   const onSubmit = async (values) => {
     const formData = new FormData();
+    const resolved = values?.item?.id === 'RESOLVED';
     const hasMsg = values?.message && values.message.trim() !== '';
+    const value = resolved ? { id: 'CLOSED', label: 'Fechado' } : values?.item;
 
     if (hasMsg) {
       const messagePayload = { content: values.message, visibility: values?.to_client ? 'BOTH' : 'INTERNAL' };
@@ -54,7 +56,7 @@ export function ActionForm({ dados, item = '', onClose: onClose1, closeTicket })
     const onClose = closeTicket;
     const params1 = { id: dados?.id, patch: true, status: dados?.status, getItem: 'selectedItem' };
     const msg = (item === 'assign' && 'atribuido') || (item === 'change-department' && 'encaminhado') || '';
-    const params = { value: values?.item, resolved: values.resolved, message: hasMsg ? formData : null, ...params1 };
+    const params = { value, resolved, message: hasMsg ? formData : null, ...params1 };
 
     dispatch(updateInSuporte(item, null, { ...params, msg: msg ? `Ticket ${msg}` : 'Estado alterado', onClose }));
   };
@@ -65,10 +67,7 @@ export function ActionForm({ dados, item = '', onClose: onClose1, closeTicket })
       <DialogContent>
         <FormProvider methods={methods} onSubmit={handleSubmit(onSubmit)}>
           <Stack spacing={3} sx={{ pt: 3 }}>
-            <Stack direction="row" spacing={3}>
-              <RHFAutocompleteObj name="item" label={label} options={itemList} />
-              {values?.item?.id === 'CLOSED' && <RHFSwitch name="resolved" label="Resolvido" />}
-            </Stack>
+            <RHFAutocompleteObj name="item" label={label} options={itemList} />
             {item !== 'assign' && (
               <>
                 <RHFTextField name="message" label="Mensagem" multiline rows={4} />
@@ -162,9 +161,13 @@ function buildItemList({ item, colaboradores, utilizadores, departamentos, dados
     case 'change-status':
       itemList =
         status === 'IN_PROGRESS'
-          ? [{ id: 'CLOSED', label: 'Fechado' }]
+          ? [
+              { id: 'RESOLVED', label: 'Resolvido' },
+              { id: 'CLOSED', label: 'Fechado' },
+            ]
           : [
               { id: 'IN_PROGRESS', label: 'Em análise' },
+              { id: 'RESOLVED', label: 'Resolvido' },
               { id: 'CLOSED', label: 'Fechado' },
             ];
       break;

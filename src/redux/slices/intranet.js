@@ -6,7 +6,7 @@ import { InteractionRequiredAuthError } from '@azure/msal-browser';
 import { callMsGraph } from '@/graph';
 import { addRole, getFromParametrizacao } from './parametrizacao';
 import { API_INTRANET_URL, API_SLIM_URL, API_CORENET_URL } from '@/utils/apisUrl';
-import { loginRequest, msalInstance, redirectUri, popupRedirectUri } from '@/config';
+import { loginRequest, msalInstance, redirectUri, msalReadyPromise } from '@/auth-config';
 import { hasError, actionGet, doneSucess, headerOptions, selectUtilizador } from './sliceActions';
 
 // ---------------------------------------------------------------------------------------------------------------------
@@ -89,7 +89,7 @@ export function authenticateColaborador() {
 }
 
 export async function getAccessToken() {
-  await msalInstance.initialize();
+  await msalReadyPromise;
 
   const activeAccount = msalInstance.getActiveAccount() ?? msalInstance.getAllAccounts()[0] ?? null;
 
@@ -98,35 +98,23 @@ export async function getAccessToken() {
     return null;
   }
 
-  const tokenRequest = { ...loginRequest, account: activeAccount, redirectUri };
+  const tokenRequest = { ...loginRequest, account: activeAccount, redirectUri, forceRefresh: false };
 
   try {
     const response = await msalInstance.acquireTokenSilent(tokenRequest);
     return response.accessToken;
   } catch (error) {
-    const deveUsarPopup =
-      error.errorCode === 'timed_out' ||
-      error.errorCode === 'monitor_window_timeout' ||
-      error instanceof InteractionRequiredAuthError;
+    const deveRedirecionar =
+      error instanceof InteractionRequiredAuthError ||
+      error?.errorCode === 'timed_out' ||
+      error?.errorCode === 'monitor_window_timeout' ||
+      error?.errorCode === 'no_token_request_cache_error';
 
-    if (deveUsarPopup) {
-      try {
-        const response = await msalInstance.acquireTokenPopup({ ...tokenRequest, redirectUri: popupRedirectUri });
-
-        if (response?.account) {
-          msalInstance.setActiveAccount(response.account);
-          window.dispatchEvent(new CustomEvent('msal:tokenRefreshed', { detail: { account: response.account } }));
-        }
-
-        return response.accessToken;
-      } catch (popupError) {
-        if (popupError.errorCode === 'popup_window_error' || popupError.errorCode === 'popup_blocked') {
-          await msalInstance.acquireTokenRedirect({ ...tokenRequest, redirectUri });
-          return null;
-        }
-        throw popupError;
-      }
+    if (deveRedirecionar) {
+      await msalInstance.acquireTokenRedirect({ ...tokenRequest, redirectUri });
+      return null;
     }
+
     throw error;
   }
 }

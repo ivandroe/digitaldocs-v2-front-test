@@ -1,7 +1,7 @@
 import { MsalProvider } from '@azure/msal-react';
 
 import Router from './routes';
-import { msalInstance } from './config';
+import { msalInstance } from './auth-config';
 
 import LoginPage from './pages/login';
 import { StyledChart } from './components/chart';

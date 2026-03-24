@@ -58,7 +58,7 @@ export function getDefaultsTaxas({ dadosStepper, dados, precario }) {
   let taxaJuroDesconto = resolveField('taxa_juro_desconto', { dadosStepper, dados, precario, fallback: null });
 
   if (taxaJuroDesconto === null) {
-    const taxaDados = dados?.taxa_juros;
+    const taxaDados = dados?.taxa_juro;
     const taxaPrecario = precario?.taxa_juro_precario?.default;
 
     if (taxaPrecario !== undefined && taxaPrecario !== null && taxaDados !== undefined && taxaDados !== null) {

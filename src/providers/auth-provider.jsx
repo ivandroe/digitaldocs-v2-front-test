@@ -1,6 +1,6 @@
-import { createContext, useContext, useState, useEffect, useCallback } from 'react';
+import { createContext, useContext, useState, useEffect, useCallback, useRef } from 'react';
 import { EventType } from '@azure/msal-browser';
-import { msalInstance, loginRequest, redirectUri } from '../config';
+import { msalInstance, loginRequest, redirectUri, msalReadyPromise } from '../auth-config';
 
 // ---------------------------------------------------------------------------------------------------------------------
 
@@ -24,11 +24,53 @@ export const AuthProvider = ({ children }) => {
   const [account, setAccount] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [loginLoading, setLoginLoading] = useState(false);
+  const renewalTimerRef = useRef(null);
+
+  const scheduleRenewal = useCallback((currentAccount) => {
+    if (renewalTimerRef.current) clearTimeout(renewalTimerRef.current);
+    if (!currentAccount) return;
+
+    msalInstance
+      .acquireTokenSilent({ ...loginRequest, account: currentAccount, redirectUri })
+      .then((response) => {
+        if (!response?.expiresOn) return;
+
+        const delay = new Date(response.expiresOn).getTime() - Date.now() - 4 * 60 * 1000;
+        if (delay <= 0) return;
+
+        renewalTimerRef.current = setTimeout(async () => {
+          try {
+            const renewed = await msalInstance.acquireTokenSilent({
+              ...loginRequest,
+              account: currentAccount,
+              redirectUri,
+              forceRefresh: true,
+            });
+            if (renewed?.account) {
+              msalInstance.setActiveAccount(renewed.account);
+              scheduleRenewal(renewed.account);
+            }
+          } catch (err) {
+            console.warn('[AuthProvider] Renovação proativa falhou:', err?.errorCode);
+
+            const isExpired =
+              err?.errorCode === 'login_required' ||
+              err?.errorCode === 'consent_required' ||
+              err?.errorCode === 'interaction_required';
+
+            if (isExpired) {
+              console.warn('[AuthProvider] Sessão expirada, próxima chamada API vai redirecionar');
+            } else {
+              renewalTimerRef.current = setTimeout(() => scheduleRenewal(currentAccount), 2 * 60 * 1000);
+            }
+          }
+        }, delay);
+      })
+      .catch(() => {});
+  }, []);
 
   useEffect(() => {
-    let callbackId = null;
-
-    callbackId = msalInstance.addEventCallback((event) => {
+    const callbackId = msalInstance.addEventCallback((event) => {
       if (event.eventType === EventType.LOGIN_SUCCESS || event.eventType === EventType.ACQUIRE_TOKEN_SUCCESS) {
         const eventAccount = event.payload?.account;
         if (eventAccount) {
@@ -36,38 +78,43 @@ export const AuthProvider = ({ children }) => {
           setAccount(eventAccount);
         }
       }
+
       if (event.eventType === EventType.LOGOUT_SUCCESS) {
         setAccount(null);
       }
+
       if (event.eventType === EventType.ACQUIRE_TOKEN_FAILURE) {
-        console.warn('[AuthProvider] Falha ao adquirir token:', event.error);
-        const erroDeInteracao =
-          event.error?.errorCode === 'timed_out' || event.error?.errorCode === 'monitor_window_timeout';
-        if (!erroDeInteracao && !resolveAccount()) setAccount(null);
+        const code = event.error?.errorCode;
+        const isIframeTimeout = code === 'timed_out' || code === 'monitor_window_timeout';
+        if (!isIframeTimeout && !resolveAccount()) {
+          setAccount(null);
+        }
       }
     });
 
-    const handleTokenRefreshed = (event) => {
-      const refreshedAccount = event.detail?.account ?? resolveAccount();
-      if (refreshedAccount) {
-        console.info('[AuthProvider] Token renovado via popup');
-        msalInstance.setActiveAccount(refreshedAccount);
-        setAccount(refreshedAccount);
-      }
-    };
-
-    window.addEventListener('msal:tokenRefreshed', handleTokenRefreshed);
-
     const init = async () => {
       try {
-        await msalInstance.initialize();
-        const redirectResponse = await msalInstance.handleRedirectPromise();
+        await msalReadyPromise;
+
+        let redirectResponse = null;
+        try {
+          redirectResponse = await msalInstance.handleRedirectPromise();
+        } catch (redirectErr) {
+          if (redirectErr?.errorCode !== 'no_token_request_cache_error') {
+            throw redirectErr;
+          }
+        }
+
+        let resolvedAccount = null;
         if (redirectResponse?.account) {
           msalInstance.setActiveAccount(redirectResponse.account);
-          setAccount(redirectResponse.account);
+          resolvedAccount = redirectResponse.account;
         } else {
-          setAccount(resolveAccount());
+          resolvedAccount = resolveAccount();
         }
+
+        setAccount(resolvedAccount);
+        if (resolvedAccount) scheduleRenewal(resolvedAccount);
       } catch (err) {
         console.error('[AuthProvider] Erro na inicialização:', err);
         setError(err);
@@ -80,9 +127,9 @@ export const AuthProvider = ({ children }) => {
 
     return () => {
       if (callbackId) msalInstance.removeEventCallback(callbackId);
-      window.removeEventListener('msal:tokenRefreshed', handleTokenRefreshed);
+      if (renewalTimerRef.current) clearTimeout(renewalTimerRef.current);
     };
-  }, []);
+  }, [scheduleRenewal]);
 
   const login = useCallback(async () => {
     if (loginLoading) return;
@@ -98,6 +145,7 @@ export const AuthProvider = ({ children }) => {
   }, [loginLoading]);
 
   const logout = useCallback(() => {
+    if (renewalTimerRef.current) clearTimeout(renewalTimerRef.current);
     const activeAccount = msalInstance.getActiveAccount();
     msalInstance.logoutRedirect({
       account: activeAccount ?? undefined,
@@ -114,6 +162,8 @@ export const AuthProvider = ({ children }) => {
     </AuthContext.Provider>
   );
 };
+
+// ---------------------------------------------------------------------------------------------------------------------
 
 export const useAuthContext = () => {
   const context = useContext(AuthContext);

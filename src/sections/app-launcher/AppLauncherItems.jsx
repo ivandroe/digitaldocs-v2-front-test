@@ -100,7 +100,7 @@ export function RecenteItem({ item, onAbrir }) {
         sx={{
           p: 1,
           gap: '5px',
-          minWidth: 64,
+          minWidth: 68,
           borderRadius: 2,
           display: 'flex',
           cursor: 'pointer',

@@ -3,15 +3,23 @@ import Box from '@mui/material/Box';
 import Tab from '@mui/material/Tab';
 import Tabs from '@mui/material/Tabs';
 import Stack from '@mui/material/Stack';
-import InputBase from '@mui/material/InputBase';
+import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
 import SearchIcon from '@mui/icons-material/Search';
+import ScheduleIcon from '@mui/icons-material/Schedule';
 // utils
 import { useAppLauncher } from './useAppLauncher';
 // components
+import { LinksIcon, AppsIcon } from '@/assets';
 import MenuPopover from '@/components/MenuPopover';
 import { IconButtonHeader } from '@/layouts/header';
 import { RecenteItem, AppCard, LinkItem, EmptyState } from './AppLauncherItems';
+
+const getIcon = (icon) => (
+  <Box sx={{ height: 18, width: 18 }}>
+    {(icon === 'app' && <AppsIcon />) || (icon === 'link' && <LinksIcon />) || <ScheduleIcon sx={{ height: 18 }} />}
+  </Box>
+);
 
 // ---------------------------------------------------------------------------------------------------------------------
 
@@ -45,49 +53,40 @@ export default function AppLauncher() {
           overflow: 'inherit',
           flexDirection: 'column',
           maxHeight: 'calc(90vh - 100px)',
-          ...{ p: 0, mt: 1.5, ml: 0.75, width: 480 },
+          ...{ p: 0, mt: 1.5, ml: 0.75, width: 510 },
         }}
       >
-        <Box sx={{ px: 2, pt: 2, pb: 1.5, flexShrink: 0 }}>
+        <Box sx={{ px: 2, pt: 2, b: 1, flexShrink: 0 }}>
           <Box sx={{ mb: 2 }}>
             <Typography variant="subtitle1">Aplicações & Links úteis</Typography>
           </Box>
 
-          <Box
-            sx={{
-              gap: 1,
-              px: 1.5,
-              py: 0.75,
-              borderRadius: 1,
-              display: 'flex',
-              border: '1px solid',
-              alignItems: 'center',
-              borderColor: 'divider',
-              bgcolor: 'action.hover',
-            }}
+          <Tabs
+            value={tab}
+            variant="fullWidth"
+            onChange={(_, newValue) => setTab(newValue)}
+            sx={{ mb: 1.5, pb: 0.15, pt: 0.75, flexShrink: 0, borderRadius: 1, bgcolor: 'background.neutral' }}
           >
-            <SearchIcon sx={{ color: 'text.disabled', fontSize: 20 }} />
-            <InputBase
-              autoFocus
-              fullWidth
-              value={query}
-              placeholder="Pesquisar..."
-              sx={{ typography: 'body2' }}
-              onChange={(e) => setQuery(e.target.value)}
+            <Tab
+              value="Recentes"
+              icon={getIcon('')}
+              label={`Recentes${` (${recentesApps.length + recentesLinks.length})`}`}
             />
-          </Box>
-        </Box>
+            <Tab value="Aplicações" icon={getIcon('app')} label={`Aplicações${` (${appsVisiveis.length})`}`} />
+            <Tab value="Links Úteis" icon={getIcon('link')} label={`Links úteis${` (${linksVisiveis.length})`}`} />
+          </Tabs>
 
-        <Tabs
-          value={tab}
-          variant="fullWidth"
-          onChange={(_, newValue) => setTab(newValue)}
-          sx={{ flexShrink: 0, pt: 0.5, bgcolor: 'background.neutral' }}
-        >
-          <Tab value="Recentes" label={`Recentes${` (${recentesApps.length + recentesLinks.length})`}`} />
-          <Tab value="Aplicações" label={`Aplicações${` (${appsVisiveis.length})`}`} />
-          <Tab value="Links Úteis" label={`Links Úteis${` (${linksVisiveis.length})`}`} />
-        </Tabs>
+          <TextField
+            autoFocus
+            fullWidth
+            size="small"
+            value={query}
+            placeholder=" Pesquisar..."
+            onChange={(e) => setQuery(e.target.value)}
+            sx={{ bgcolor: 'action.hover', '& .MuiInputBase-input': { typography: 'body2' } }}
+            InputProps={{ startAdornment: <SearchIcon sx={{ color: 'text.disabled', fontSize: 20 }} /> }}
+          />
+        </Box>
 
         <Box sx={{ overflowY: 'auto', flex: 1, px: 2, py: 1.5 }}>
           {tab === 'Recentes' && (

@@ -18,7 +18,6 @@ import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 // utils
 import { store } from './redux/store';
-import { msalInstance } from './config';
 //
 import App from './App';
 
@@ -62,40 +61,19 @@ setLocale({
   },
 });
 
-if (import.meta.env.DEV) {
-  import('./utils/devTools.js');
-}
-
 // ---------------------------------------------------------------------------------------------------------------------
 
 const domNode = document.getElementById('root');
 const root = createRoot(domNode);
 
-if (window.opener && window.opener !== window) {
-  msalInstance
-    .initialize()
-    .then(() => msalInstance.handleRedirectPromise())
-    .then(() => {
-      setTimeout(() => {
-        if (!window.closed) window.close();
-      }, 3000);
-    })
-    .catch((err) => {
-      console.error('[popup] Erro:', err);
-      setTimeout(() => {
-        if (!window.closed) window.close();
-      }, 1000);
-    });
-} else {
-  root.render(
-    <ReduxProvider store={store}>
-      <BrowserRouter>
-        <LocalizationProvider dateAdapter={AdapterDateFns} adapterLocale={pt}>
-          <HelmetProvider>
-            <App />
-          </HelmetProvider>
-        </LocalizationProvider>
-      </BrowserRouter>
-    </ReduxProvider>
-  );
-}
+root.render(
+  <ReduxProvider store={store}>
+    <BrowserRouter>
+      <LocalizationProvider dateAdapter={AdapterDateFns} adapterLocale={pt}>
+        <HelmetProvider>
+          <App />
+        </HelmetProvider>
+      </LocalizationProvider>
+    </BrowserRouter>
+  </ReduxProvider>
+);
