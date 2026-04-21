@@ -75,7 +75,7 @@ export default function TableInfoProcesso({ id, item }) {
 
   return (
     <Box sx={{ p: 1 }}>
-      <Stack direction="row" spacing={3} alignItems="center" sx={{ pb: 1 }}>
+      <Stack direction="row" spacing={1} alignItems="center" sx={{ pb: 1 }}>
         <Stack sx={{ flexGrow: 1 }}>
           <SearchToolbarSimple filter={filter} setFilter={setFilter} pb={0} />
         </Stack>

@@ -27,6 +27,7 @@ export default function InfoCredito({ dados }) {
   const emAnalise = meusAmbientes?.find(({ id }) => id === dados?.estado?.estado_id)?.isanalise_credito || false;
 
   useEffect(() => {
+    dispatch(getFromGaji9('tiposImoveis'));
     dispatch(getFromGaji9('tiposSeguros'));
     dispatch(getFromGaji9('garantias-selecionaveis', { item: 'tiposGarantias' }));
   }, [dispatch]);

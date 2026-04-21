@@ -9,13 +9,13 @@ import { DocIllustration, DocIllustration404 } from '@/assets';
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-export default function SearchNotFound({ message = '', card = false, height = 250 }) {
+export default function SearchNotFound({ message = '', card = false, height = 250, sx = null }) {
   return (
     <Card sx={card ? null : { boxShadow: 'none', bgcolor: 'transparent' }}>
       <Stack
         align="center"
         justifyContent="center"
-        sx={{ py: { xs: 3, sm: 7 }, typography: 'body2', fontStyle: 'italic', color: 'text.secondary' }}
+        sx={{ py: { xs: 3, sm: 7 }, typography: 'body2', fontStyle: 'italic', color: 'text.secondary', ...sx }}
       >
         <DocIllustration sx={{ height, mb: { xs: 5, sm: 10 } }} />
         {message}
@@ -26,12 +26,18 @@ export default function SearchNotFound({ message = '', card = false, height = 25
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-export function SearchNotFoundSmall({ message, xs }) {
+export function SearchNotFoundSmall({ message, xs, sx = null }) {
   return (
     <Stack
       align="center"
       justifyContent="center"
-      sx={{ py: xs ? 1.5 : 3, typography: xs ? 'caption' : 'body2', fontStyle: 'italic', color: 'text.secondary' }}
+      sx={{
+        py: xs ? 1.5 : 3,
+        fontStyle: 'italic',
+        color: 'text.secondary',
+        typography: xs ? 'caption' : 'body2',
+        ...sx,
+      }}
     >
       <DocIllustration sx={{ height: xs ? 80 : 130, mb: { xs: xs ? 1 : 2, sm: xs ? 2 : 3 } }} />
       {message}

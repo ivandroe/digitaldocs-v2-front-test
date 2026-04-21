@@ -20,11 +20,10 @@ import {
   getDefaultsCondicoes,
 } from './metadados-utils';
 // redux
-import { getFromGaji9 } from '@/redux/slices/gaji9';
 import { updateItem } from '@/redux/slices/digitaldocs';
 import { useSelector, useDispatch } from '@/redux/store';
+import { getSuccess } from '@/redux/slices/parametrizacao';
 import { updateDados, resetDados, backStep } from '@/redux/slices/stepper';
-import { getFromParametrizacao, getSuccess } from '@/redux/slices/parametrizacao';
 // components
 import {
   RHFSwitch,
@@ -46,11 +45,6 @@ export default function MetadadosCreditoForm({ onClose, dados = null, outros, id
   const dispatch = useDispatch();
   const { activeStep, dadosStepper } = useSelector((state) => state.stepper);
   const { precario, isLoading } = useSelector((state) => state.parametrizacao);
-
-  useEffect(() => {
-    dispatch(getFromGaji9('tiposImoveis'));
-    if (!dados) dispatch(getFromParametrizacao('pesquizar-precario', { ...ids, item: 'precario' }));
-  }, [dados, dispatch, ids]);
 
   const handleClose = useCallback(() => {
     onClose();

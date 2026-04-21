@@ -9,8 +9,10 @@ import Typography from '@mui/material/Typography';
 import CardContent from '@mui/material/CardContent';
 import { alpha, useTheme } from '@mui/material/styles';
 // utils
-import useToggle from '@/hooks/useToggle';
+import { dispatch, useSelector } from '@/redux/store';
+import { setModal } from '@/redux/slices/digitaldocs';
 import { useMetadadosCreditoData } from './useMetadadosCreditoData';
+import { getFromParametrizacao } from '@/redux/slices/parametrizacao';
 // Components
 import GridItem from '@/components/GridItem';
 import { DefaultAction } from '@/components/Actions';
@@ -21,8 +23,13 @@ import MetadadosCreditoForm from '../../form/credito/form-metadados-credito';
 
 export default function MetadadosCredito({ dados, outros, modificar = false, ids = null }) {
   const theme = useTheme();
-  const { toggle: open, onOpen, onClose } = useToggle();
+  const isOpenModal = useSelector((state) => state.digitaldocs.isOpenModal);
   const { financeiroPrincipal, cardsVisible } = useMetadadosCreditoData(dados);
+
+  const openModal = () => {
+    dispatch(setModal({ modal: 'form-metadados' }));
+    if (!dados) dispatch(getFromParametrizacao('pesquizar-precario', { ...ids, item: 'precario' }));
+  };
 
   return (
     <Box sx={{ p: 1 }}>
@@ -101,16 +108,21 @@ export default function MetadadosCredito({ dados, outros, modificar = false, ids
           </Box>
         </>
       ) : (
-        <SearchNotFoundSmall message="Nenhuma informação adicionada..." />
+        <SearchNotFoundSmall
+          message="Nenhuma informação adicionada..."
+          sx={{ bgcolor: 'background.neutral', borderRadius: 1.5 }}
+        />
       )}
 
       {modificar && (
-        <Stack direction="row" justifyContent="center" sx={{ mt: 4 }}>
-          <DefaultAction variant="contained" button label={dados ? 'Editar' : 'Adicionar'} onClick={onOpen} />
+        <Stack direction="row" justifyContent="center" sx={{ mt: 3 }}>
+          <DefaultAction button variant="contained" label={dados ? 'Editar' : 'Adicionar'} onClick={openModal} />
         </Stack>
       )}
 
-      {open && <MetadadosCreditoForm onClose={onClose} dados={dados} ids={ids} outros={outros} />}
+      {isOpenModal === 'form-metadados' && (
+        <MetadadosCreditoForm onClose={() => dispatch(setModal())} dados={dados} ids={ids} outros={outros} />
+      )}
     </Box>
   );
 }
