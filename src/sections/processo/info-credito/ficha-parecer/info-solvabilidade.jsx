@@ -5,6 +5,7 @@ import TableBody from '@mui/material/TableBody';
 import Typography from '@mui/material/Typography';
 // utils
 import Markdown from '@/components/Markdown';
+import { labelMeses } from '@/utils/formatText';
 import { fPercent, fCurrency } from '@/utils/formatNumber';
 import { normalizeQuillLists } from '@/components/editor/normalizeEditorText';
 //
@@ -73,7 +74,7 @@ export function NovoFinanciamento({ dados }) {
           proposta?.origem_taxa ? ` - ${proposta?.origem_taxa}` : ''
         }`
       )}
-      {rowInfo('Prazo de amortização', `${proposta?.prazo_amortizacao || credito?.prazo_amortizacao} meses`, false)}
+      {rowInfo('Prazo de amortização', labelMeses(proposta?.prazo_amortizacao), false)}
       {rowInfo(
         'Prestação mensal',
         fCurrency(valorPrestacao),
@@ -182,8 +183,8 @@ export function Proposta({ dados }) {
           {rowInfo('Finalidade', credito?.finalidade)}
           {rowInfo('Montante', fCurrency(proposta?.montante))}
           {rowInfo('Taxa de juro', fPercent(proposta?.taxa_juro) || '')}
-          {rowInfo('Prazo de amortização', `${proposta?.prazo_amortizacao} meses`)}
-          {rowInfo('Prazo de utilização', proposta?.prazo_utilizacao ? `${proposta?.prazo_utilizacao || 0} meses` : '')}
+          {rowInfo('Prazo de amortização', labelMeses(proposta?.prazo_amortizacao))}
+          {rowInfo('Prazo de utilização', labelMeses(proposta?.prazo_utilizacao))}
           {rowInfo('Valor da prestação', fCurrency(valorPrestacao))}
           {rowInfo('Comissões', proposta?.comissoes)}
           {rowInfo('Garantia', credito?.garantia)}

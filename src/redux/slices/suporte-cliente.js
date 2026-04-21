@@ -1,7 +1,8 @@
 import axios from 'axios';
 import { createSlice } from '@reduxjs/toolkit';
 // utils
-import { API_SUPORTE_CLIENTE_URL } from '../../utils/apisUrl';
+import { queryString } from '@/utils/formatText';
+import { API_SUPORTE_CLIENTE_URL } from '@/utils/apisUrl';
 //
 import {
   hasError,
@@ -27,14 +28,15 @@ const initialState = {
   utilizador: null,
   indicadores: null,
   selectedItem: null,
+  tickets: {},
+  pesquisa: {},
   faq: [],
   slas: [],
   slasUo: [],
-  tickets: [],
   prompts: [],
-  pesquisa: [],
   assuntos: [],
   respostas: [],
+  conteudos: [],
   categorias: [],
   utilizadores: [],
   departamentos: [],
@@ -58,13 +60,6 @@ const slice = createSlice({
 
     deleteSuccess(state, action) {
       actionDelete(state, action.payload);
-    },
-
-    changeProp(state, action) {
-      const { id, value, assign } = action.payload;
-      const prop = assign ? 'current_user_id' : 'status';
-      const index = state.tickets.findIndex(({ id: idRow }) => idRow === id);
-      if (index !== -1) state.tickets[index][prop] = value?.id;
     },
 
     changeCustomer(state, action) {
@@ -110,20 +105,16 @@ export function getInSuporte(item, params) {
         (item === 'departamentos' && `/api/v1/departments/all`) ||
         (item === 'categorias' && `/api/v1/faq-categories/all`) ||
         (item === 'prompts' && `/api/v1/mail-scan-presets/all`) ||
+        (item === 'conteudos' && `/api/v1/page-information/all`) ||
         (item === 'ticket' && `/api/v1/tickets/get/${params?.id}`) ||
         (item === 'respostas' && `/api/v1/standardized-response/all`) ||
         (item === 'presets' && `/api/v1/mail-scan-presets/${params?.id}`) ||
         (item === 'utilizador' && `/api/v1/users/employee/${params?.id}`) ||
         (item === 'prompt' && `/api/v1/mail-scan-presets/generate-prompt`) ||
-        (item === 'pesquisa' && `/api/v1/tickets/search?query=${params?.query}`) ||
-        (item === 'indicadores' &&
-          `/api/v1/indicators/all?year=${params?.year}${params?.month ? `&month=${params?.month}` : ''}${
-            params?.department ? `&department=${params?.department}` : ''
-          }`) ||
-        (item === 'tickets' &&
-          `/api/v1/tickets/all${params?.department ? `?departmentId=${params?.department}` : ''}${
-            params?.status ? `${params?.department ? '&' : '?'}status=${params?.status}` : ''
-          }`) ||
+        //
+        (item === 'tickets' && `/api/v1/tickets/all${queryString(params)}`) ||
+        (item === 'pesquisa' && `/api/v1/tickets/search${queryString(params)}`) ||
+        (item === 'indicadores' && `/api/v1/indicators/all${queryString(params)}`) ||
         '';
       if (apiUrl) {
         const headers = headerOptions({ accessToken, mail: '', cc: true, ct: false, mfd: false });
@@ -161,14 +152,17 @@ export function createInSuporte(item, body, params) {
         (item === 'departamentos' && `/api/v1/departments/new`) ||
         (item === 'categorias' && `/api/v1/faq-categories/create`) ||
         (item === 'prompts' && `/api/v1/mail-scan-presets/create`) ||
+        (item === 'conteudos' && `/api/v1/page-information/create`) ||
         (item === 'respostas' && `/api/v1/standardized-response/create`) ||
         (item === 'add-message' && `/api/v1/ticket-messages/create/${params?.id}`) ||
+        (item === 'lembrete' && `/api/v1/tickets/send-draft-reminder/${params?.id}`) ||
         '';
 
       if (apiUrl) {
         const response = await axios.post(`${API_SUPORTE_CLIENTE_URL}${apiUrl}`, body, options);
         const dados = response.data?.payload;
-        dispatch(slice.actions.createSuccess({ item: params?.item || item, item1: params?.item1 || '', dados }));
+        if (item !== 'lembrete')
+          dispatch(slice.actions.createSuccess({ item: params?.item || item, item1: params?.item1 || '', dados }));
       }
 
       doneSucess(params, dispatch, slice.actions.getSuccess);
@@ -194,15 +188,11 @@ export function updateInSuporte(item, body, params) {
         // const response = await axios.patch(`${API_SUPORTE_CLIENTE_URL}${apiUrl}`, body, options);
         // body = JSON.stringify({ coreBankingAccountValidation: false, coreBankingEmailValidation: false, ...body });
       }
+      const patchProp = item === 'assign' || item === 'change-status' || item === 'change-subject';
 
-      if (params?.message && (item === 'assign' || item === 'change-department' || item === 'change-status')) {
+      if (params?.message && (patchProp || item === 'change-department')) {
         const opt = headerOptions({ accessToken, mail: '', cc: true, ct: true, mfd: true });
         await axios.post(`${API_SUPORTE_CLIENTE_URL}/api/v1/ticket-messages/create/${params?.id}`, params.message, opt);
-        if (item === 'change-status' && params?.value?.id === 'IN_PROGRESS') {
-          dispatch(slice.actions.changeProp({ assign: item === 'assign', value: params?.value, id: params?.id }));
-          doneSucess(params, dispatch, slice.actions.getSuccess);
-          return;
-        }
       }
 
       const apiUrl =
@@ -214,6 +204,7 @@ export function updateInSuporte(item, body, params) {
         (item === 'departamentos' && `/api/v1/departments/update/${params?.id}`) ||
         (item === 'prompts' && `/api/v1/mail-scan-presets/update/${params?.id}`) ||
         (item === 'categorias' && `/api/v1/faq-categories/update/${params?.id}`) ||
+        (item === 'conteudos' && `/api/v1/page-information/update/${params?.id}`) ||
         (item === 'respostas' && `/api/v1/standardized-response/update/${params?.id}`) ||
         // toggle
         (item === 'toggle-faq' && `/api/v1/faqs/toggle/${params?.id}`) ||
@@ -224,6 +215,7 @@ export function updateInSuporte(item, body, params) {
         (item === 'assign' && `/api/v1/tickets/assign/${params?.id}/${params?.value?.id}`) ||
         (item === 'core-validation' && `/api/v1/customers/validate-core-bank/${params?.id}`) ||
         (item === 'change-department' && `/api/v1/tickets/change-department/${params?.id}/${params?.value?.id}`) ||
+        (item === 'change-subject' && `/api/v1/tickets/change-subject/${params?.id}?subjectId=${params?.value?.id}`) ||
         (item === 'change-status' &&
           `/api/v1/tickets/change-status/${params?.id}/${params?.value?.id}?resolved=${!!params?.resolved}`) ||
         '';
@@ -235,18 +227,13 @@ export function updateInSuporte(item, body, params) {
         const dados = response.data?.payload;
         if (item?.includes('toggle-')) dispatch(slice.actions.toogleItem(params));
         if (item === 'core-validation') dispatch(slice.actions.changeCustomer(dados));
-        else if (params?.getItem) {
-          dispatch(slice.actions.getSuccess({ item: params?.getItem, dados }));
-          if (item === 'assign' || item === 'change-status') {
-            dispatch(slice.actions.changeProp({ assign: item === 'assign', value: params?.value, id: params?.id }));
-          } else if (item === 'change-department') {
-            dispatch(slice.actions.deleteSuccess({ item: 'tickets', id: params?.id }));
-          }
-        } else {
+        else if (params?.getItem) dispatch(slice.actions.getSuccess({ item: params?.getItem, dados }));
+        else if (!patchProp && item !== 'change-department') {
           dispatch(slice.actions.updateSuccess({ item: params?.item || item, item1: params?.item1 || '', dados }));
         }
       }
 
+      params?.refetch?.();
       doneSucess(params, dispatch, slice.actions.getSuccess);
     } catch (error) {
       hasError(error, dispatch, slice.actions.getSuccess);
@@ -273,6 +260,7 @@ export function deleteInSuporte(item, params) {
         (item === 'departamentos' && `/api/v1/departments/delete/${params?.id}`) ||
         (item === 'categorias' && `/api/v1/faq-categories/delete/${params?.id}`) ||
         (item === 'prompts' && `/api/v1/mail-scan-presets/delete/${params?.id}`) ||
+        (item === 'conteudos' && `/api/v1/page-information/delete/${params?.id}`) ||
         (item === 'respostas' && `/api/v1/standardized-response/delete/${params?.id}`) ||
         '';
 

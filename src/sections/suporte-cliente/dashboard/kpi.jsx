@@ -9,7 +9,7 @@ import { fNumber, fPercent, calcPercentagem } from '@/utils/formatNumber';
 //
 import { Icon } from '@/assets/icons';
 import GridItem from '@/components/GridItem';
-import { CheckIcon, TicketIcon, FirstIcon, TimeIcon, SatisfyIcon, ArrowIcon } from './icons';
+import { CheckIcon, TicketIcon, TimeIcon, SatisfyIcon, ArrowIcon } from './icons';
 
 // ---------------------------------------------------------------------------------------------------------------------
 
@@ -32,7 +32,7 @@ export default function KPI({ dados }) {
         sub={fNumber(dados?.tickets_resolved - dados?.tickets_resolved_prev)}
         percentagem={fPercent(calcPercentagem(dados?.tickets_resolved, dados?.tickets_opened))}
       />
-      <KpiItem
+      {/* <KpiItem
         color="info.main"
         icon={<FirstIcon />}
         title="Resolução 1º Contacto"
@@ -40,9 +40,8 @@ export default function KPI({ dados }) {
         melhorou={dados?.first_contact_resolution > dados?.first_contact_resolution_prev}
         sub={fNumber(dados?.first_contact_resolution - dados?.first_contact_resolution_prev)}
         percentagem={fPercent(calcPercentagem(dados?.first_contact_resolution, dados?.tickets_resolved))}
-      />
+      /> */}
       <KpiItem
-        md={6}
         inverso
         icon={<TimeIcon />}
         title="Tempo Médio Resposta"
@@ -51,7 +50,6 @@ export default function KPI({ dados }) {
         sub={toHourLabel(dados?.avg_response - dados?.avg_response_prev)}
       />
       <KpiItem
-        md={6}
         icon={<SatisfyIcon />}
         title="Satisfação Média"
         value={`${dados?.avg_satisfaction?.toFixed(1)} / 5`}
@@ -64,12 +62,12 @@ export default function KPI({ dados }) {
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-function KpiItem({ title, value, sub, icon, color = 'primary.main', md = 4, melhorou = false, inverso, percentagem }) {
+function KpiItem({ title, value, sub, icon, color = 'primary.main', md = 6, melhorou = false, inverso, percentagem }) {
   const cleanSub = String(sub).replace(/[+-]/, '').trim();
   const signedSub = `${(!inverso && melhorou) || (inverso && !melhorou) ? '+' : '−'}${cleanSub}`;
 
   return (
-    <GridItem xs={6} md={md} xl={2.4}>
+    <GridItem sm={6} md={md} xl={3}>
       <Card sx={{ height: 1, p: 2 }}>
         <Stack direction="row" alignItems="center" spacing={2}>
           <Box>

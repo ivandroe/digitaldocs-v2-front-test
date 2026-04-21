@@ -10,8 +10,8 @@ import DialogTitle from '@mui/material/DialogTitle';
 import DialogContent from '@mui/material/DialogContent';
 // utils
 import { mapConcelhoToBackend } from './utils';
-import { applyList, rolesList, phasesList } from '../utils';
 import { useSelector, useDispatch } from '@/redux/store';
+import { applyList, rolesList, phasesList } from '../utils';
 import { createInSuporte, updateInSuporte } from '@/redux/slices/suporte-cliente';
 // components
 import {
@@ -20,6 +20,7 @@ import {
   FormProvider,
   RHFTextField,
   RHFNumberField,
+  RHFAutocompleteSmp,
   RHFAutocompleteObj,
 } from '@/components/hook-form';
 import { DialogButons } from '@/components/Actions';
@@ -150,7 +151,66 @@ export function FaqForm({ onClose }) {
                 </Stack>
               </Stack>
               <RHFTextField name="question" label="Questão" />
-              <RHFTextField name="response" label="Resposta" multiline rows={4} />
+              <RHFTextField name="response" label="Resposta" multiline minRows={5} />
+            </Stack>
+            <DialogButons edit={isEdit} isSaving={isSaving} onClose={onClose} />
+          </ItemComponent>
+        </FormProvider>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+// ---------------------------------------------------------------------------------------------------------------------
+
+export function ConteudoForm({ onClose }) {
+  const dispatch = useDispatch();
+  const { conteudos, isEdit, isSaving, selectedItem } = useSelector((state) => state.suporte);
+
+  const conteudosList = useMemo(() => {
+    const listaVite = (import.meta.env.VITE_CONTEUDOS_PORTAL || '')
+      .split(',')
+      .map((item) => item.trim())
+      .filter(Boolean);
+
+    return listaVite.filter((opcao) => {
+      const jaEstaSendoUsado = conteudos.some((item) => item.reference === opcao);
+      return !jaEstaSendoUsado;
+    });
+  }, [conteudos]);
+
+  const formSchema = Yup.object().shape({
+    content: Yup.string().required().label('Conteúdo'),
+    reference: Yup.mixed().required().label('Referência'),
+  });
+
+  const defaultValues = useMemo(
+    () => ({ content: selectedItem?.content ?? '', reference: selectedItem?.reference ?? null }),
+    [selectedItem]
+  );
+
+  const methods = useForm({ resolver: yupResolver(formSchema), defaultValues });
+  const { handleSubmit } = methods;
+
+  const onSubmit = async (values) => {
+    const params = { id: selectedItem?.id, msg: `Conteúdo ${isEdit ? 'atualizado' : 'adicionado'}` };
+    dispatch((isEdit ? updateInSuporte : createInSuporte)('conteudos', values, { ...params, onClose }));
+  };
+
+  return (
+    <Dialog open onClose={onClose} fullWidth maxWidth="md">
+      <DialogTitle>{isEdit ? 'Editar conteúdo' : 'Adicionar conteúdo'}</DialogTitle>
+      <DialogContent>
+        <FormProvider methods={methods} onSubmit={handleSubmit(onSubmit)}>
+          <ItemComponent item={selectedItem} rows={1}>
+            <Stack spacing={3} sx={{ pt: 3 }}>
+              <RHFAutocompleteSmp
+                name="reference"
+                disabled={isEdit}
+                label="Referência"
+                options={conteudosList?.sort()}
+              />
+              <RHFTextField name="content" label="Conteúdo" multiline minRows={8} />
             </Stack>
             <DialogButons edit={isEdit} isSaving={isSaving} onClose={onClose} />
           </ItemComponent>
@@ -448,14 +508,16 @@ export function RespostaForm({ onClose }) {
 
   return (
     <Dialog open onClose={onClose} fullWidth maxWidth="md">
-      <DialogTitle>{isEdit ? 'Editar resposta' : 'Adicionar resposta'}</DialogTitle>
+      <DialogTitle sx={{ mb: 2 }}>{isEdit ? 'Editar resposta' : 'Adicionar resposta'}</DialogTitle>
       <DialogContent>
         <FormProvider methods={methods} onSubmit={handleSubmit(onSubmit)}>
           <ItemComponent item={selectedItem} rows={1}>
-            <Stack spacing={3} sx={{ pt: 3 }}>
-              <RHFTextField name="subject" label="Assunto" />
+            <Stack spacing={3} sx={{ pt: 1 }}>
+              <Stack spacing={3} direction={{ xs: 'column', sm: 'row' }} justifyContent="space-between">
+                <RHFTextField name="subject" label="Assunto" />
+                <RHFAutocompleteObj name="phase" label="Fase" options={phasesList} sx={{ width: { sm: '50%' } }} />
+              </Stack>
               <RHFEditor name="content" label="Conteúdo" simple />
-              <RHFAutocompleteObj name="phase" label="Fase" options={phasesList} />
             </Stack>
             <DialogButons edit={isEdit} isSaving={isSaving} onClose={onClose} />
           </ItemComponent>
@@ -511,14 +573,6 @@ export function ItemComponent({ item, rows, children }) {
   return isEdit && isLoading ? (
     <FormLoading rows={rows} />
   ) : (
-    <>
-      {isEdit && !item ? (
-        <Stack sx={{ py: 5 }}>
-          <SearchNotFoundSmall message="Item não disponível..." />
-        </Stack>
-      ) : (
-        children
-      )}
-    </>
+    <>{isEdit && !item ? <SearchNotFoundSmall message="Item não disponível..." /> : children}</>
   );
 }

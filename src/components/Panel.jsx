@@ -15,7 +15,8 @@ import AccessTimeOutlinedIcon from '@mui/icons-material/AccessTimeOutlined';
 import AccountCircleOutlinedIcon from '@mui/icons-material/AccountCircleOutlined';
 import CheckCircleOutlineOutlinedIcon from '@mui/icons-material/CheckCircleOutlineOutlined';
 // utils
-import { ptDateTime } from '../utils/formatTime';
+import { ptDateTime } from '@/utils/formatTime';
+import { nomeacaoBySexo } from '@/utils/formatText';
 // components
 import Label from './Label';
 import { AvatarBadge } from './custom-avatar';
@@ -87,16 +88,18 @@ export function Criado({ iconText = '', tipo = '', value, value1 = '', caption =
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-export function Colaborador({ row, email }) {
+export function Colaborador({ row, email, funcao = false }) {
+  const { colaborador } = row || {};
+  const nomeacao = nomeacaoBySexo(colaborador.nomeacao_funcao, colaborador?.sexo);
   return (
     <ColaboradorInfo
       labelAltCaption
       labelAlt={row?.utilizador_id}
-      foto={row?.colaborador?.foto_anexo}
-      caption={!row?.colaborador?.uo_label}
-      presence={row?.colaborador?.presence}
-      nome={row?.colaborador?.nome || row?.utilizador_email || row?.nome}
-      label={email ? row?.colaborador?.email : row?.colaborador?.uo || 'Perfil sem ID_AAD na Intranet'}
+      foto={colaborador?.foto_anexo}
+      caption={!colaborador?.uo_label}
+      presence={colaborador?.presence}
+      nome={colaborador?.nome || row?.utilizador_email || row?.nome}
+      label={(funcao && nomeacao) || (email && colaborador?.email) || colaborador?.uo || ''}
     />
   );
 }

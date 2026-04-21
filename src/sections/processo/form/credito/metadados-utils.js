@@ -22,10 +22,11 @@ export function getDefaultsRegime({ dadosStepper, dados, precario }) {
   return {
     revolving: resolveBool('revolving'),
     bonificado: resolveBool('bonificado'),
-    jovem_bonificado: resolveBool('jovem_bonificado'),
     isento_comissao: resolveBool('isento_comissao'),
-    colaborador_empresa_parceira: resolveBool('colaborador_empresa_parceira'),
+    jovem_bonificado: resolveBool('jovem_bonificado'),
+    habitacao_propria_1: resolveBool('habitacao_propria_1'),
     tem_isencao_imposto_selo: resolveBool('tem_isencao_imposto_selo'),
+    colaborador_empresa_parceira: resolveBool('colaborador_empresa_parceira'),
     credibolsa: dadosStepper?.credibolsa || Number(dados?.montante_tranches_credibolsa) > 0,
     nivel_formacao: dadosStepper?.nivel_formacao || dados?.nivel_formacao || '',
     designacao_curso: dadosStepper?.designacao_curso || dados?.designacao_curso || '',
@@ -69,7 +70,12 @@ export function getDefaultsTaxas({ dadosStepper, dados, precario }) {
   }
 
   return {
-    modo_taxa_equivalente: resolveField('modo_taxa_equivalente', { dadosStepper, dados, precario, fallback: false }),
+    modo_taxa_equivalente: resolveField('modo_taxa_equivalente', {
+      dadosStepper,
+      dados,
+      precario,
+      fallback: dadosStepper?.habitacao_propria_1,
+    }),
     taxa_mora: resolve('taxa_mora', 2),
     taxa_juro_desconto: taxaJuroDesconto,
     taxa_imposto_selo: resolve('taxa_imposto_selo', 3.5),
@@ -175,6 +181,7 @@ export function buildPayload(rawData) {
     bonificado: Boolean(rawData.bonificado),
     isento_comissao: Boolean(rawData.isento_comissao),
     jovem_bonificado: Boolean(rawData.jovem_bonificado),
+    habitacao_propria_1: Boolean(rawData.habitacao_propria_1),
     tem_isencao_imposto_selo: Boolean(rawData.tem_isencao_imposto_selo),
     colaborador_empresa_parceira: Boolean(rawData.colaborador_empresa_parceira),
     // Datas

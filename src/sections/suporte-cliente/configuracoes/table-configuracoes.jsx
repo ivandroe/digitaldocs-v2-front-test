@@ -17,7 +17,6 @@ import useTable, { getComparator, applySort } from '@/hooks/useTable';
 import { useDispatch, useSelector } from '@/redux/store';
 import { getInSuporte, updateInSuporte, setModal } from '@/redux/slices/suporte-cliente';
 // Components
-import Markdown from '@/components/Markdown';
 import Scrollbar from '@/components/Scrollbar';
 import { DefaultAction } from '@/components/Actions';
 import { SkeletonTable } from '@/components/skeleton';
@@ -31,13 +30,14 @@ import {
   SlaUoForm,
   AssuntoForm,
   RespostaForm,
+  ConteudoForm,
   UtilizadorForm,
   DepartamentoForm,
 } from './form-configuracoes';
 import Categorias from './categorias';
 import DetalhesPrompt from './detalhes';
 import FormPrompt, { Eliminar } from './form-prompt';
-import { getApllyLabel, getRolesLabel, getPhasesLabel, getDepartTypeLabel, LabelApply } from '../utils';
+import { getDepartTypeLabel, LabelApply, LabelPhase, LabelRole } from '../utils';
 
 // ---------------------------------------------------------------------------------------------------------------------
 
@@ -60,7 +60,8 @@ export default function TableConfiguracoes({ item }) {
   } = useTable();
 
   const { colaboradores } = useSelector((state) => state.intranet);
-  const { assuntos, utilizadores, slas, slasUo, faq, departamentos, respostas, prompts, isLoading, modalSuporte } =
+  const isLoading = useSelector((state) => state.suporte.isLoading);
+  const { assuntos, utilizadores, slas, slasUo, faq, departamentos, respostas, prompts, conteudos, modalSuporte } =
     useSelector((state) => state.suporte);
 
   useEffect(() => {
@@ -87,6 +88,7 @@ export default function TableConfiguracoes({ item }) {
       (item === 'prompts' && prompts) ||
       (item === 'assuntos' && assuntos) ||
       (item === 'respostas' && respostas) ||
+      (item === 'conteudos' && conteudos) ||
       (item === 'departamentos' && departamentos) ||
       (item === 'utilizadores' &&
         utilizadores?.map((row) => ({ ...colaboradores?.find(({ id }) => id === row?.employee_id), ...row }))) ||
@@ -117,7 +119,15 @@ export default function TableConfiguracoes({ item }) {
               <TableHeadCustom order={order} onSort={onSort} orderBy={orderBy} headLabel={headerTable(item)} />
               <TableBody>
                 {isLoading && isNotFound ? (
-                  <SkeletonTable row={10} column={(item === 'prompts' && 3) || (item === 'faq' && 7) || 5} />
+                  <SkeletonTable
+                    row={10}
+                    column={
+                      (item === 'faq' && 6) ||
+                      (item === 'respostas' && 4) ||
+                      ((item === 'prompts' || item === 'conteudos') && 3) ||
+                      5
+                    }
+                  />
                 ) : (
                   dataFiltered.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((row, index) => (
                     <TableRow hover key={`${item}_${index}`}>
@@ -125,9 +135,9 @@ export default function TableConfiguracoes({ item }) {
                       {item === 'faq' && <TableCell>{row?.category_name || noDados('(Não definido)')}</TableCell>}
                       <TableCell>
                         {item === 'utilizadores' ? (
-                          <Colaborador row={{ colaborador: row }} />
+                          <Colaborador funcao row={{ colaborador: row }} />
                         ) : (
-                          row?.subject || row?.name || row?.question || row?.preset_name || noDados()
+                          row?.subject || row?.name || row?.question || row?.preset_name || row?.reference || noDados()
                         )}
                       </TableCell>
 
@@ -135,16 +145,16 @@ export default function TableConfiguracoes({ item }) {
                       {item === 'assuntos' && <TableCell>{row?.department_name}</TableCell>}
                       {item === 'assuntos' && <TableCell>{row?.sla_name}</TableCell>}
                       {item === 'assuntos' && (
-                        <TableCell align="center">
-                          <LabelApply label={getApllyLabel(row?.applicability)} />
-                        </TableCell>
+                        <TableCell align="center">{<LabelApply label={row?.applicability} />}</TableCell>
                       )}
 
                       {/* UTILIZADOR */}
                       {item === 'utilizadores' && (
                         <TableCell>{row?.department_name || noDados('(Não definido)')}</TableCell>
                       )}
-                      {item === 'utilizadores' && <TableCell>{getRolesLabel(row?.role)}</TableCell>}
+                      {item === 'utilizadores' && (
+                        <TableCell align="center">{<LabelRole label={row?.role} />}</TableCell>
+                      )}
 
                       {/* DEPARTAMENTOS */}
                       {item === 'departamentos' && (
@@ -155,10 +165,10 @@ export default function TableConfiguracoes({ item }) {
                       )}
 
                       {/* SLA */}
-                      {item === 'slas' && (
+                      {(item === 'slas' || item === 'conteudos') && (
                         <TableCell>
                           <Typography variant="body2" sx={{ whiteSpace: 'pre-line' }}>
-                            {row?.description}
+                            {row?.description || row?.content}
                           </Typography>
                         </TableCell>
                       )}
@@ -169,20 +179,9 @@ export default function TableConfiguracoes({ item }) {
 
                       {/* RESPOSTAS */}
                       {item === 'respostas' && (
-                        <TableCell>
-                          <Markdown variant="body2">{row?.content}</Markdown>
-                        </TableCell>
+                        <TableCell align="center">{<LabelPhase label={row?.phase} />}</TableCell>
                       )}
-                      {item === 'respostas' && <TableCell align="center">{getPhasesLabel(row?.phase)}</TableCell>}
 
-                      {/* FAQ */}
-                      {item === 'faq' && (
-                        <TableCell>
-                          <Typography variant="body2" sx={{ textAlign: 'justify', whiteSpace: 'pre-line' }}>
-                            {row?.response}
-                          </Typography>
-                        </TableCell>
-                      )}
                       {item === 'faq' && <CellChecked check={row?.highlighted} />}
 
                       {(item === 'prompts' || item === 'utilizadores' || item === 'respostas' || item === 'faq') && (
@@ -197,10 +196,10 @@ export default function TableConfiguracoes({ item }) {
                       <TableCell align="center" width={10}>
                         <Stack direction="row" spacing={0.75}>
                           <DefaultAction small label="EDITAR" onClick={() => viewItem('update', row)} />
-                          {item === 'prompts' && !row?.active && (
+                          {((item === 'prompts' && !row?.active) || item === 'conteudos') && (
                             <DefaultAction small label="ELIMINAR" onClick={() => viewItem('eliminar', row)} />
                           )}
-                          {item === 'prompts' && row?.active && (
+                          {((item === 'prompts' && row?.active) || item === 'respostas' || item === 'faq') && (
                             <DefaultAction small label="DETALHES" onClick={() => viewItem('detalhes', row)} />
                           )}
                         </Stack>
@@ -231,8 +230,8 @@ export default function TableConfiguracoes({ item }) {
       </Card>
 
       {modalSuporte === 'categories' && <Categorias onClose={onClose} />}
-      {modalSuporte === 'detalhes' && <DetalhesPrompt onClose={onClose} />}
       {modalSuporte === 'eliminar' && <Eliminar onClose={onClose} item={item} />}
+      {modalSuporte === 'detalhes' && <DetalhesPrompt onClose={onClose} item={item} editarItem={viewItem} />}
       {(modalSuporte === 'add' || modalSuporte === 'update') && (
         <>
           {item === 'faq' && <FaqForm onClose={onClose} />}
@@ -240,6 +239,7 @@ export default function TableConfiguracoes({ item }) {
           {item === 'slasUo' && <SlaUoForm onClose={onClose} />}
           {item === 'prompts' && <FormPrompt onClose={onClose} />}
           {item === 'assuntos' && <AssuntoForm onClose={onClose} />}
+          {item === 'conteudos' && <ConteudoForm onClose={onClose} />}
           {item === 'respostas' && <RespostaForm onClose={onClose} />}
           {item === 'utilizadores' && <UtilizadorForm onClose={onClose} />}
           {item === 'departamentos' && <DepartamentoForm onClose={onClose} />}
@@ -257,14 +257,16 @@ export function applySortFilter({ dados, filter, comparator }) {
   if (filter) {
     const normalizedFilter = normalizeText(filter);
     dados = dados.filter(
-      ({ name, subject, subject_name: subject1, department_name: department, question, response, description }) =>
+      ({ name, nome, subject, subject_name, department_name, uo_label, question, response, description }) =>
         (name && normalizeText(name).indexOf(normalizedFilter) !== -1) ||
+        (nome && normalizeText(nome).indexOf(normalizedFilter) !== -1) ||
         (subject && normalizeText(subject).indexOf(normalizedFilter) !== -1) ||
-        (subject1 && normalizeText(subject1).indexOf(normalizedFilter) !== -1) ||
         (question && normalizeText(question).indexOf(normalizedFilter) !== -1) ||
         (response && normalizeText(response).indexOf(normalizedFilter) !== -1) ||
-        (department && normalizeText(department).indexOf(normalizedFilter) !== -1) ||
-        (description && normalizeText(description).indexOf(normalizedFilter) !== -1)
+        (uo_label && normalizeText(uo_label).indexOf(normalizedFilter) !== -1) ||
+        (description && normalizeText(description).indexOf(normalizedFilter) !== -1) ||
+        (subject_name && normalizeText(subject_name).indexOf(normalizedFilter) !== -1) ||
+        (department_name && normalizeText(department_name).indexOf(normalizedFilter) !== -1)
     );
   }
 
@@ -276,7 +278,7 @@ export function applySortFilter({ dados, filter, comparator }) {
 function headerTable(item) {
   return [
     ...((item === 'assuntos' && [
-      { id: 'subject', label: 'Assunto' },
+      { id: 'name', label: 'Assunto' },
       { id: 'department_name', label: 'Departamento' },
       { id: 'sla_name', label: 'SLA' },
       { id: 'applicability', label: 'Aplicabilidade', align: 'center' },
@@ -284,7 +286,7 @@ function headerTable(item) {
       (item === 'utilizadores' && [
         { id: 'nome', label: 'Colaborador' },
         { id: 'department', label: 'Departamento' },
-        { id: 'role', label: 'Função' },
+        { id: 'role', label: 'Função', align: 'center' },
       ]) ||
       (item === 'departamentos' && [
         { id: 'name', label: 'Nome' },
@@ -305,19 +307,21 @@ function headerTable(item) {
       ]) ||
       (item === 'respostas' && [
         { id: 'subject', label: 'Assunto' },
-        { id: 'content', label: 'Conteúdo' },
         { id: 'phase', label: 'Fase', align: 'center' },
       ]) ||
       (item === 'faq' && [
-        { id: 'sequuence', label: 'Ordem', align: 'center', width: 10 },
+        { id: 'sequence', label: 'Ordem', align: 'center', width: 10 },
         { id: 'category', label: 'Categoria' },
         { id: 'question', label: 'Questão' },
-        { id: 'response', label: 'Resposta' },
         { id: 'highlighted', label: 'Destaque', align: 'center' },
+      ]) ||
+      (item === 'conteudos' && [
+        { id: 'reference', label: 'Referência' },
+        { id: 'content', label: 'Conteúdo' },
       ]) ||
       (item === 'prompts' && [{ id: 'preset_name', label: 'Nome' }]) ||
       []),
-    ...(item !== 'assuntos' && item !== 'departamentos' && item !== 'slas' && item !== 'slasUo'
+    ...(item === 'prompts' || item === 'utilizadores' || item === 'respostas' || item === 'faq'
       ? [{ id: 'active', label: 'Estado', align: 'center' }]
       : []),
     { id: '', width: 10 },

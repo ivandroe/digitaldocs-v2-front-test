@@ -2,15 +2,16 @@
 import { useFormContext, useFieldArray } from 'react-hook-form';
 // @mui
 import Grid from '@mui/material/Grid';
+import Card from '@mui/material/Card';
 import Stack from '@mui/material/Stack';
 import Divider from '@mui/material/Divider';
 import Typography from '@mui/material/Typography';
-import InputAdornment from '@mui/material/InputAdornment';
 // components
+import FormEntidades from './form-entidades';
 import GridItem from '@/components/GridItem';
 import { SemDados } from '@/components/Panel';
 import { RHFTextField } from '@/components/hook-form';
-import { AddItem, DeleteBox } from '@/components/Actions';
+import { AddItem, DefaultAction } from '@/components/Actions';
 
 // ---------------------------------------------------------------------------------------------------------------------
 
@@ -25,9 +26,9 @@ export default function FormLivrancas() {
         <AddItem onClick={() => append({ numero_livranca: '' })} dados={{ label: 'Livrança', small: true }} />
       </Stack>
       <Divider sx={{ my: 1 }} />
-      <Grid container spacing={2} justifyContent="center">
+      <Stack spacing={2}>
         <Livrancas fields={fields} remove={remove} prefixo="livrancas" />
-      </Grid>
+      </Stack>
     </Stack>
   );
 }
@@ -37,19 +38,17 @@ export default function FormLivrancas() {
 function Livrancas({ fields = [], remove, prefixo }) {
   return fields.length ? (
     fields.map((item, index) => (
-      <GridItem sm={6} md={4} lg={3} key={item.id}>
-        <RHFTextField
-          label="Nº da livrança"
-          name={`${prefixo}[${index}].numero_livranca`}
-          InputProps={{
-            endAdornment: (
-              <InputAdornment position="end">
-                <DeleteBox onClick={() => remove(index)} />
-              </InputAdornment>
-            ),
-          }}
-        />
-      </GridItem>
+      <Card key={item.id} sx={{ p: 1, boxShadow: (theme) => theme.customShadows.cardAlt }}>
+        <Stack direction="row" justifyContent="space-between" alignItems="center" spacing={2}>
+          <Grid container spacing={2} sx={{ flexGrow: 1 }}>
+            <GridItem sm={6} md={3}>
+              <RHFTextField label="Nº da livrança" name={`${prefixo}[${index}].numero_livranca`} />
+            </GridItem>
+            <FormEntidades livranca label="Avalista" name={`livrancas[${index}].avalistas`} />
+          </Grid>
+          <DefaultAction small label="Eliminar" icon="Remover" onClick={() => remove(index)} />
+        </Stack>
+      </Card>
     ))
   ) : (
     <GridItem children={<SemDados message="Nenhuma livrança adicionada..." sx={{ p: 1.5 }} />} />

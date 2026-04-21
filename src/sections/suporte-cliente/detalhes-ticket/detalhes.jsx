@@ -20,30 +20,28 @@ export const Detalhes = React.memo(({ ticket }) => {
   const allMessages = useMemo(() => {
     const rootMessage = { content: description ?? '', sent_at: res?.created_at, from: 'Cliente', attachments };
     const normalized = messages.map((m) => ({ ...m, from: m?.user_id }));
-    const combined = [rootMessage, ...normalized].sort((a, b) => new Date(a.sent_at) - new Date(b.sent_at));
+    const combined = [rootMessage, ...normalized].sort((a, b) => new Date(b.sent_at) - new Date(a.sent_at));
     return combined;
   }, [description, res?.created_at, attachments, messages]);
 
   return (
     <>
-      <Stack useFlexGap flexWrap="wrap" direction="row" spacing={5}>
+      <Stack useFlexGap flexWrap="wrap" direction="row" spacing={5} sx={{ mt: 1 }}>
         <Stack spacing={1}>
           <ItemDesc label="Nome" value={customer?.fullname} />
           <ItemDesc label="E-mail" value={customer?.email} />
           <ItemDesc label="Telefone" value={customer?.phone} />
+          <ItemDesc label="Cliente da Caixa" value={<LabelSN val={customer?.is_cliente} />} />
         </Stack>
 
-        <Stack spacing={1}>
-          <ItemDesc label="Cliente da Caixa" value={<LabelSN val={customer?.is_cliente} />} />
-          {customer?.is_cliente && (
-            <>
-              {/* <ItemDesc label="Emigrante" value={<LabelSN val={customer?.is_emigrant} />} /> */}
-              <ItemDesc label="Tipo de cliente" value={getCustomerTypeLabel(customer?.customer_type)} />
-              <ItemDesc label="Agência" value={customer?.agency_name} />
-              <ItemDesc label="Número de conta" value={customer?.account_number} />
-            </>
-          )}
-        </Stack>
+        {customer?.is_cliente && (
+          <Stack spacing={1}>
+            <ItemDesc label="Tipo de cliente" value={getCustomerTypeLabel(customer?.customer_type)} />
+            <ItemDesc label="Agência" value={customer?.agency_name} />
+            <ItemDesc label="Balcão de domicílio" value={customer?.home_service_counter} />
+            <ItemDesc label="Número de conta" value={customer?.account_number} />
+          </Stack>
+        )}
         {res?.created_by_email || (status !== 'DRAFT' && customer?.is_cliente && customer?.account_number) ? (
           <Stack spacing={1}>
             {res?.created_by_email && (

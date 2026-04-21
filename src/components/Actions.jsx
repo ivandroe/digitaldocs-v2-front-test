@@ -6,14 +6,15 @@ import Box from '@mui/material/Box';
 import Stack from '@mui/material/Stack';
 import Button from '@mui/material/Button';
 import Tooltip from '@mui/material/Tooltip';
+import IconButton from '@mui/material/IconButton';
+import DialogActions from '@mui/material/DialogActions';
+// icons
 import CloseIcon from '@mui/icons-material/Close';
 import ClearIcon from '@mui/icons-material/Clear';
-import IconButton from '@mui/material/IconButton';
 import SearchIcon from '@mui/icons-material/Search';
 import RemoveIcon from '@mui/icons-material/Remove';
 import RefreshIcon from '@mui/icons-material/Refresh';
 import DoneAllIcon from '@mui/icons-material/DoneAll';
-import DialogActions from '@mui/material/DialogActions';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import LockPersonIcon from '@mui/icons-material/LockPerson';
 import CircularProgress from '@mui/material/CircularProgress';
@@ -119,7 +120,6 @@ export function DefaultAction({
     (icon === 'loading' && <CircularProgress size={small ? 18 : 24} color="inherit" />) ||
     (label === 'Mais processos' && <PostAddOutlinedIcon sx={{ width: small ? 18 : 22 }} />) ||
     (label === 'PENDENTE' && <PendingActionsOutlinedIcon sx={{ color: 'text.secondary' }} />) ||
-    ((label === 'Contas' || label === 'Nº PROCESSOS') && <InfoOutlinedIcon sx={{ width: 20 }} />) ||
     ((label === 'ATRIBUIR' || label === 'Atribuir') && <Atribuir sx={{ width: small ? 18 : 22 }} />) ||
     ((label === 'RESGATAR' || label === 'REATIVAR') && <Resgatar sx={{ width: small ? 18 : 22 }} />) ||
     ((label === 'ELIMINAR' || label === 'Eliminar') && <Eliminar sx={{ width: small ? 18 : 22 }} />) ||
@@ -130,6 +130,9 @@ export function DefaultAction({
       <Icon sx={{ width: small ? 18 : 22 }}>
         <Contrato />
       </Icon>
+    )) ||
+    ((label === 'Lembrete' || label === 'Contas' || label === 'Nº PROCESSOS') && (
+      <InfoOutlinedIcon sx={{ width: 20 }} />
     )) ||
     ((icon === 'Procurar' || label === 'Procurar' || label === 'PROCURAR') && (
       <SearchIcon sx={{ width: small ? 18 : 22, height: small ? 18 : 22 }} />

@@ -13,7 +13,9 @@ export const shapeGarantia = () =>
       then: (schema) => schema.required().label('Subtipo'),
       otherwise: (schema) => schema.nullable(),
     }),
-    livrancas: Yup.array(Yup.object({ numero_livranca: Yup.string().required().label('Nº de livrança') })),
+    livrancas: Yup.array(
+      Yup.object({ numero_livranca: Yup.string().required().label('Nº de livrança'), avalistas: shapeEntidades() })
+    ),
     contas: Yup.array(
       Yup.object({
         percentagem_cobertura: shapePercentagem('Cobertura'),

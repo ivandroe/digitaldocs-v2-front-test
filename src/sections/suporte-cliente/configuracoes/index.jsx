@@ -14,25 +14,22 @@ import TableConfiguracoes from './table-configuracoes';
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-export default function Configuracoes({ role }) {
+export default function Configuracoes() {
   const dispatch = useDispatch();
 
   const tabsList = useMemo(
     () => [
       { value: 'Assuntos', component: <TableConfiguracoes item="assuntos" /> },
-      ...(role === 'ADMINISTRATOR'
-        ? [
-            { value: 'Utilizadores', component: <TableConfiguracoes item="utilizadores" /> },
-            { value: 'Departamentos', component: <TableConfiguracoes item="departamentos" /> },
-            { value: 'Prompt email', component: <TableConfiguracoes item="prompts" /> },
-          ]
-        : []),
+      { value: 'Utilizadores', component: <TableConfiguracoes item="utilizadores" /> },
+      { value: 'Departamentos', component: <TableConfiguracoes item="departamentos" /> },
       { value: 'Respostas', component: <TableConfiguracoes item="respostas" /> },
       { value: 'FAQ', component: <TableConfiguracoes item="faq" /> },
       { value: 'SLA Global', component: <TableConfiguracoes item="slas" /> },
       { value: 'SLA Departamental', component: <TableConfiguracoes item="slasUo" /> },
+      { value: 'Prompt email', component: <TableConfiguracoes item="prompts" /> },
+      { value: 'Conteúdos Suporte', component: <TableConfiguracoes item="conteudos" /> },
     ],
-    [role]
+    []
   );
 
   const [tab, setTab] = useTabsSync(tabsList, 'Assuntos', 'tab-suporte-cliente-config');

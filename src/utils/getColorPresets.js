@@ -53,6 +53,7 @@ export function colorLabel(value, padrao = 'primary') {
   return (
     ((value === 'Preso' ||
       value === 'Tarefas' ||
+      value === 'Abertura' ||
       value === 'Clientes' ||
       value === 'Mensagem' ||
       value === 'Favorável' ||
@@ -61,19 +62,22 @@ export function colorLabel(value, padrao = 'primary') {
       'success') ||
     ((value === 'Pendente' ||
       value === 'Pendentes' ||
+      value === 'Administrador' ||
       value === 'Favorável parcial' ||
       value === 'Alteração do estado' ||
       value?.includes('UPDATE')) &&
       'warning') ||
     ((value === 'Afeto' ||
       value === 'Ambos' ||
+      value === 'Chefia' ||
+      value === 'Análise' ||
       value === 'Em análise' ||
       value === 'em análise' ||
       value === 'Atribuídos' ||
       value === 'Atribuição' ||
       value?.includes('READ')) &&
       'info') ||
-    ((value === 'Entrada' || value === 'Sem parecer') && 'default') ||
+    ((value === 'Entrada' || value === 'Sem parecer' || value === 'Fecho') && 'default') ||
     ((value === 'Retidos' ||
       value === 'desistido' ||
       value === 'indeferido' ||

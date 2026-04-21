@@ -7,15 +7,19 @@ import Stack from '@mui/material/Stack';
 import { useTheme } from '@mui/material/styles';
 import Typography from '@mui/material/Typography';
 // utils
-import { fNumber, fPercent, fData } from '../../utils/formatNumber';
+import { useFileSystemStats } from './useFileSystemStats';
+import { fNumber, fPercent, fData } from '@/utils/formatNumber';
 // redux
-import { useDispatch, useSelector } from '../../redux/store';
-import { getIndicadores } from '../../redux/slices/indicadores';
+import { useDispatch, useSelector } from '@/redux/store';
+import { getIndicadores } from '@/redux/slices/indicadores';
 // components
-import GridItem from '../../components/GridItem';
-import Chart, { useChart } from '../../components/chart';
-//
+import GridItem from '@/components/GridItem';
 import { IndicadorItem } from './Indicadores';
+import Chart, { useChart } from '@/components/chart';
+
+const DISCO_TOTAL = 1_000_000_000_000;
+
+// ---------------------------------------------------------------------------------------------------------------------
 
 export function DiscoFicheiros() {
   const theme = useTheme();
@@ -26,7 +30,10 @@ export function DiscoFicheiros() {
     dispatch(getIndicadores('fileSystem', { item: 'fileSystem' }));
   }, [dispatch]);
 
-  const tamanho = 650000000000;
+  const stats = useFileSystemStats(fileSystem);
+  const total = stats[0];
+  const usedPercent = total.tamanho > 0 ? ((total.tamanho * 100) / DISCO_TOTAL).toFixed(2) : 0;
+
   const chartOptions = useChart({
     chart: { offsetY: -16, sparkline: { enabled: true } },
     grid: { padding: { top: 24, bottom: 24 } },
@@ -39,107 +46,73 @@ export function DiscoFicheiros() {
         dataLabels: {
           name: { offsetY: 8 },
           value: { offsetY: -50 },
-          total: { label: `Usado de ${fData(tamanho)}`, fontSize: theme.typography.body2.fontSize },
+          total: { label: `Usado de ${fData(DISCO_TOTAL)}`, fontSize: theme.typography.body2.fontSize },
         },
       },
     },
   });
 
-  const total = { tipo: 'Total', qnt: 0, tamanho: 0, file: 'folder' };
-  const pdf = { tipo: 'Pdf', qnt: 0, tamanho: 0, file: 'format_pdf' };
-  const outros = { tipo: 'Outros', qnt: 0, tamanho: 0, file: 'file' };
-  const word = { tipo: 'Word', qnt: 0, tamanho: 0, file: 'format_word' };
-  const imagem = { tipo: 'Img', qnt: 0, tamanho: 0, file: 'format_image' };
-  const excel = { tipo: 'Excel', qnt: 0, tamanho: 0, file: 'format_excel' };
-
-  fileSystem?.forEach(({ tipo, quantidade, tamanhoMB }) => {
-    total.qnt += quantidade;
-    total.tamanho += tamanhoMB * 1000000;
-    if (tipo === 'application/pdf') {
-      pdf.qnt += quantidade;
-      pdf.tamanho += tamanhoMB * 1000000;
-    } else if (tipo.includes('image/')) {
-      imagem.qnt += quantidade;
-      imagem.tamanho += tamanhoMB * 1000000;
-    } else if (tipo === 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' || tipo.includes('excel')) {
-      excel.qnt += quantidade;
-      excel.tamanho += tamanhoMB * 1000000;
-    } else if (
-      tipo === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' ||
-      tipo.includes('msword')
-    ) {
-      word.qnt += quantidade;
-      word.tamanho += tamanhoMB * 1000000;
-    } else {
-      outros.qnt += quantidade;
-      outros.tamanho += tamanhoMB * 1000000;
-    }
-  });
-
   return (
     <Card>
-      <IndicadorItem
-        isLoading={isLoading}
-        isNotFound={!fileSystem.length}
-        children={
-          <Grid container spacing={3} alignItems="center">
-            <GridItem sm={6}>
-              <Chart
-                height={500}
-                type="radialBar"
-                options={chartOptions}
-                series={[total?.tamanho > 0 ? ((total?.tamanho * 100) / tamanho).toFixed(2) : 0]}
-              />
-            </GridItem>
-            <GridItem sm={6}>
-              <Stack spacing={2}>
-                {[total, pdf, imagem, excel, word, outros].map(
-                  (folder) =>
-                    folder.qnt > 0 && (
-                      <Card
-                        key={folder.tipo}
-                        sx={{
-                          p: 2,
-                          borderRadius: 1,
-                          boxShadow: 'none',
-                          border: `solid 1px ${theme.palette.divider}`,
-                          '&:hover': { bgcolor: 'background.neutral', boxShadow: theme.customShadows.z2 },
-                        }}
-                      >
-                        <Stack spacing={2} direction="row" alignItems="center">
-                          <Box
-                            component="img"
-                            sx={{ width: 45, height: 45 }}
-                            src={`/assets/icons/file_format/${folder.file}.svg`}
-                          />
+      <IndicadorItem isLoading={isLoading} isNotFound={!fileSystem.length}>
+        <Grid container spacing={3} alignItems="center">
+          <GridItem sm={6}>
+            <Chart height={500} type="radialBar" options={chartOptions} series={[Number(usedPercent)]} />
+          </GridItem>
 
-                          <Stack spacing={0.5} flexGrow={1}>
-                            <Typography variant="subtitle1">{folder.tipo}</Typography>
-                            <Stack direction="row" alignContent="center" spacing={0.5}>
-                              <Typography variant="body2">{fNumber(folder.qnt)} </Typography>
-                              <Typography variant="caption" sx={{ color: 'text.secondary', typography: 'body2' }}>
-                                {folder.qnt > 1 ? 'ficheiros' : 'ficheiro'}
-                              </Typography>
-                            </Stack>
-                          </Stack>
+          <GridItem sm={6}>
+            <Stack spacing={2}>
+              {stats
+                .filter(({ qnt }) => qnt > 0)
+                .map((item) => (
+                  <FileTypeCard key={item.tipo} {...item} totalTamanho={total.tamanho} />
+                ))}
+            </Stack>
+          </GridItem>
+        </Grid>
+      </IndicadorItem>
+    </Card>
+  );
+}
 
-                          <Stack direction={{ xs: 'column', md: 'row' }} alignItems="center" spacing={0.5}>
-                            <Typography variant="h6"> {fData(folder.tamanho)} </Typography>
-                            {folder.tipo !== 'Total' && (
-                              <Typography variant="caption" sx={{ color: 'text.secondary', typography: 'body2' }}>
-                                ({fPercent((folder.tamanho * 100) / total.tamanho)})
-                              </Typography>
-                            )}
-                          </Stack>
-                        </Stack>
-                      </Card>
-                    )
-                )}
-              </Stack>
-            </GridItem>
-          </Grid>
-        }
-      />
+// ---------------------------------------------------------------------------------------------------------------------
+
+export function FileTypeCard({ tipo, file, qnt, tamanho, totalTamanho }) {
+  const theme = useTheme();
+  const isTotal = tipo === 'Total';
+
+  return (
+    <Card
+      sx={{
+        p: 2,
+        borderRadius: 1,
+        boxShadow: 'none',
+        border: `solid 1px ${theme.palette.divider}`,
+        '&:hover': { bgcolor: 'background.neutral', boxShadow: theme.customShadows.z2 },
+      }}
+    >
+      <Stack spacing={2} direction="row" alignItems="center">
+        <Box component="img" sx={{ width: 40, height: 40 }} src={`/assets/icons/file_format/${file}.svg`} />
+
+        <Stack spacing={0.5} flexGrow={1}>
+          <Typography variant="subtitle1">{tipo}</Typography>
+          <Stack direction="row" alignItems="center" spacing={0.5}>
+            <Typography variant="body2">{fNumber(qnt)}</Typography>
+            <Typography variant="body2" sx={{ color: 'text.secondary' }}>
+              {qnt === 1 ? 'ficheiro' : 'ficheiros'}
+            </Typography>
+          </Stack>
+        </Stack>
+
+        <Stack direction={{ xs: 'column', md: 'row' }} alignItems="center" spacing={0.5}>
+          <Typography variant="h6">{fData(tamanho)}</Typography>
+          {!isTotal && totalTamanho > 0 && (
+            <Typography variant="body2" sx={{ color: 'text.secondary' }}>
+              ({fPercent((tamanho * 100) / totalTamanho)})
+            </Typography>
+          )}
+        </Stack>
+      </Stack>
     </Card>
   );
 }

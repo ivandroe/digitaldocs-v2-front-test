@@ -19,9 +19,9 @@ import { meses } from '../_mock';
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-export function SearchToolbarSimple({ filter, item = '', setFilter, children = null }) {
+export function SearchToolbarSimple({ filter, item = '', setFilter, children = null, pb = 1 }) {
   return (
-    <Stack direction={{ xs: children ? 'column' : 'row', sm: 'row' }} alignItems="center" spacing={1} sx={{ pb: 1 }}>
+    <Stack direction={{ xs: children ? 'column' : 'row', sm: 'row' }} alignItems="center" spacing={1} sx={{ pb }}>
       {children}
       <SearchField item={item} filter={filter} setFilter={setFilter} />
       {filter && <RemoverFiltros removerFiltro={() => setItemValue('', setFilter, item, false)} />}

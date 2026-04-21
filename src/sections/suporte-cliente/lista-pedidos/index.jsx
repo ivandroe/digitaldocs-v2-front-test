@@ -1,87 +1,120 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useCallback } from 'react';
 // @mui
 import Card from '@mui/material/Card';
 // utils
-import { normalizeText } from '@/utils/formatText';
-import { statusList, injectCollaboratorName } from '../utils';
-import useTable, { getComparator, applySort } from '@/hooks/useTable';
-// redux
+import useTable from '@/hooks/useTable';
 import { useDispatch, useSelector } from '@/redux/store';
 import { getInSuporte } from '@/redux/slices/suporte-cliente';
+import { statusList, injectCollaboratorName, getAccessibleUsers, getAccessibleDepartments } from '../utils';
 // Components
-import HeaderBreadcrumbs from '@/components/HeaderBreadcrumbs';
-//
 import TablePedidos from './table-pedidos';
 import SearchToolbar from './search-toolbar';
+import HeaderBreadcrumbs from '@/components/HeaderBreadcrumbs';
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-export default function Tickets({ admin, department, setDepartment }) {
+const DEFAULT_STATUS = { id: 'OPEN', label: 'Pendente' };
+
+function storageGet(key, fallback = null) {
+  try {
+    const raw = localStorage.getItem(key);
+    if (!raw) return fallback;
+    return JSON.parse(raw);
+  } catch {
+    return fallback;
+  }
+}
+
+function storageSet(key, value) {
+  if (value == null || value === '') localStorage.removeItem(key);
+  else localStorage.setItem(key, JSON.stringify(value));
+}
+
+// ---------------------------------------------------------------------------------------------------------------------
+
+export default function Tickets({ utilizador, department, setDepartment }) {
   const dispatch = useDispatch();
+  const { order, page, rowsPerPage, setPage, ...rest } = useTable({
+    defaultRowsPerPage: 10,
+    defaultOrderBy: 'created_at',
+  });
 
-  const { order, orderBy, setPage, ...rest } = useTable();
+  const colaboradores = useSelector((state) => state.intranet.colaboradores);
+  const { tickets, departamentos, utilizadores, assuntos } = useSelector((state) => state.suporte);
 
-  const { colaboradores } = useSelector((state) => state.intranet);
-  const { isLoading, tickets, departamentos, utilizadores } = useSelector((state) => state.suporte);
+  const isAdmin = utilizador?.role === 'ADMINISTRATOR';
+  const isCentral = department?.type === 'CENTRAL_SERVICES';
 
-  const [filter, setFilter] = useState(localStorage.getItem('filterTickets') || '');
-  const [subject, setSubject] = useState(localStorage.getItem('subjectTickets') || '');
-  const [colaborador, setColaborador] = useState(localStorage.getItem('colaboradorTickets') || '');
+  const [prevIsCentral, setPrevIsCentral] = useState(isCentral);
+  const [subject, setSubject] = useState(() => storageGet('subjectTicket'));
+  const [colaborador, setColaborador] = useState(() => storageGet('colaboradorTickets'));
   const [status, setStatus] = useState(
-    statusList?.find(({ id }) => id === localStorage.getItem('statusTicket')) || { id: 'OPEN', label: 'Pendente' }
+    () => statusList?.find(({ id }) => id === storageGet('statusTicket')?.id) || null
   );
 
-  useEffect(() => {
-    if (department?.id || admin) dispatch(getInSuporte('tickets', { department: department?.id, status: status?.id }));
-  }, [dispatch, department?.id, status?.id, admin]);
+  if (isCentral !== prevIsCentral && !isAdmin) {
+    setPrevIsCentral(isCentral);
+    if (isCentral) setStatus(DEFAULT_STATUS);
+  }
+
+  const departamentoList = getAccessibleDepartments(departamentos, utilizador);
+  const usersList = getAccessibleUsers(utilizadores, colaboradores, utilizador);
+
+  const fetchTickets = useCallback(() => {
+    if (!isAdmin && !department?.id) return;
+    dispatch(
+      getInSuporte('tickets', {
+        page,
+        sort: order,
+        size: rowsPerPage,
+        status: status?.id,
+        reset: { dados: {} },
+        subjectId: subject?.id,
+        departmentId: department?.id,
+        currentUserEmployeeId: colaborador?.id,
+      })
+    );
+  }, [dispatch, page, rowsPerPage, order, status?.id, department?.id, subject?.id, colaborador?.id, isAdmin]);
 
   useEffect(() => {
-    setPage(0);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [filter, department, subject, status, colaborador]);
+    fetchTickets();
+  }, [fetchTickets]);
 
+  const handleFilter = useCallback(
+    (setter, key) => (value) => {
+      setPage(0);
+      setter(value);
+      storageSet(key, value);
+    },
+    [setPage]
+  );
+
+  const { tickets: data = [], total_elements: total = 0 } = tickets;
   const dados = useMemo(
-    () => injectCollaboratorName(tickets, utilizadores, colaboradores),
-    [tickets, utilizadores, colaboradores]
+    () => injectCollaboratorName(data, utilizadores, colaboradores),
+    [data, utilizadores, colaboradores]
   );
-  const dataFiltered = useMemo(
-    () => applySortFilter({ dados, filter, subject, colaborador, comparator: getComparator(order, orderBy) }),
-    [dados, filter, subject, order, colaborador, orderBy]
-  );
-  const usersList = useMemo(() => [...new Set(dados?.map((t) => t.colaborador).filter(Boolean))], [dados]);
-  const subjectsList = useMemo(() => [...new Set(tickets?.map((t) => t.subject_name).filter(Boolean))], [tickets]);
 
   return (
     <>
       <HeaderBreadcrumbs sx={{ px: 1 }} heading="Tickets" />
       <Card sx={{ p: 1 }}>
         <SearchToolbar
-          extra={{ colaborador, setColaborador, admin }}
-          lists={{ usersList, subjectsList, departamentos }}
-          dados={{ filter, status, subject, department, setStatus, setFilter, setSubject, setDepartment }}
+          values={{ colaborador, status, subject, department, isAdmin }}
+          lists={{ usersList, subjectsList: assuntos, departamentoList }}
+          setValues={{
+            setDepartment,
+            setStatus: handleFilter(setStatus, 'statusTicket'),
+            setSubject: handleFilter(setSubject, 'subjectTicket'),
+            setColaborador: handleFilter(setColaborador, 'colaboradorTickets'),
+          }}
         />
-        <TablePedidos dados={dataFiltered} isLoading={isLoading} useTable={{ order, orderBy, ...rest }} />
+        <TablePedidos
+          dados={dados}
+          refetch={() => fetchTickets()}
+          useTable={{ total, page, order, rowsPerPage, ...rest }}
+        />
       </Card>
     </>
   );
-}
-
-// ---------------------------------------------------------------------------------------------------------------------
-
-export function applySortFilter({ dados, filter, subject, colaborador, comparator }) {
-  dados = applySort(dados, comparator);
-
-  if (subject) dados = dados.filter(({ subject_name: subjectRow }) => subjectRow === subject);
-  if (colaborador) dados = dados.filter(({ colaborador: colaboradorRow }) => colaboradorRow === colaborador);
-
-  if (filter) {
-    const normalizedFilter = normalizeText(filter);
-    dados = dados.filter(
-      ({ customer_name: customer, code_ticket: code }) =>
-        (code && normalizeText(code).indexOf(normalizedFilter) !== -1) ||
-        (customer && normalizeText(customer).indexOf(normalizedFilter) !== -1)
-    );
-  }
-
-  return dados;
 }

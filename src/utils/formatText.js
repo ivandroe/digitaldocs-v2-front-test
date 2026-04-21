@@ -114,6 +114,40 @@ export function formatPrazoAmortizacao(valor) {
 
 // ---------------------------------------------------------------------------------------------------------------------
 
+export const queryString = (params) =>
+  params && typeof params === 'object' && !params.detalhes
+    ? (() => {
+        const searchParams = new URLSearchParams();
+
+        Object.entries(params).forEach(([key, value]) => {
+          const isExcluded = ['id', 'notLoading', 'reset'].includes(key);
+          const hasValue = value !== null && value !== undefined && value !== '';
+          if (!isExcluded && hasValue) searchParams.append(key, value);
+        });
+
+        const string = searchParams.toString();
+        return string ? `?${string}` : '';
+      })()
+    : '';
+
+// ---------------------------------------------------------------------------------------------------------------------
+
+export function labelMeses(valor) {
+  if (valor === '' || valor === null || valor === undefined) return '';
+  return `${valor} meses`;
+}
+
+// ---------------------------------------------------------------------------------------------------------------------
+
+export function getInitials(nome) {
+  if (!nome) return '?';
+  const parts = nome.trim().split(/\s+/);
+  if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
+  return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+}
+
+// ---------------------------------------------------------------------------------------------------------------------
+
 export const pdfInfo = {
   modificationDate: new Date(),
   producer: 'react-pdf/renderer',

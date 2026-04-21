@@ -137,10 +137,10 @@ const DetalhesEstado = Loadable(lazy(() => import('../pages/parametrizacao/page-
 
 // ------------------------------------------------------- GAJ-i9 ------------------------------------------------------
 
-const GestaoGaji9 = Loadable(lazy(() => import('../pages/gaji9/page-gestao-gaji9')));
-const DetalhesMinuta = Loadable(lazy(() => import('../pages/gaji9/page-detalhes-minuta')));
-const DetalhesCredito = Loadable(lazy(() => import('../pages/gaji9/page-detalhes-credito')));
-const DetalhesClausula = Loadable(lazy(() => import('../pages/gaji9/page-detalhes-clausula')));
+const GestaoGaji9 = Loadable(lazy(() => import('../modules/gaji9/pages/gestao-gaji9')));
+const DetalhesMinuta = Loadable(lazy(() => import('../modules/gaji9/pages/detalhes-minuta')));
+const DetalhesCredito = Loadable(lazy(() => import('../modules/gaji9/pages/detalhes-credito')));
+const DetalhesClausula = Loadable(lazy(() => import('../modules/gaji9/pages/detalhes-clausula')));
 
 // --------------------------------------------------- SUPORTE CLIENTE --------------------------------------------------
 

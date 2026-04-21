@@ -1,8 +1,8 @@
 // utils
-import { useSelector } from '../../redux/store';
-import { colorLabel } from '../../utils/getColorPresets';
+import { useSelector } from '@/redux/store';
+import { colorLabel } from '@/utils/getColorPresets';
 // components
-import Label from '../../components/Label';
+import Label from '@/components/Label';
 
 // ---------------------------------------------------------------------------------------------------------------------
 
@@ -32,7 +32,23 @@ export function LabelStatus({ label }) {
 export function LabelApply({ label }) {
   return (
     <Label color={colorLabel(getApllyLabel(label), 'default')} variant="ghost">
-      {getStatusLabel(label)}
+      {getApllyLabel(label)}
+    </Label>
+  );
+}
+
+export function LabelPhase({ label }) {
+  return (
+    <Label color={colorLabel(getPhasesLabel(label), 'warning')} variant="ghost">
+      {getPhasesLabel(label)}
+    </Label>
+  );
+}
+
+export function LabelRole({ label }) {
+  return (
+    <Label color={colorLabel(getRolesLabel(label), 'success')} variant="ghost">
+      {getRolesLabel(label)}
     </Label>
   );
 }
@@ -51,6 +67,7 @@ export const phasesList = [
   { id: 'OPENING', label: 'Abertura' },
   { id: 'ANALYSIS', label: 'Análise' },
   { id: 'CLOSING', label: 'Fecho' },
+  { id: 'REMINDER', label: 'Lembrete' },
 ];
 
 export const applyList = [
@@ -128,4 +145,31 @@ export function injectCollaboratorName(data, users, colaboradores) {
 
     return { ...item, colaborador: name };
   });
+}
+
+// ---------------------------------------------------------------------------------------------------------------------
+
+export function getAccessibleUsers(users, employees, currentUser) {
+  const filteredUsers = users.filter((user) => {
+    switch (currentUser.role) {
+      case 'ADMINISTRATOR':
+        return true;
+      case 'COORDINATOR':
+        return user.department_id === currentUser.department_id && user.department_id !== null;
+      case 'OPERATOR':
+        return user.id === currentUser.id;
+      default:
+        return false;
+    }
+  });
+
+  return filteredUsers.map((user) => {
+    const employee = employees.find((emp) => emp.id === user.employee_id);
+    return { id: user.id, name: employee ? employee.nome : `UserId: ${user.id}` };
+  });
+}
+
+export function getAccessibleDepartments(departamentos, currentUser) {
+  if (currentUser.role === 'ADMINISTRATOR') return departamentos;
+  return departamentos?.filter(({ id }) => id === currentUser?.department_id);
 }

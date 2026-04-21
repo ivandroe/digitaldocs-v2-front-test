@@ -3,6 +3,7 @@ import { useMemo } from 'react';
 import Stack from '@mui/material/Stack';
 // utils
 import { ptDate } from '@/utils/formatTime';
+import { labelMeses } from '@/utils/formatText';
 import { fCurrency, fPercent } from '@/utils/formatNumber';
 // components
 import Label from '@/components/Label';
@@ -25,7 +26,11 @@ export function useMetadadosCreditoData(dados) {
       {
         titulo: 'Regime & Isenções',
         dados: [
-          ...(dados?.bonificado || dados?.revolving || dados?.jovem_bonificado || dados?.colaborador_empresa_parceira
+          ...(dados?.bonificado ||
+          dados?.revolving ||
+          dados?.jovem_bonificado ||
+          dados?.habitacao_propria_1 ||
+          dados?.colaborador_empresa_parceira
             ? [
                 {
                   title: 'Regime',
@@ -35,6 +40,7 @@ export function useMetadadosCreditoData(dados) {
                       {dados?.jovem_bonificado && <Label color="info">Jovem Bonificado</Label>}
                       {dados?.revolving && <Label color="info">Revolving</Label>}
                       {dados?.colaborador_empresa_parceira && <Label color="info">Parceiro</Label>}
+                      {dados?.habitacao_propria_1 && <Label color="info">1ª habitação própria</Label>}
                     </Stack>
                   ),
                 },
@@ -57,14 +63,10 @@ export function useMetadadosCreditoData(dados) {
         dados: [
           { title: 'Data da 1ª prestação', value: ptDate(dados?.data_vencimento_prestacao1) },
           { title: 'Data de utilização', value: ptDate(dados?.data_utilizacao) },
-          {
-            title: 'Nº de prestações',
-            value: dados?.numero_prestacao && `${dados?.numero_prestacao} meses`,
-            bold: true,
-          },
-          { title: 'Meses de vencimento', value: dados?.meses_vencimento && `${dados?.meses_vencimento} meses` },
-          { title: 'Período de carência', value: dados?.periodo_carencia && `${dados?.periodo_carencia} meses` },
-          { title: 'Prazo de utilização', value: dados?.prazo_utilizacao && `${dados?.prazo_utilizacao} meses` },
+          { title: 'Nº de prestações', value: labelMeses(dados?.numero_prestacao), bold: true },
+          { title: 'Meses de vencimento', value: labelMeses(dados?.meses_vencimento) },
+          { title: 'Período de carência', value: labelMeses(dados?.periodo_carencia) },
+          { title: 'Prazo de utilização', value: labelMeses(dados?.prazo_utilizacao) },
         ],
       },
       {

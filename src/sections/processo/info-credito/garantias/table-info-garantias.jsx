@@ -13,9 +13,9 @@ import { TableSearchNotFound } from '@/components/table/SearchNotFound';
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-export default function TableInfoGarantias({ dados, item = '', garantia = false }) {
+export default function TableInfoGarantias({ dados, size = 'meddium', item = '', garantia = false }) {
   return (
-    <Table>
+    <Table size={size}>
       <TableHead>
         {item === 'seguros' && (
           <TableRow sx={{ '& .MuiTableCell-root': { py: 1 } }}>

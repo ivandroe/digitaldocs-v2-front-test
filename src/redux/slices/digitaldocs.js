@@ -438,6 +438,7 @@ export function createItem(item, body, params) {
       }
       const apiUrl =
         (item === 'aplicar' && `${API_FORMINGA_URL}/api/v1/dform/aplicar/banka`) ||
+        (item === 'enquadramento' && `${API_FORMINGA_URL}/v2/processos/${params?.id}/enquadramentos`) ||
         (item === 'seguros' && `${API_FORMINGA_URL}/v2/processos/${params?.processoId}/credito/seguros`) ||
         (item === 'parecer-credito' && `${API_FORMINGA_URL}/v2/processos/${params?.id}/cr/${perfilId}/pareceres`) ||
         (item === 'garantias' &&
@@ -449,6 +450,10 @@ export function createItem(item, body, params) {
         if (item === 'garantias' || item === 'seguros')
           dispatch(slice.actions.addItemProcesso({ item: 'credito', dados: response.data.objeto?.credito || null }));
         if (item === 'aplicar') dispatch(getProcesso('processo', { id: params?.id }));
+        if (item === 'enquadramento') {
+          const dados = response?.data?.objeto?.enquadramentos || [];
+          dispatch(slice.actions.addItemProcesso({ item: 'enquadramentos', dados }));
+        }
       }
       doneSucess(params, dispatch, slice.actions.getSuccess);
     } catch (error) {
@@ -566,6 +571,7 @@ export function deleteItem(item, params) {
       const { perfilId } = selectUtilizador(getState()?.intranet || {});
 
       const apiUrl =
+        (item === 'enquadramento' && `/v2/processos/${params?.processoId}/enquadramentos/${params?.id}`) ||
         (item === 'seguros' && `/v2/processos/${params?.processoId}/credito/seguros?seguro_id=${params?.id}`) ||
         (item === 'garantias' &&
           `/v2/processos/garantias/${perfilId}?processo_id=${params?.processoId}&garantia_id=${params?.id}`) ||
@@ -586,6 +592,10 @@ export function deleteItem(item, params) {
           dispatch(slice.actions.deleteAnexoSuccess({ ...params, perfilId }));
         if (item === 'garantias' || item === 'seguros')
           dispatch(slice.actions.addItemProcesso({ item: 'credito', dados: response.data.objeto?.credito || null }));
+        if (item === 'enquadramento') {
+          const dados = response?.data?.objeto?.enquadramentos || [];
+          dispatch(slice.actions.addItemProcesso({ item: 'enquadramentos', dados }));
+        }
       }
       doneSucess(params, dispatch, slice.actions.getSuccess);
     } catch (error) {

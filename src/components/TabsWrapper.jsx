@@ -1,6 +1,7 @@
 // @mui
 import Tab from '@mui/material/Tab';
 import Tabs from '@mui/material/Tabs';
+import Chip from '@mui/material/Chip';
 import Card from '@mui/material/Card';
 import Stack from '@mui/material/Stack';
 import { styled } from '@mui/material/styles';
@@ -72,13 +73,33 @@ export function TabsWrapperSimple({ tabsList, tab, setTab, sx }) {
             allowScrollButtonsMobile
             value={tabsList.some(({ value }) => value === tab) ? tab : tabsList[0]?.value}
           >
-            {tabsList.map(({ value, label }) => (
-              <Tab key={value} value={value} sx={{ px: 0.64, py: 1.55 }} label={label || value} />
+            {tabsList.map(({ value, label, count = null, pill = '' }) => (
+              <Tab
+                key={value}
+                value={value}
+                sx={{ px: 0.64, py: 1.55 }}
+                label={<TabLabel text={label || value} count={count} pill={pill} />}
+              />
             ))}
           </Tabs>
         )}
       </TabsWrapperStyleSimple>
     </Card>
+  );
+}
+
+function TabLabel({ text, count, pill }) {
+  return (
+    <Stack direction="row" spacing={0.75} alignItems="center">
+      <span>{text}</span>
+      {(count != null || pill) && (
+        <Chip
+          size="small"
+          label={count ?? pill}
+          sx={{ height: 16, typography: 'caption', fontWeight: 600, color: 'text.secondary' }}
+        />
+      )}
+    </Stack>
   );
 }
 

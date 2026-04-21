@@ -65,6 +65,7 @@ const initialState = {
   motivosPendencia: [],
   motivosTransicao: [],
   colaboradoresEstado: [],
+  fluxosEnquadramento: [],
 };
 
 const slice = createSlice({
@@ -183,6 +184,7 @@ export function getFromParametrizacao(item, params) {
         (item === 'origens' && `/v1/origens/${perfilId}`) ||
         (item === 'motivosPendencia' && `/v1/motivos/all/${perfilId}`) ||
         (item === 'meusacessos' && `/v1/acessos?perfilID=${perfilId}`) ||
+        (item === 'fluxosEnquadramento' && `/v2/fluxos/enquadramento`) ||
         (item === 'acessos' && `/v1/acessos?perfilID=${params?.perfilId}`) ||
         (item === 'componentes' && `/v2/processos/componentes/${perfilId}`) ||
         (item === 'transicao' && `/v1/transicoes/${params?.id}/${perfilId}`) ||

@@ -11,6 +11,7 @@ import {
   dstiAposContratacao,
   dividasConsolidadas,
 } from '../calculos';
+import { labelMeses } from '@/utils/formatText';
 import { fCurrency, fPercent } from '@/utils/formatNumber';
 // components
 import { styles } from '@/components/exportar-dados/pdf';
@@ -50,11 +51,7 @@ export default function Financiamento({ dados }) {
             }`}
           />
         )}
-        <RowFicha
-          small
-          title="Prazo de amortização"
-          value={`${proposta?.prazo_amortizacao || credito?.prazo_amortizacao} meses`}
-        />
+        <RowFicha small title="Prazo de amortização" value={labelMeses(proposta?.prazo_amortizacao)} />
         <RowFicha
           small
           title="Prestação mensal"

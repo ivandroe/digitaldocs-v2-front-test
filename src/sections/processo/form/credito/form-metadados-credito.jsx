@@ -115,16 +115,17 @@ function RegimeEspecial({ onClose, dados, dispatch, dadosStepper, precario }) {
     >
       <Title title="Regime especial" />
       <Grid container spacing={3} sx={{ mt: 1 }}>
-        <GridItem xs={6} md={3} children={<RHFSwitch name="bonificado" label="Bonificado" mt />} />
-        <GridItem xs={6} md={3} children={<RHFSwitch name="jovem_bonificado" label="Jovem bonificado" mt />} />
-        <GridItem xs={6} md={3} children={<RHFSwitch name="revolving" label="Revolving" mt />} />
-        <GridItem xs={6} md={3} children={<RHFSwitch name="credibolsa" label="Credibolsa" mt />} />
-        <GridItem sm={6} md={4} children={<RHFSwitch name="isento_comissao" label="Isento de comissão" mt />} />
-        <GridItem sm={6} md={4}>
-          <RHFSwitch name="tem_isencao_imposto_selo" label="Isento de imposto de selo" mt />
-        </GridItem>
+        <GridItem xs={6} md={4} children={<RHFSwitch name="bonificado" label="Bonificado" mt />} />
+        <GridItem xs={6} md={4} children={<RHFSwitch name="jovem_bonificado" label="Jovem bonificado" mt />} />
+        <GridItem xs={6} md={4} children={<RHFSwitch name="revolving" label="Revolving" mt />} />
+        <GridItem xs={6} md={4} children={<RHFSwitch name="credibolsa" label="Credibolsa" mt />} />
         <GridItem sm={6} md={4}>
           <RHFSwitch name="colaborador_empresa_parceira" label="Colaborador de empresa parceira" mt />
+        </GridItem>
+        <GridItem sm={6} md={4} children={<RHFSwitch name="habitacao_propria_1" label="1ª habitação própria" mt />} />
+        <GridItem sm={6} children={<RHFSwitch name="isento_comissao" label="Isento de comissão" mt />} />
+        <GridItem sm={6}>
+          <RHFSwitch name="tem_isencao_imposto_selo" label="Isento de imposto de selo" mt />
         </GridItem>
         {values?.credibolsa && (
           <>

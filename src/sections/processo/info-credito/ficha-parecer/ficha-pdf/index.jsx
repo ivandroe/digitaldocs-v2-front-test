@@ -3,9 +3,9 @@ import Html from 'react-pdf-html';
 import { Document, Page, View, Text } from '@react-pdf/renderer';
 // utils
 import { ptDate } from '@/utils/formatTime';
-import { pdfInfo } from '@/utils/formatText';
 import { extractClientes } from '../calculos';
 import { situacaoProfissionalRows } from '../utils';
+import { pdfInfo, labelMeses } from '@/utils/formatText';
 import { fCurrency, fPercent } from '@/utils/formatNumber';
 // components
 import { processHtmlForPdf } from '@/components/editor/normalizeEditorText';
@@ -247,10 +247,8 @@ export default function FichaPdf({ dados }) {
                 <RowFicha small title="Finalidade" value={credito?.finalidade} />
                 <RowFicha small title="Montante" value={fCurrency(proposta?.montante)} />
                 <RowFicha small title="Taxa de juro" value={fPercent(proposta?.taxa_juro)} />
-                <RowFicha small title="Prazo de amortização" value={`${proposta?.prazo_amortizacao} meses`} />
-                {proposta?.prazo_utilizacao && (
-                  <RowFicha small title="Prazo de utilização" value={`${proposta?.prazo_utilizacao} meses`} />
-                )}
+                <RowFicha small title="Prazo de amortização" value={labelMeses(proposta?.prazo_amortizacao)} />
+                <RowFicha small title="Prazo de utilização" value={labelMeses(proposta?.prazo_utilizacao)} />
                 <RowFicha small title="Valor da prestação" value={fCurrency(valorPrestacao)} />
                 <RowFicha small title="Comissões" value={proposta?.comissoes} />
                 <RowFicha small title="Garantias" value={credito?.garantia} options={{ final: true }} />

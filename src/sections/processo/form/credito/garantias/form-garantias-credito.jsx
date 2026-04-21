@@ -26,7 +26,7 @@ import FormLivrancas from './form-livrancas';
 import { shapeGarantia } from './validationFields';
 import composeGarantiaPayload from './composePayload';
 import { construirSchemaImoveis } from './schemaFileds';
-import { listaGarantias } from '../../../../gaji9/applySortFilter';
+import { listaGarantias } from '@/modules/gaji9/utils/applySortFilter';
 
 // ---------------------------------------------------------------------------------------------------------------------
 
@@ -49,13 +49,13 @@ export default function FormGarantias({ dados, processoId, onClose }) {
       titulos: dados?.metadados?.titulos || [],
       seguros: dados?.metadados?.seguros || [],
       fiadores: dados?.metadados?.fiadores || [],
-      livrancas: dados?.metadados?.livrancas || [],
       percentagem_cobertura: dados?.percentagem_cobertura || '',
       predios: construirSchemaImoveis(dados?.metadados?.imoveis?.predios || []),
       terrenos: construirSchemaImoveis(dados?.metadados?.imoveis?.terrenos || []),
       veiculos: construirSchemaImoveis(dados?.metadados?.imoveis?.veiculos || []),
       apartamentos: construirSchemaImoveis(dados?.metadados?.imoveis?.apartamentos || []),
       subtipo_garantia: tipoGarantia?.subtipos?.find(({ id }) => id === dados?.subtipo_garantia_id) || null,
+      livrancas: dados?.metadados?.livrancas || [{ numero_livranca: '', avalistas: [{ numero_entidade: '' }] }],
       tipo_garantia: tipoGarantia,
     }),
     [dados, tipoGarantia]

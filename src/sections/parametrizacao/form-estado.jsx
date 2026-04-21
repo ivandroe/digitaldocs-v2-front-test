@@ -63,6 +63,8 @@ export function EstadoForm({ onClose }) {
       is_decisao: selectedItem?.is_decisao || false,
       is_inicial: selectedItem?.is_inicial || false,
       nivel_decisao: selectedItem?.nivel_decisao || null,
+      pode_enquadrar: selectedItem?.pode_enquadrar || false,
+      is_analise_credito: selectedItem?.is_analise_credito || false,
       uo_id: uosList?.find(({ id }) => Number(id) === Number(selectedItem?.uo_id)) || null,
     }),
     [selectedItem, uosList]
@@ -79,9 +81,9 @@ export function EstadoForm({ onClose }) {
 
   const onSubmit = async () => {
     try {
-      const params = { id: selectedItem?.id, msg: `Estado ${isEdit ? 'atualizado' : 'adicionado'}` };
+      const params = { getItem: isEdit ? '' : 'selectedItem', msg: `Estado ${isEdit ? 'atualizado' : 'adicionado'}` };
       const formData = JSON.stringify({ ...values, balcao: values?.uo_id?.balcao, uo_id: values?.uo_id?.id });
-      dispatch((isEdit ? updateItem : createItem)('estado', formData, { ...params, getItem: 'selectedItem' }));
+      dispatch((isEdit ? updateItem : createItem)('estado', formData, { id: selectedItem?.id, ...params, onClose }));
     } catch {
       enqueueSnackbar('Erro ao submeter os dados', { variant: 'error' });
     }
@@ -108,10 +110,14 @@ export function EstadoForm({ onClose }) {
             />
             <GridItem xs={values?.is_decisao ? 6 : 4} children={<RHFSwitch name="is_inicial" label="Inicial" />} />
             <GridItem xs={values?.is_decisao ? 6 : 4} children={<RHFSwitch name="is_final" label="Final" />} />
-            <GridItem xs={values?.is_decisao ? 6 : 4} children={<RHFSwitch name="is_decisao" label="Decisão" />} />
+            <GridItem xs={values?.is_decisao ? 6 : 4}>
+              <RHFSwitch name="is_decisao" label="Decisão" mt={values?.is_decisao} />
+            </GridItem>
             {values?.is_decisao && (
               <GridItem sm={6} children={<RHFNumberField name="nivel_decisao" label="Escalão de decisão" />} />
             )}
+            <GridItem sm={6} children={<RHFSwitch name="is_analise_credito" label="Análise de crédito" />} />
+            <GridItem sm={6} children={<RHFSwitch name="pode_enquadrar" label="Pode enquadrar" />} />
             <GridItem children={<RHFTextField name="observacao" multiline rows={3} label="Observação" />} />
           </Grid>
           <DialogButons edit={isEdit} isSaving={isSaving} onClose={onClose} />

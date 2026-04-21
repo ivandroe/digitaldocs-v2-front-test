@@ -14,7 +14,7 @@ import Typography from '@mui/material/Typography';
 import DialogContent from '@mui/material/DialogContent';
 // redux
 import { useSelector, useDispatch } from '@/redux/store';
-import { listaProdutos } from '@/sections/gaji9/applySortFilter';
+import { listaProdutos } from '@/modules/gaji9/utils/applySortFilter';
 import { getFromParametrizacao, createItem, updateItem, deleteItem } from '@/redux/slices/parametrizacao';
 // components
 import GridItem from '@/components/GridItem';

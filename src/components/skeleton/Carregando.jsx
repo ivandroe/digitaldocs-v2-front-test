@@ -98,17 +98,11 @@ export function FormLoading({ rows = 0 }) {
 
 export function SkeletonEntidade() {
   return (
-    <>
+    <Grid container spacing={2}>
       <GridItem children={<Skeleton variant="text" height={140} sx={{ transform: 'none' }} />} />
       <GridItem children={<Skeleton variant="text" height={45} sx={{ transform: 'none' }} />} />
-      {[...Array(2)].map((row, index) => (
-        <GridItem
-          sm={6}
-          key={`entidade_${index}`}
-          children={<Skeleton variant="text" height={500} sx={{ transform: 'none' }} />}
-        />
-      ))}
-    </>
+      <GridItem children={<Skeleton variant="text" height={500} sx={{ transform: 'none' }} />} />
+    </Grid>
   );
 }
 

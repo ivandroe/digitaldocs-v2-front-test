@@ -19,17 +19,25 @@ import { RHFSwitch, FormProvider, RHFTextField, RHFAutocompleteObj, RHFUploadMul
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-export function ActionForm({ dados, item = '', onClose: onClose1, closeTicket }) {
+export function ActionForm({ dados, item = '', onClose, closeTicket, refetch }) {
   const dispatch = useDispatch();
   const { colaboradores } = useSelector((state) => state.intranet);
-  const { isEdit, isSaving, departamentos, utilizadores } = useSelector((state) => state.suporte);
+  const { isEdit, isSaving, departamentos, utilizadores, assuntos } = useSelector((state) => state.suporte);
 
-  const title = (item === 'assign' && 'Atribuir') || (item === 'change-department' && 'Encaminhar') || 'Alterar';
-  const label = (item === 'assign' && 'Colaborador') || (item === 'change-department' && 'Departamento') || 'Estado';
+  const title =
+    (item === 'assign' && 'Atribuir ticket a um colaborador') ||
+    (item === 'change-subject' && 'Alterar assunto do ticket') ||
+    (item === 'change-department' && 'Encaminhar para outro departamento') ||
+    'Alterar estado do ticket';
+  const label =
+    (item === 'assign' && 'Colaborador') ||
+    (item === 'change-subject' && 'Assunto') ||
+    (item === 'change-department' && 'Departamento') ||
+    'Estado';
 
   const itemList = useMemo(
-    () => buildItemList({ item, colaboradores, utilizadores, departamentos, dados }),
-    [item, colaboradores, utilizadores, departamentos, dados]
+    () => buildItemList({ item, colaboradores, utilizadores, departamentos, assuntos, dados }),
+    [item, colaboradores, utilizadores, departamentos, assuntos, dados]
   );
 
   const formSchema = Yup.object().shape({ item: Yup.mixed().required().label(label) });
@@ -45,7 +53,7 @@ export function ActionForm({ dados, item = '', onClose: onClose1, closeTicket })
     const formData = new FormData();
     const resolved = values?.item?.id === 'RESOLVED';
     const hasMsg = values?.message && values.message.trim() !== '';
-    const value = resolved ? { id: 'CLOSED', label: 'Fechado' } : values?.item;
+    const value = resolved ? { id: 'CLOSED', label: 'Encerrado (Não Resolvido)' } : values?.item;
 
     if (hasMsg) {
       const messagePayload = { content: values.message, visibility: values?.to_client ? 'BOTH' : 'INTERNAL' };
@@ -53,17 +61,21 @@ export function ActionForm({ dados, item = '', onClose: onClose1, closeTicket })
       values?.attachments?.forEach((file) => formData.append('attachments', file));
     }
 
-    const onClose = closeTicket;
-    const params1 = { id: dados?.id, patch: true, status: dados?.status, getItem: 'selectedItem' };
-    const msg = (item === 'assign' && 'atribuido') || (item === 'change-department' && 'encaminhado') || '';
-    const params = { value, resolved, message: hasMsg ? formData : null, ...params1 };
+    const isAssunto = item === 'change-subject';
+    const msg =
+      (isAssunto && 'Assunto alterado') ||
+      (item === 'assign' && 'Ticket atribuido') ||
+      (item === 'change-department' && 'Ticket encaminhado') ||
+      'Estado alterado';
+    const params = { id: dados?.id, status: dados?.status, getItem: isAssunto ? 'selectedItem' : '' };
+    const params1 = { patch: true, msg, value, resolved, message: hasMsg ? formData : null, refetch, ...params };
 
-    dispatch(updateInSuporte(item, null, { ...params, msg: msg ? `Ticket ${msg}` : 'Estado alterado', onClose }));
+    dispatch(updateInSuporte(item, null, { ...params1, onClose: isAssunto ? onClose : closeTicket }));
   };
 
   return (
-    <Dialog open onClose={onClose1} fullWidth maxWidth={item === 'assign' ? 'xs' : 'sm'}>
-      <DialogTitle>{`${title} ${item === 'change-status' ? ' estado' : 'ticket'}`}</DialogTitle>
+    <Dialog open onClose={onClose} fullWidth maxWidth={item === 'assign' ? 'xs' : 'sm'}>
+      <DialogTitle>{title}</DialogTitle>
       <DialogContent>
         <FormProvider methods={methods} onSubmit={handleSubmit(onSubmit)}>
           <Stack spacing={3} sx={{ pt: 3 }}>
@@ -80,7 +92,7 @@ export function ActionForm({ dados, item = '', onClose: onClose1, closeTicket })
               </>
             )}
           </Stack>
-          <DialogButons edit={isEdit} isSaving={isSaving} onClose={onClose1} />
+          <DialogButons edit={isEdit} isSaving={isSaving} onClose={onClose} />
         </FormProvider>
       </DialogContent>
     </Dialog>
@@ -133,11 +145,9 @@ export function MessageForm({ dados, onClose }) {
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-function buildItemList({ item, colaboradores, utilizadores, departamentos, dados }) {
+function buildItemList({ item, colaboradores, utilizadores, departamentos, assuntos, dados }) {
   const colaboradoresMap = new Map(colaboradores?.map((c) => [c.id, c.nome]));
-
-  const status = dados?.status;
-  const currentDept = dados?.current_department_id;
+  const { status = '', current_department_id: currentDept = '' } = dados || {};
 
   const usersList = utilizadores
     ?.filter((ut) => ut?.department_id === currentDept)
@@ -158,17 +168,23 @@ function buildItemList({ item, colaboradores, utilizadores, departamentos, dados
       itemList = departsList || [];
       break;
 
+    case 'change-subject':
+      itemList = assuntos
+        ?.filter(({ name }) => name !== dados?.subject_name)
+        ?.map((row) => ({ ...row, label: row?.name }));
+      break;
+
     case 'change-status':
       itemList =
         status === 'IN_PROGRESS'
           ? [
               { id: 'RESOLVED', label: 'Resolvido' },
-              { id: 'CLOSED', label: 'Fechado' },
+              { id: 'CLOSED', label: 'Encerrado (Não Resolvido)' },
             ]
           : [
               { id: 'IN_PROGRESS', label: 'Em análise' },
               { id: 'RESOLVED', label: 'Resolvido' },
-              { id: 'CLOSED', label: 'Fechado' },
+              { id: 'CLOSED', label: 'Encerrado (Não Resolvido)' },
             ];
       break;
 
@@ -176,5 +192,5 @@ function buildItemList({ item, colaboradores, utilizadores, departamentos, dados
       itemList = [];
   }
 
-  return applySort(itemList, getComparator('asc', 'label'));
+  return item === 'change-status' ? itemList : applySort(itemList, getComparator('asc', 'label'));
 }

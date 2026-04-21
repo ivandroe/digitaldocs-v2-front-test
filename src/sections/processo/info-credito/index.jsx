@@ -5,8 +5,8 @@ import Stack from '@mui/material/Stack';
 // utils
 import { useTabsSync } from '@/hooks/minimal-hooks/use-tabs-sync';
 //
-import { useDispatch } from '@/redux/store';
 import { getFromGaji9 } from '@/redux/slices/gaji9';
+import { useDispatch, useSelector } from '@/redux/store';
 // components
 import { TabsWrapperSimple } from '@/components/TabsWrapper';
 //
@@ -21,9 +21,10 @@ import TableGarantias from './garantias/table-garantias';
 
 export default function InfoCredito({ dados }) {
   const dispatch = useDispatch();
+  const { meusAmbientes } = useSelector((state) => state.parametrizacao);
 
   const modificar = dados?.estado?.preso && dados?.estado?.atribuidoAMim;
-  const emAnalise = (dados?.estado?.estado || '')?.toLowerCase()?.includes('análise de crédito');
+  const emAnalise = meusAmbientes?.find(({ id }) => id === dados?.estado?.estado_id)?.isanalise_credito || false;
 
   useEffect(() => {
     dispatch(getFromGaji9('tiposSeguros'));

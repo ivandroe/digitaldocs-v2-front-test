@@ -15,12 +15,11 @@ import { fillData } from '@/utils/formatTime';
 import { submitDados } from '../utils-form-processo';
 import { useSelector, useDispatch } from '@/redux/store';
 import { getComparator, applySort } from '@/hooks/useTable';
+import { listaTitrulares, listaProdutos } from '@/modules/gaji9/utils/applySortFilter';
 // components
 import GridItem from '@/components/GridItem';
 import { ButtonsStepper } from '@/components/Actions';
 import { FormProvider, RHFTextField, RHFDataEntrada, RHFNumberField, RHFAutocompleteObj } from '@/components/hook-form';
-// sections
-import { listaTitrulares, listaProdutos } from '../../../gaji9/applySortFilter';
 
 // ---------------------------------------------------------------------------------------------------------------------
 

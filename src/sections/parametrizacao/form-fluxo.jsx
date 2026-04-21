@@ -15,12 +15,12 @@ import Typography from '@mui/material/Typography';
 import DialogTitle from '@mui/material/DialogTitle';
 import DialogContent from '@mui/material/DialogContent';
 // utils
-import { fillData } from '../../utils/formatTime';
-import { fluxoFixo } from '../../utils/validarAcesso';
-import { transicoesList } from '../../utils/formatObject';
+import { fillData } from '@/utils/formatTime';
+import { fluxoFixo } from '@/utils/validarAcesso';
+import { transicoesList } from '@/utils/formatObject';
 // redux
-import { useSelector, useDispatch } from '../../redux/store';
-import { getFromParametrizacao, createItem, updateItem, deleteItem } from '../../redux/slices/parametrizacao';
+import { useSelector, useDispatch } from '@/redux/store';
+import { getFromParametrizacao, createItem, updateItem, deleteItem } from '@/redux/slices/parametrizacao';
 // components
 import {
   RHFEditor,
@@ -31,11 +31,10 @@ import {
   RHFNumberField,
   RHFAutocompleteSmp,
   RHFAutocompleteObj,
-} from '../../components/hook-form';
-import GridItem from '../../components/GridItem';
-import { AddItem, DefaultAction, DialogButons } from '../../components/Actions';
-//
+} from '@/components/hook-form';
+import GridItem from '@/components/GridItem';
 import { ItemComponent } from './ParametrizacaoForm';
+import { AddItem, DefaultAction, DialogButons } from '@/components/Actions';
 
 // ---------------------------------------------------------------------------------------------------------------------
 
@@ -63,6 +62,8 @@ export function FluxoForm({ onClose }) {
       is_credito: selectedItem?.is_credito || false,
       is_ativo: isEdit ? selectedItem?.is_ativo : true,
       is_interno: isEdit ? selectedItem?.is_interno : true,
+      is_enquadramento: selectedItem?.is_enquadramento || false,
+      permite_enquadramento: selectedItem?.permite_enquadramento || false,
     }),
     [selectedItem, isEdit, perfilId]
   );
@@ -73,8 +74,8 @@ export function FluxoForm({ onClose }) {
   const onSubmit = async (values) => {
     try {
       const msg = `Fluxo ${isEdit ? 'atualizado' : 'adicionado'}`;
-      const params = { id: selectedItem?.id, msg, getItem: 'selectedItem', onClose };
-      dispatch((isEdit ? updateItem : createItem)('fluxo', JSON.stringify(values), params));
+      const params = { id: selectedItem?.id, msg, getItem: isEdit ? '' : 'selectedItem' };
+      dispatch((isEdit ? updateItem : createItem)('fluxo', JSON.stringify(values), { ...params, onClose }));
     } catch {
       enqueueSnackbar('Erro ao submeter os dados', { variant: 'error' });
     }
@@ -104,6 +105,8 @@ export function FluxoForm({ onClose }) {
               <GridItem xs={4} children={<RHFSwitch name="is_credito" label="Crédito" />} />
               <GridItem xs={4} children={<RHFSwitch name="limpo" label="Limpo" />} />
               <GridItem xs={4} children={<RHFSwitch name="is_con" label="CON" />} />
+              <GridItem sm={6} children={<RHFSwitch name="is_enquadramento" label="Fluxo de enquadramento" />} />
+              <GridItem sm={6} children={<RHFSwitch name="permite_enquadramento" label="Permite enquadramento" />} />
               <GridItem children={<RHFTextField name="observacao" multiline rows={3} label="Observação" />} />
             </Grid>
             <DialogButons edit={isEdit} isSaving={isSaving} onClose={onClose} />

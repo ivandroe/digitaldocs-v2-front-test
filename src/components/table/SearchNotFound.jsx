@@ -9,16 +9,18 @@ import { DocIllustration, DocIllustration404 } from '@/assets';
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-export default function SearchNotFound({ message = '', height = 250 }) {
+export default function SearchNotFound({ message = '', card = false, height = 250 }) {
   return (
-    <Stack
-      align="center"
-      justifyContent="center"
-      sx={{ py: { xs: 3, sm: 7 }, typography: 'body2', fontStyle: 'italic', color: 'text.secondary' }}
-    >
-      <DocIllustration sx={{ height, mb: { xs: 5, sm: 10 } }} />
-      {message}
-    </Stack>
+    <Card sx={card ? null : { boxShadow: 'none', bgcolor: 'transparent' }}>
+      <Stack
+        align="center"
+        justifyContent="center"
+        sx={{ py: { xs: 3, sm: 7 }, typography: 'body2', fontStyle: 'italic', color: 'text.secondary' }}
+      >
+        <DocIllustration sx={{ height, mb: { xs: 5, sm: 10 } }} />
+        {message}
+      </Stack>
+    </Card>
   );
 }
 

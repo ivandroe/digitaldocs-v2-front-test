@@ -22,34 +22,30 @@ import ProcurarPedidos from '../sections/suporte-cliente/lista-pedidos/procurar-
 export default function PageGestaoSuporteCliente() {
   const { themeStretch } = useSettings();
   const [department, setDepartment] = useState(null);
-
   const { departamentos, utilizador } = useSelector((state) => state.suporte);
 
   const tabsList = useMemo(
     () => [
       {
         value: 'Tickets',
-        component: (
-          <Tickets department={department} setDepartment={setDepartment} admin={utilizador?.role === 'ADMINISTRATOR'} />
-        ),
+        component: <Tickets department={department} setDepartment={setDepartment} utilizador={utilizador} />,
       },
       ...(utilizador?.role === 'ADMINISTRATOR' || utilizador?.role === 'COORDINATOR'
-        ? [
-            { value: 'Dashboard', component: <Dashboard params={{ department, setDepartment, departamentos }} /> },
-            { value: 'Configurações', component: <Configuracoes role={utilizador?.role} /> },
-          ]
+        ? [{ value: 'Dashboard', component: <Dashboard params={{ department, setDepartment, departamentos }} /> }]
         : []),
-
+      ...(utilizador?.role === 'ADMINISTRATOR'
+        ? [{ value: 'Configurações', component: <Configuracoes role={utilizador?.role} /> }]
+        : []),
       { value: 'Procurar', icon: <SearchIcon sx={{ width: 20, height: 20 }} />, component: <ProcurarPedidos /> },
     ],
-    [department, utilizador?.role, departamentos]
+    [department, utilizador, departamentos]
   );
 
   useEffect(() => {
     if (!department?.id && departamentos?.length > 0 && utilizador?.role !== 'ADMINISTRATOR') {
       const idSel = localStorage.getItem('departmentTicket') || utilizador?.department_id;
       const dep = departamentos.find(({ id }) => Number(id) === Number(idSel));
-      if (dep) setDepartment({ id: dep.id, abreviation: dep.abreviation });
+      if (dep) setDepartment(dep);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [departamentos, utilizador]);

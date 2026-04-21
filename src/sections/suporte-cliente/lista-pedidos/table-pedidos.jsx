@@ -21,15 +21,16 @@ import { TableHeadCustom, TableSearchNotFound, TablePaginationAlt } from '@/comp
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-export default function TablePedidos({ dados, useTable }) {
-  const { isLoading, modalSuporte } = useSelector((state) => state.suporte);
+export default function TablePedidos({ dados, useTable, refetch = null }) {
   const dispatch = useDispatch();
-  const { page, order, dense, orderBy, rowsPerPage, onSort, onChangePage, onChangeDense, onChangeRowsPerPage } =
+  const { isLoading, modalSuporte } = useSelector((state) => state.suporte);
+
+  const { page, order, dense, orderBy, rowsPerPage, onSort, onChangePage, onChangeDense, onChangeRowsPerPage, total } =
     useTable;
   const isNotFound = !dados.length;
 
   const viewItem = (modal, dados) => {
-    dispatch(setModal({ modal: 'detalhes-ticket' }));
+    dispatch(setModal({ modal: 'detalhe-ticket' }));
     dispatch(getInSuporte('ticket', { id: dados?.id, item: 'selectedItem' }));
   };
 
@@ -43,12 +44,12 @@ export default function TablePedidos({ dados, useTable }) {
               onSort={onSort}
               orderBy={orderBy}
               headLabel={[
-                { id: 'code_ticket', label: 'Código' },
-                { id: 'subject_name', label: 'Assunto' },
-                { id: 'customer_name', label: 'Requerente' },
+                { id: '', label: 'Código' },
+                { id: '', label: 'Assunto' },
+                { id: '', label: 'Requerente' },
                 { id: 'created_at', label: 'Data', align: 'center' },
-                { id: 'colaborador', label: 'Atribuído a' },
-                { id: 'status', label: 'Estado', align: 'center' },
+                { id: '', label: 'Atribuído a' },
+                { id: '', label: 'Estado', align: 'center' },
                 { id: '', width: 10 },
               ]}
             />
@@ -56,7 +57,7 @@ export default function TablePedidos({ dados, useTable }) {
               {isLoading && isNotFound ? (
                 <SkeletonTable row={10} column={7} />
               ) : (
-                dados.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((row, index) => (
+                dados.map((row, index) => (
                   <TableRow hover key={`ticket_${index}`}>
                     <TableCell>{row?.code_ticket}</TableCell>
                     <TableCell>{row?.subject_name}</TableCell>
@@ -83,19 +84,19 @@ export default function TablePedidos({ dados, useTable }) {
         </TableContainer>
       </Scrollbar>
 
-      {!isNotFound && dados.length > 10 && (
+      {!isNotFound && total > 10 && (
         <TablePaginationAlt
           page={page}
           dense={dense}
+          count={total}
           rowsPerPage={rowsPerPage}
-          count={dados.length}
           onChangePage={onChangePage}
           onChangeDense={onChangeDense}
           onChangeRowsPerPage={onChangeRowsPerPage}
         />
       )}
 
-      {modalSuporte === 'detalhes-ticket' && <DetalhesTicket onClose={() => dispatch(setModal({}))} />}
+      {modalSuporte === 'detalhe-ticket' && <DetalhesTicket refetch={refetch} onClose={() => dispatch(setModal({}))} />}
     </>
   );
 }

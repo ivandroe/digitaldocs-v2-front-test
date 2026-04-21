@@ -152,9 +152,7 @@ export function getFromGaji9(item, params) {
         (item === 'representsBalcao' && `/v1/acs/representantes/credito?balcao=${params?.balcao}`) ||
         ((item === 'utilizador' || item === 'funcao') && `/v1/acs/grupos/utilizador?utilizador_id=${params?.id}`) ||
         (item === 'proposta' &&
-          `/v1/suportes/creditos/carregar/proposta?numero_proposta=${
-            params?.proposta
-          }&credibox=${!!params?.credibox}`) ||
+          `/v1/suportes/creditos/carregar/proposta?numero_proposta=${params?.proposta}&credibox=${!!params?.credibox}`) ||
         // LISTA
         (item === 'importar componentes' && `/v1/produtos/importar`) ||
         (item === 'tiposTitulos' && `/v1/suportes/creditos/tipos/titulos`) ||

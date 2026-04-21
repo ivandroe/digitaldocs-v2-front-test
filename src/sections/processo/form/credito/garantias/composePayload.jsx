@@ -28,7 +28,7 @@ function mapFiador(fiador) {
 }
 
 function mapLivranca(livranca) {
-  return { numero_livranca: livranca?.numero_livranca ?? '' };
+  return livranca;
 }
 
 function mapSeguro(seguro) {

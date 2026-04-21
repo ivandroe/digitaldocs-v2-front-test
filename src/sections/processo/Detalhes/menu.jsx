@@ -7,10 +7,10 @@ import Estados from './estados-processo';
 import DadosGerais from './dados-gerais';
 import InfoCredito from '../info-credito';
 import Versoes from './historico-versoes';
-import TableDetalhes from './table-processo';
 import Views from './historico-visualiacoes';
 import Transicoes from './historico-transicoes';
 import TodosAnexos from './anexos/todos-anexos';
+import TableInfoProcesso from './table-info-processo';
 import Pareceres, { PareceresEstado } from './historico-pareceres';
 
 // ---------------------------------------------------------------------------------------------------------------------
@@ -18,7 +18,7 @@ import Pareceres, { PareceresEstado } from './historico-pareceres';
 export default function useMenuProcesso({ id, processo, handleAceitar }) {
   const { isAdmin, isAuditoria } = useSelector((state) => state.parametrizacao);
 
-  const { estado = null, credito = null, con = null } = processo || {};
+  const { estado = null, credito = null, con = null, estado_pode_enquadrar = false } = processo || {};
   const { valor = '', fluxo = '', titular = '', numero_operacao: numero } = processo || {};
   const { estados = [], htransicoes = [], pareceres_estado: pareceres = [], criado_em, data_entrada } = processo || {};
 
@@ -61,12 +61,16 @@ export default function useMenuProcesso({ id, processo, handleAceitar }) {
       tabs.push({ value: 'Encaminhamentos', component: <Transicoes transicoes={htransicoes} assunto={assunto} /> });
     }
 
+    if (titular) tabs.push({ value: 'Anexos', component: <TodosAnexos /> });
+
+    if (titular && estado_pode_enquadrar)
+      tabs.push({ value: 'Enquadramentos', component: <TableInfoProcesso id={id} item="enquadramentos" /> });
+
     if (titular) {
       tabs.push(
-        { value: 'Anexos', component: <TodosAnexos /> },
-        { value: 'Retenções', component: <TableDetalhes id={id} item="hretencoes" /> },
-        { value: 'Pendências', component: <TableDetalhes id={id} item="hpendencias" /> },
-        { value: 'Atribuições', component: <TableDetalhes id={id} item="hatribuicoes" /> }
+        { value: 'Retenções', component: <TableInfoProcesso id={id} item="hretencoes" /> },
+        { value: 'Pendências', component: <TableInfoProcesso id={id} item="hpendencias" /> },
+        { value: 'Atribuições', component: <TableInfoProcesso id={id} item="hatribuicoes" /> }
       );
     }
 
@@ -93,6 +97,7 @@ export default function useMenuProcesso({ id, processo, handleAceitar }) {
     data_entrada,
     handleAceitar,
     estados?.length,
+    estado_pode_enquadrar,
   ]);
 
   return tabsList;

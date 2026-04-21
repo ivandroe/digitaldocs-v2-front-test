@@ -11,6 +11,7 @@ import { fNumber, fCurrency, fPercent } from '@/utils/formatNumber';
 // components
 import { noDados } from '@/components/Panel';
 import TableInfoGarantias from './table-info-garantias';
+import { DonosBlock } from '@/modules/gaji9/components/detalhes-credito/garantia-sub-components';
 
 // ---------------------------------------------------------------------------------------------------------------------
 
@@ -230,21 +231,16 @@ function Balcao({ balcao }) {
 
 function Livrancas({ dados }) {
   return (
-    <Paper sx={{ p: 2, bgcolor: 'background.neutral' }}>
-      <Typography variant="subtitle2" sx={{ mb: 1 }}>
-        Número(s) de livrança(s)
-      </Typography>
-      <Stack direction="row" flexWrap="wrap" spacing={1.5}>
-        {dados.map((row, index) => (
-          <Box
-            key={row?.numero_livranca ?? index}
-            sx={{ px: 1.5, py: 0.5, bgcolor: 'background.paper', borderRadius: 1 }}
-          >
-            <Typography variant="subtitle2">{row?.numero_livranca}</Typography>
-          </Box>
-        ))}
-      </Stack>
-    </Paper>
+    <Stack spacing={1.5}>
+      {dados.map((row, index) => (
+        <Paper key={row?.numero_livranca ?? index} sx={{ p: 2, bgcolor: 'background.neutral' }}>
+          <Typography variant="subtitle2" sx={{ mb: 1 }}>
+            {row?.numero_livranca}
+          </Typography>
+          <DonosBlock donos={row?.avalistas} item="Avalista(s)" />
+        </Paper>
+      ))}
+    </Stack>
   );
 }
 

@@ -10,12 +10,10 @@ import TimelineItem from '@mui/lab/TimelineItem';
 import TimelineContent from '@mui/lab/TimelineContent';
 import TimelineSeparator from '@mui/lab/TimelineSeparator';
 import TimelineConnector from '@mui/lab/TimelineConnector';
-import TimelineOppositeContent from '@mui/lab/TimelineOppositeContent';
 // utils
 import { useColaborador } from '../utils';
 import { ptDateTime } from '@/utils/formatTime';
 import { getFileThumb } from '@/utils/formatFile';
-import useResponsive from '@/hooks/useResponsive';
 import { API_SUPORTE_CLIENTE_URL } from '@/utils/apisUrl';
 // components
 import { SemRegisto } from './historico';
@@ -24,56 +22,40 @@ import { newLineText } from '@/components/Panel';
 // ---------------------------------------------------------------------------------------------------------------------
 
 export default function Mensagens({ messages }) {
-  const isDesktop = useResponsive('up', 'md');
-
   return (
-    <Timeline sx={{ px: 0, mt: 1 }}>
+    <Timeline sx={{ pr: 0, pl: { xs: 0, md: 2 }, mt: 1 }}>
       {messages.length === 0 ? (
         <SemRegisto message="Nenhuma mensagem encontrada..." />
       ) : (
         messages.map((msg, idx) => {
           const isLast = idx === messages.length - 1;
-          return (
-            <TimelineMessageItem key={`${msg.sent_at}-${idx}`} message={msg} isLast={isLast} isDesktop={isDesktop} />
-          );
+          return <TimelineMessageItem key={`${msg.sent_at}-${idx}`} message={msg} isLast={isLast} />;
         })
       )}
     </Timeline>
   );
 }
 
-function TimelineMessageItem({ message, isLast, isDesktop }) {
+function TimelineMessageItem({ message, isLast }) {
   const { content, sent_at: at, from, attachments = [] } = message;
   const criadoPor = useColaborador({ userId: from, nome: true });
 
   return (
     <TimelineItem sx={{ '&:before': { display: 'none' } }}>
-      {isDesktop && (
-        <TimelineOppositeContent sx={{ pl: 0, flex: 0, minWidth: 200 }}>
-          <Typography variant="subtitle2" sx={{ color: 'success.main' }}>
-            {criadoPor || from}
-          </Typography>
-          <Typography variant="caption" sx={{ color: 'text.secondary' }}>
-            {ptDateTime(at)}
-          </Typography>
-        </TimelineOppositeContent>
-      )}
       <TimelineSeparator>
-        <TimelineDot color={(criadoPor || from) === 'Cliente' ? 'grey' : 'success'} sx={{ boxShadow: 'none' }} />
+        <TimelineDot color={from === 'Cliente' ? 'grey' : 'success'} />
         {!isLast && <TimelineConnector />}
       </TimelineSeparator>
-      <TimelineContent sx={{ pr: 0, width: 1 }}>
-        <Paper elevation={1} sx={{ p: 2, mb: 0.5 }}>
-          {!isDesktop && (
-            <Stack direction="row" alignItems="flex-end" spacing={1} sx={{ mb: 1 }}>
-              <Typography variant="subtitle2" sx={{ color: 'success.main' }}>
-                {criadoPor || from}
-              </Typography>
-              <Typography variant="caption" sx={{ color: 'text.secondary' }}>
-                {ptDateTime(at)}
-              </Typography>
-            </Stack>
-          )}
+      <TimelineContent sx={{ width: 1 }}>
+        <Paper elevation={1} sx={{ p: 2 }}>
+          <Stack direction="row" alignItems="flex-end" spacing={1} sx={{ mb: 1 }}>
+            <Typography variant="subtitle2" sx={{ color: 'success.main' }}>
+              {criadoPor || from}
+            </Typography>
+            <Typography variant="caption" sx={{ color: 'text.secondary' }}>
+              {ptDateTime(at)}
+            </Typography>
+          </Stack>
           <Typography variant="body2" component="div" sx={{ whiteSpace: 'pre-line' }}>
             {newLineText(content)}
           </Typography>
