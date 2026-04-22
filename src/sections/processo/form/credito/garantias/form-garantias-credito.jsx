@@ -55,14 +55,22 @@ export default function FormGarantias({ dados, processoId, onClose }) {
       veiculos: construirSchemaImoveis(dados?.metadados?.imoveis?.veiculos || []),
       apartamentos: construirSchemaImoveis(dados?.metadados?.imoveis?.apartamentos || []),
       subtipo_garantia: tipoGarantia?.subtipos?.find(({ id }) => id === dados?.subtipo_garantia_id) || null,
-      livrancas: dados?.metadados?.livrancas || [{ numero_livranca: '', avalistas: [{ numero_entidade: '' }] }],
+      livrancas: dados?.metadados?.livrancas,
       tipo_garantia: tipoGarantia,
     }),
     [dados, tipoGarantia]
   );
 
   const methods = useForm({ resolver: yupResolver(formSchema), defaultValues });
-  const { handleSubmit, watch, reset, setValue } = methods;
+  const {
+    handleSubmit,
+    watch,
+    reset,
+    setValue,
+    formState: { errors },
+  } = methods;
+
+  console.log(errors);
 
   useEffect(() => {
     reset(defaultValues);
