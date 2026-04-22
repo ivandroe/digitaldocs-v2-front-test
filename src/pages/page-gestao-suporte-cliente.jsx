@@ -15,6 +15,7 @@ import Dashboard from '../sections/suporte-cliente/dashboard';
 import Tickets from '../sections/suporte-cliente/lista-pedidos';
 import Configuracoes from '../sections/suporte-cliente/configuracoes';
 import AcessoSuporte from '../sections/suporte-cliente/acesso-suporte';
+import Avaliacoes from '@/sections/suporte-cliente/lista-pedidos/avaliacoes';
 import ProcurarPedidos from '../sections/suporte-cliente/lista-pedidos/procurar-pedidos';
 
 // ---------------------------------------------------------------------------------------------------------------------
@@ -33,6 +34,7 @@ export default function PageGestaoSuporteCliente() {
       ...(utilizador?.role === 'ADMINISTRATOR' || utilizador?.role === 'COORDINATOR'
         ? [{ value: 'Dashboard', component: <Dashboard params={{ department, setDepartment, departamentos }} /> }]
         : []),
+      { value: 'Avaliações', component: <Avaliacoes /> },
       ...(utilizador?.role === 'ADMINISTRATOR'
         ? [{ value: 'Configurações', component: <Configuracoes role={utilizador?.role} /> }]
         : []),

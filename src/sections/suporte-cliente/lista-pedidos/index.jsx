@@ -2,33 +2,23 @@ import { useState, useEffect, useMemo, useCallback } from 'react';
 // @mui
 import Card from '@mui/material/Card';
 // utils
+import {
+  storageGet,
+  storageSet,
+  statusList,
+  getAccessibleUsers,
+  injectCollaboratorName,
+  getAccessibleDepartments,
+} from '../utils';
 import useTable from '@/hooks/useTable';
 import { useDispatch, useSelector } from '@/redux/store';
 import { getInSuporte } from '@/redux/slices/suporte-cliente';
-import { statusList, injectCollaboratorName, getAccessibleUsers, getAccessibleDepartments } from '../utils';
 // Components
 import TablePedidos from './table-pedidos';
 import SearchToolbar from './search-toolbar';
 import HeaderBreadcrumbs from '@/components/HeaderBreadcrumbs';
 
-// ---------------------------------------------------------------------------------------------------------------------
-
 const DEFAULT_STATUS = { id: 'OPEN', label: 'Pendente' };
-
-function storageGet(key, fallback = null) {
-  try {
-    const raw = localStorage.getItem(key);
-    if (!raw) return fallback;
-    return JSON.parse(raw);
-  } catch {
-    return fallback;
-  }
-}
-
-function storageSet(key, value) {
-  if (value == null || value === '') localStorage.removeItem(key);
-  else localStorage.setItem(key, JSON.stringify(value));
-}
 
 // ---------------------------------------------------------------------------------------------------------------------
 

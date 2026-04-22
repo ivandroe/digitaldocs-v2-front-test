@@ -32,6 +32,29 @@ export default function SearchToolbar({ values, setValues, lists }) {
   );
 }
 
+// ---------------------------------------------------------------------------------------------------------------------
+
+export function SearchAvaliacoes({ values, setValues, lists }) {
+  const { rating, subject } = values;
+  const { setSubject, setRating } = setValues;
+  const { ratingList = [], subjectsList = [] } = lists;
+
+  return (
+    <Stack direction={{ xs: 'column', md: 'row' }} sx={{ pb: 1, pt: 0 }} spacing={1}>
+      <SearchFilter
+        value={rating}
+        label="Avaliação"
+        setValue={setRating}
+        sx={{ maxWidth: { xs: 1, sm: 250 } }}
+        dados={ratingList?.map(({ rating, label }) => ({ id: rating, label }))}
+      />
+      <SearchFilter value={subject} dados={subjectsList} setValue={setSubject} label="Assunto" />
+    </Stack>
+  );
+}
+
+// ---------------------------------------------------------------------------------------------------------------------
+
 function SearchFilter({ value, dados, setValue, label, ...others }) {
   return (
     <Autocomplete

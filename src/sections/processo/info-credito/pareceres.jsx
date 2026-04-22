@@ -47,7 +47,7 @@ export default function PareceresCredito({ infoCredito }) {
   const openModal = (modal, dados) => dispatch(setModal({ modal: modal ?? '', dados: dados ?? null }));
 
   const boxNoDados = (atual) => (
-    <Box sx={{ bgcolor: 'background.neutral', borderRadius: 2, p: atual ? 0 : 4 }}>
+    <Box sx={{ bgcolor: 'background.neutral', borderRadius: 2, p: atual ? 0 : 2 }}>
       <SearchNotFoundSmall message="Ainda não foi adicionado nenhum parecer..." xs={atual} />
     </Box>
   );

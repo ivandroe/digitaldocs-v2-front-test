@@ -173,3 +173,19 @@ export function getAccessibleDepartments(departamentos, currentUser) {
   if (currentUser.role === 'ADMINISTRATOR') return departamentos;
   return departamentos?.filter(({ id }) => id === currentUser?.department_id);
 }
+// ---------------------------------------------------------------------------------------------------------------------
+
+export function storageGet(key, fallback = null) {
+  try {
+    const raw = localStorage.getItem(key);
+    if (!raw) return fallback;
+    return JSON.parse(raw);
+  } catch {
+    return fallback;
+  }
+}
+
+export function storageSet(key, value) {
+  if (value == null || value === '') localStorage.removeItem(key);
+  else localStorage.setItem(key, JSON.stringify(value));
+}

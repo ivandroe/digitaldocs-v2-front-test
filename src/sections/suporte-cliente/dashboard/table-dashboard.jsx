@@ -14,8 +14,8 @@ import TableContainer from '@mui/material/TableContainer';
 // utils
 import { getColorRating } from '../utils';
 import { noDados } from '@/components/Panel';
+import { toHourLabel } from '@/utils/formatTime';
 import { fNumber, fPercent } from '@/utils/formatNumber';
-import { ptDateTime, toHourLabel } from '@/utils/formatTime';
 //
 import { TableSearchNotFound } from '@/components/table/SearchNotFound';
 
@@ -50,7 +50,7 @@ export function Asuntos({ dados }) {
 export function Desempenho({ dados }) {
   return (
     <TableDashboard
-      title="Desempenho por colaborador"
+      title="Desempenho por colaborador  (Top 5)"
       headLabel={[
         { id: 'employee', label: 'Colaborador' },
         { id: 'closed', label: 'Fechados', align: 'center' },
@@ -74,7 +74,7 @@ export function Desempenho({ dados }) {
 export function Departamentos({ dados }) {
   return (
     <TableDashboard
-      title="Desempenho por departamento"
+      title="Desempenho por departamento (Top 5)"
       headLabel={[
         { id: 'department_name', label: 'Departamento' },
         { id: 'check_in_count', label: 'Entradas', align: 'right' },
@@ -89,28 +89,6 @@ export function Departamentos({ dados }) {
           <TableCell align="right">{fNumber(row.check_out_count)}</TableCell>
           <TableCell align="right">{fPercent(row?.check_out_rate * 100)}</TableCell>
           <TableCell align="right">{fPercent(row?.sla_compliance_rate * 100)}</TableCell>
-        </TableRow>
-      ))}
-    />
-  );
-}
-
-// ---------------------------------------------------------------------------------------------------------------------
-
-export function Avaliacoes({ dados }) {
-  return (
-    <TableDashboard
-      title="Avaliações recentes"
-      headLabel={[
-        { id: 'subject', label: 'Assunto' },
-        { id: 'rating', label: 'Avaliação', align: 'center' },
-        { id: 'comment', label: 'Comentário' },
-      ]}
-      body={dados.map((row) => (
-        <TableRow key={row.id} hover>
-          <TableCell>{row?.subject}</TableCell>
-          <Avaliacao rating={row.rating} extra={ptDateTime(row?.created_at)} />
-          <TableCell>{row?.comment}</TableCell>
         </TableRow>
       ))}
     />
@@ -153,15 +131,17 @@ export function TableHeadCustom({ headLabel }) {
   );
 }
 
-export function Avaliacao({ rating, extra = null }) {
+export function Avaliacao({ rating, hideLabel = false, extra = null }) {
   return (
-    <TableCell align="center">
+    <TableCell align={hideLabel ? 'left' : 'center'}>
       {rating ? (
-        <Stack direction="row" spacing={1} justifyContent="center" alignItems="center">
+        <Stack direction="row" spacing={1} justifyContent={hideLabel ? 'left' : 'center'} alignItems="center">
           <Rating readOnly size="small" precision={0.1} value={rating} sx={{ color: 'success.main' }} />
-          <Typography variant="caption" sx={{ fontWeight: 'bold', color: getColorRating(rating) }}>
-            ({rating})
-          </Typography>
+          {!hideLabel && (
+            <Typography variant="caption" sx={{ fontWeight: 'bold', color: getColorRating(rating) }}>
+              ({rating})
+            </Typography>
+          )}
         </Stack>
       ) : (
         noDados('(Sem avaliação)')

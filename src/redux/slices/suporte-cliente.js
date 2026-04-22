@@ -30,6 +30,9 @@ const initialState = {
   selectedItem: null,
   tickets: {},
   pesquisa: {},
+  avaliacoes: {},
+  dashutilizadores: {},
+  dashdepartamentos: {},
   faq: [],
   slas: [],
   slasUo: [],
@@ -115,6 +118,9 @@ export function getInSuporte(item, params) {
         (item === 'tickets' && `/api/v1/tickets/all${queryString(params)}`) ||
         (item === 'pesquisa' && `/api/v1/tickets/search${queryString(params)}`) ||
         (item === 'indicadores' && `/api/v1/indicators/all${queryString(params)}`) ||
+        (item === 'avaliacoes' && `/api/v1/indicators/evaluations${queryString(params)}`) ||
+        (item === 'dashutilizadores' && `/api/v1/indicators/employees${queryString(params)}`) ||
+        (item === 'dashdepartamentos' && `/api/v1/indicators/departments${queryString(params)}`) ||
         '';
       if (apiUrl) {
         const headers = headerOptions({ accessToken, mail: '', cc: true, ct: false, mfd: false });

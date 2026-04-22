@@ -40,7 +40,7 @@ export function PorDepartamento({ dados }) {
 
   return (
     <Card sx={{ height: 1, display: 'flex', flexDirection: 'column' }}>
-      <CardHeader title="Distribuição por departamento" />
+      <CardHeader title="Distribuição por departamento   (Top 5)" />
       {dados.length === 0 ? (
         <SearchNotFoundSmall message="Nenhum registo encontrado..." />
       ) : (

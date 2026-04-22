@@ -67,7 +67,7 @@ function KpiItem({ title, value, sub, icon, color = 'primary.main', md = 6, melh
   const signedSub = `${(!inverso && melhorou) || (inverso && !melhorou) ? '+' : '−'}${cleanSub}`;
 
   return (
-    <GridItem sm={6} md={md} xl={3}>
+    <GridItem sm={6} md={md} lg={3}>
       <Card sx={{ height: 1, p: 2 }}>
         <Stack direction="row" alignItems="center" spacing={2}>
           <Box>

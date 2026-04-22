@@ -32,7 +32,7 @@ export default function MetadadosCredito({ dados, outros, modificar = false, ids
   };
 
   return (
-    <Box sx={{ p: 1 }}>
+    <Box sx={{ p: dados ? 1 : 0 }}>
       {dados ? (
         <>
           <Grid container spacing={2} sx={{ mb: 3 }}>
