@@ -62,15 +62,7 @@ export default function FormGarantias({ dados, processoId, onClose }) {
   );
 
   const methods = useForm({ resolver: yupResolver(formSchema), defaultValues });
-  const {
-    handleSubmit,
-    watch,
-    reset,
-    setValue,
-    formState: { errors },
-  } = methods;
-
-  console.log(errors);
+  const { handleSubmit, watch, reset, setValue } = methods;
 
   useEffect(() => {
     reset(defaultValues);
