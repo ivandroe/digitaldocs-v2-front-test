@@ -149,10 +149,11 @@ export function injectCollaboratorName(data, users, colaboradores) {
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-export function getAccessibleUsers(users, employees, currentUser) {
+export function getAccessibleUsers(users, employees, currentUser, department) {
   const filteredUsers = users.filter((user) => {
     switch (currentUser.role) {
       case 'ADMINISTRATOR':
+        if (department?.id) return user.department_id === department?.id;
         return true;
       case 'COORDINATOR':
         return user.department_id === currentUser.department_id && user.department_id !== null;

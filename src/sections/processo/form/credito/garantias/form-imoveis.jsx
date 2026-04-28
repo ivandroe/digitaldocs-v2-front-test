@@ -41,8 +41,10 @@ export default function FormImoveis({ tipo, name }) {
 // ---------------------------------------------------------------------------------------------------------------------
 
 function Imoveis({ fields = [], remove, prefixo, tipo }) {
+  console.log(tipo);
   const isAp = tipo === 'Apartamento';
   const isTerreno = tipo === 'Terreno';
+  const { setValue } = useFormContext();
 
   return fields?.length ? (
     fields.map((item, index) => (
@@ -62,14 +64,38 @@ function Imoveis({ fields = [], remove, prefixo, tipo }) {
               </GridItem>
             ) : (
               <GridItem sm={6} md={4}>
-                <RHFTextField name={`${prefixo}[${index}].numero_matriz`} label="Nº de matriz" />
+                <RHFTextField
+                  name={`${prefixo}[${index}].numero_matriz`}
+                  label="Nº de matriz"
+                  onChange={(e) => {
+                    setValue(`${prefixo}[${index}].numero_matriz`, e.target.value);
+                    if (e.target.value) setValue(`${prefixo}[${index}].nip`, '');
+                  }}
+                />
               </GridItem>
             )}
             <GridItem sm={6} md={isAp ? 3 : 4}>
-              <RHFTextField name={`${prefixo}[${index}].numero_descricao_predial`} label="Nº descrição predial" />
+              <RHFTextField
+                name={`${prefixo}[${index}].numero_descricao_predial`}
+                label="Nº descrição predial"
+                onChange={(e) => {
+                  setValue(`${prefixo}[${index}].numero_descricao_predial`, e.target.value);
+                  if (e.target.value) setValue(`${prefixo}[${index}].nip`, '');
+                }}
+              />
             </GridItem>
             <GridItem sm={6} md={isAp || isTerreno ? 3 : 4}>
-              <RHFTextField name={`${prefixo}[${index}].nip`} label="NIP" />
+              <RHFTextField
+                label="NIP"
+                name={`${prefixo}[${index}].nip`}
+                onChange={(e) => {
+                  setValue(`${prefixo}[${index}].nip`, e.target.value);
+                  if (e.target.value) {
+                    setValue(`${prefixo}[${index}].numero_matriz`, '');
+                    setValue(`${prefixo}[${index}].numero_descricao_predial`, '');
+                  }
+                }}
+              />
             </GridItem>
             {isAp && (
               <>

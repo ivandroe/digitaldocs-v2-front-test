@@ -15,6 +15,7 @@ import { useMetadadosCreditoData } from './useMetadadosCreditoData';
 import { getFromParametrizacao } from '@/redux/slices/parametrizacao';
 // Components
 import GridItem from '@/components/GridItem';
+import { noDados } from '@/components/Panel';
 import { DefaultAction } from '@/components/Actions';
 import { SearchNotFoundSmall } from '@/components/table/SearchNotFound';
 import MetadadosCreditoForm from '../../form/credito/form-metadados-credito';
@@ -24,7 +25,7 @@ import MetadadosCreditoForm from '../../form/credito/form-metadados-credito';
 export default function MetadadosCredito({ dados, outros, modificar = false, ids = null }) {
   const theme = useTheme();
   const isOpenModal = useSelector((state) => state.digitaldocs.isOpenModal);
-  const { financeiroPrincipal, cardsVisible } = useMetadadosCreditoData(dados);
+  const { financeiroPrincipal, cards } = useMetadadosCreditoData(dados);
 
   const openModal = () => {
     dispatch(setModal({ modal: 'form-metadados' }));
@@ -40,7 +41,7 @@ export default function MetadadosCredito({ dados, outros, modificar = false, ids
               <GridItem xs={6} md={3} key={item.label}>
                 <Card
                   sx={{
-                    p: 1.5,
+                    p: 1,
                     textAlign: 'center',
                     boxShadow: theme.customShadows.cardAlt,
                     bgcolor: alpha(theme.palette[item.color].main, 0.025),
@@ -60,15 +61,10 @@ export default function MetadadosCredito({ dados, outros, modificar = false, ids
           <Box
             gap={3}
             display="grid"
-            gridTemplateColumns={{
-              xs: '1fr',
-              sm: 'repeat(2, 1fr)',
-              lg: `repeat(${cardsVisible?.length > 4 ? 3 : 2}, 1fr)`,
-              xl: `repeat(${cardsVisible?.length > 4 ? 3 : cardsVisible?.length}, 1fr)`,
-            }}
             alignItems="center"
+            gridTemplateColumns={{ xs: '1fr', sm: 'repeat(2, 1fr)', lg: `repeat(3, 1fr)`, xl: `repeat(3, 1fr)` }}
           >
-            {cardsVisible.map((card, index) => (
+            {cards.map((card, index) => (
               <Card key={index} sx={{ height: '100%', boxShadow: theme.customShadows.cardAlt, borderRadius: 0 }}>
                 <CardHeader
                   title={card.titulo}
@@ -76,31 +72,29 @@ export default function MetadadosCredito({ dados, outros, modificar = false, ids
                     variant: 'subtitle2',
                     sx: { color: 'primary.main', textTransform: 'uppercase' },
                   }}
-                  sx={{ py: 1.25, bgcolor: 'background.neutral' }}
+                  sx={{ py: 1.25, px: 2, bgcolor: 'background.neutral' }}
                 />
-                <CardContent sx={{ p: 2 }}>
-                  <Stack spacing={1} divider={<Divider sx={{ borderStyle: 'dashed' }} />}>
-                    {card.dados
-                      .filter((d) => d.value)
-                      .map((item, idx) => (
-                        <Box
-                          key={idx}
-                          sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 1 }}
-                        >
-                          <Typography variant="caption" sx={{ color: 'text.secondary', fontWeight: 'medium' }}>
-                            {item.title}:
+                <CardContent sx={{ p: 2, paddingBottom: '12px !important' }}>
+                  <Stack spacing={0.5} divider={<Divider sx={{ borderStyle: 'dashed' }} />}>
+                    {card.dados.map((item, idx) => (
+                      <Box
+                        key={idx}
+                        sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 1 }}
+                      >
+                        <Typography variant="caption" sx={{ color: 'text.secondary', fontWeight: 'medium' }}>
+                          {item.title}:
+                        </Typography>
+                        <Box sx={{ textAlign: 'right' }}>
+                          <Typography
+                            variant="body2"
+                            noWrap={!item.noWrap}
+                            sx={{ fontWeight: item.bold ? 700 : 400, color: item.color || 'text.primary', pr: 0.25 }}
+                          >
+                            {item.value || noDados('(N/D)')}
                           </Typography>
-                          <Box sx={{ textAlign: 'right' }}>
-                            <Typography
-                              variant="body2"
-                              noWrap={!item.noWrap}
-                              sx={{ fontWeight: item.bold ? 700 : 400, color: item.color || 'text.primary' }}
-                            >
-                              {item.value}
-                            </Typography>
-                          </Box>
                         </Box>
-                      ))}
+                      </Box>
+                    ))}
                   </Stack>
                 </CardContent>
               </Card>

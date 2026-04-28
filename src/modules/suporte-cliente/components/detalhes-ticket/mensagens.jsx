@@ -11,7 +11,7 @@ import TimelineContent from '@mui/lab/TimelineContent';
 import TimelineSeparator from '@mui/lab/TimelineSeparator';
 import TimelineConnector from '@mui/lab/TimelineConnector';
 // utils
-import { useColaborador } from '../utils';
+import { useColaborador } from '../../utils';
 import { ptDateTime } from '@/utils/formatTime';
 import { getFileThumb } from '@/utils/formatFile';
 import { API_SUPORTE_CLIENTE_URL } from '@/utils/apisUrl';

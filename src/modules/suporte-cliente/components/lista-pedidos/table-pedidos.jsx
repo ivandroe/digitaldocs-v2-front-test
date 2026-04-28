@@ -7,11 +7,11 @@ import Typography from '@mui/material/Typography';
 import TableContainer from '@mui/material/TableContainer';
 // utils
 import { ptDateTime } from '@/utils/formatTime';
-import { LabelStatus } from '../utils';
 // redux
 import { useDispatch, useSelector } from '@/redux/store';
 import { getInSuporte, setModal } from '@/redux/slices/suporte-cliente';
 // Components
+import { LabelStatus } from '../../utils';
 import Scrollbar from '@/components/Scrollbar';
 import { noDados, Criado } from '@/components/Panel';
 import { DefaultAction } from '@/components/Actions';

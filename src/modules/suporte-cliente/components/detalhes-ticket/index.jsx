@@ -2,14 +2,12 @@
 import Chip from '@mui/material/Chip';
 import Stack from '@mui/material/Stack';
 import Dialog from '@mui/material/Dialog';
-import Divider from '@mui/material/Divider';
 import Typography from '@mui/material/Typography';
-import DialogActions from '@mui/material/DialogActions';
 import DialogContent from '@mui/material/DialogContent';
 // utils
 import { useSelector } from '@/redux/store';
-import { getStatusLabel, useColaborador } from '../utils';
 import { colorLabel } from '@/utils/getColorPresets';
+import { getStatusLabel, useColaborador } from '../../utils';
 import { useTabsSync } from '@/hooks/minimal-hooks/use-tabs-sync';
 // components
 import { Criado } from '@/components/Panel';
@@ -26,11 +24,8 @@ import { Detalhes } from './detalhes';
 // ---------------------------------------------------------------------------------------------------------------------
 
 export default function DetalhesTicket({ onClose, refetch }) {
-  // const dispatch = useDispatch();
   const { isLoading, selectedItem, utilizador } = useSelector((state) => state.suporte);
   const atribuidoA = useColaborador({ userId: selectedItem?.current_user_id, nome: true });
-  const role = utilizador?.role;
-  const isAdmin = role === 'ADMINISTRATOR' || role === 'COORDINATOR';
   const { status = '' } = selectedItem || {};
 
   // useEffect(() => {
@@ -126,8 +121,8 @@ export default function DetalhesTicket({ onClose, refetch }) {
                 </Stack>
                 <Stack direction="row" spacing={1}>
                   <Chip
-                    sx={{ typography: 'overline' }}
                     label={getStatusLabel(status)}
+                    sx={{ typography: 'overline' }}
                     color={colorLabel(getStatusLabel(status), 'default')}
                   />
                   {status === 'CLOSED' && (
@@ -157,14 +152,10 @@ export default function DetalhesTicket({ onClose, refetch }) {
           </>
         )}
       </DialogContent>
-      <Divider sx={{ borderStyle: 'dotted' }} />
 
-      {status !== 'CLOSED' &&
-        (role === 'ADMINISTRATOR' || selectedItem?.current_department_id === utilizador?.department_id) && (
-          <DialogActions>
-            <Actions dados={selectedItem} onClose={onClose} isAdmin={isAdmin} refetch={refetch} />
-          </DialogActions>
-        )}
+      {status !== 'CLOSED' && (
+        <Actions dados={selectedItem} onClose={onClose} utilizador={utilizador} refetch={refetch} />
+      )}
     </Dialog>
   );
 }

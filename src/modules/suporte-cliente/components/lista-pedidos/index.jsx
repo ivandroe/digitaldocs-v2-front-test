@@ -9,7 +9,7 @@ import {
   getAccessibleUsers,
   injectCollaboratorName,
   getAccessibleDepartments,
-} from '../utils';
+} from '../../utils';
 import useTable from '@/hooks/useTable';
 import { useDispatch, useSelector } from '@/redux/store';
 import { getInSuporte } from '@/redux/slices/suporte-cliente';
@@ -17,8 +17,6 @@ import { getInSuporte } from '@/redux/slices/suporte-cliente';
 import TablePedidos from './table-pedidos';
 import SearchToolbar from './search-toolbar';
 import HeaderBreadcrumbs from '@/components/HeaderBreadcrumbs';
-
-const DEFAULT_STATUS = { id: 'OPEN', label: 'Pendente' };
 
 // ---------------------------------------------------------------------------------------------------------------------
 
@@ -29,26 +27,18 @@ export default function Tickets({ utilizador, department, setDepartment }) {
     defaultOrderBy: 'created_at',
   });
 
+  const isAdmin = utilizador?.role === 'ADMINISTRATOR';
   const colaboradores = useSelector((state) => state.intranet.colaboradores);
   const { tickets, departamentos, utilizadores, assuntos } = useSelector((state) => state.suporte);
 
-  const isAdmin = utilizador?.role === 'ADMINISTRATOR';
-  const isCentral = department?.type === 'CENTRAL_SERVICES';
-
-  const [prevIsCentral, setPrevIsCentral] = useState(isCentral);
   const [subject, setSubject] = useState(() => storageGet('subjectTicket'));
   const [colaborador, setColaborador] = useState(() => storageGet('colaboradorTickets'));
   const [status, setStatus] = useState(
     () => statusList?.find(({ id }) => id === storageGet('statusTicket')?.id) || null
   );
 
-  if (isCentral !== prevIsCentral && !isAdmin) {
-    setPrevIsCentral(isCentral);
-    if (isCentral) setStatus(DEFAULT_STATUS);
-  }
-
   const departamentoList = getAccessibleDepartments(departamentos, utilizador);
-  const usersList = getAccessibleUsers(utilizadores, colaboradores, utilizador);
+  const usersList = getAccessibleUsers(utilizadores, colaboradores, utilizador, department);
 
   const fetchTickets = useCallback(() => {
     if (!isAdmin && !department?.id) return;

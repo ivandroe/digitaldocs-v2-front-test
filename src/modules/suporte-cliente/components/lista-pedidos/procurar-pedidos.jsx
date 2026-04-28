@@ -3,7 +3,7 @@ import { useState, useEffect, useMemo } from 'react';
 import Card from '@mui/material/Card';
 // utils
 import useTable from '@/hooks/useTable';
-import { injectCollaboratorName } from '../utils';
+import { injectCollaboratorName } from '../../utils';
 import { useDispatch, useSelector } from '@/redux/store';
 import { getInSuporte, getSuccess } from '@/redux/slices/suporte-cliente';
 // components

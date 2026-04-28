@@ -2,11 +2,11 @@ import { useEffect } from 'react';
 // @mui
 import Card from '@mui/material/Card';
 // utils
-import { useDispatch, useSelector } from '../../redux/store';
-import { getInSuporte } from '../../redux/slices/suporte-cliente';
+import { useDispatch, useSelector } from '@/redux/store';
+import { getInSuporte } from '@/redux/slices/suporte-cliente';
 // guards
-import RoleBasedGuard from '../../guards/RoleBasedGuard';
-import { LoadingPanel } from '../../components/LoadingScreen';
+import RoleBasedGuard from '@/guards/RoleBasedGuard';
+import { LoadingPanel } from '@/components/LoadingScreen';
 
 // ---------------------------------------------------------------------------------------------------------------------
 
@@ -20,12 +20,12 @@ export default function AcessoSuporte({ children }) {
   }, [cc?.id, dispatch]);
 
   useEffect(() => {
-    if (utilizador) {
-      dispatch(getInSuporte('assuntos'));
-      dispatch(getInSuporte('utilizadores'));
-      dispatch(getInSuporte('departamentos'));
+    if (utilizador?.id) {
+      dispatch(getInSuporte('assuntos', { notLoading: true }));
+      dispatch(getInSuporte('utilizadores', { notLoading: true }));
+      dispatch(getInSuporte('departamentos', { notLoading: true }));
     }
-  }, [dispatch, utilizador]);
+  }, [dispatch, utilizador?.id]);
 
   return isLoading && !utilizador ? (
     <Card sx={{ p: 3, height: { xs: 400, md: 600 }, alignItems: 'center' }}>

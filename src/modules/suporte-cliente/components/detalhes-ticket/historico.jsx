@@ -16,7 +16,7 @@ import TimelineConnector from '@mui/lab/TimelineConnector';
 import { ptDateTime } from '@/utils/formatTime';
 import { colorLabel } from '@/utils/getColorPresets';
 import { applySort, getComparator } from '@/hooks/useTable';
-import { getActionLabel, getStatusLabel, useColaborador } from '../utils';
+import { getActionLabel, getStatusLabel, useColaborador } from '../../utils';
 // components
 import Label from '@/components/Label';
 import { Criado } from '@/components/Panel';

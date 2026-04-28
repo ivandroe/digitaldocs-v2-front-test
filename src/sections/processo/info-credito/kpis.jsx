@@ -52,7 +52,7 @@ export default function Kpis({ credito }) {
 
 function CardItem({ title = '', value = '' }) {
   return value ? (
-    <Card sx={{ p: 1.5, textAlign: 'center', boxShadow: 'none', flexGrow: 1 }}>
+    <Card sx={{ p: 1, textAlign: 'center', boxShadow: 'none', flexGrow: 1 }}>
       <Typography variant="overline" sx={{ color: 'text.secondary' }}>
         {title}
       </Typography>

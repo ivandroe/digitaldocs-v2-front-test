@@ -107,7 +107,7 @@ export default function CreditoForm({ onClose }) {
       <DialogContent>
         <FormProvider methods={methods} onSubmit={handleSubmit(onSubmit)}>
           {versao === 2 ? (
-            <Stack sx={{ pt: 1 }}>
+            <Stack spacing={3} sx={{ pt: 1 }}>
               <RHFDatePicker name="data_vencimento_prestacao1" label="Vencimento 1ª prestação" />
             </Stack>
           ) : (

@@ -7,7 +7,7 @@ import Typography from '@mui/material/Typography';
 import InfoOutlineIcon from '@mui/icons-material/InfoOutline';
 // utils
 import { ptDateTime } from '@/utils/formatTime';
-import { getCustomerTypeLabel, getColorRating, ratingList } from '../utils';
+import { getCustomerTypeLabel, getColorRating, ratingList } from '../../utils';
 // components
 import Mensagens from './mensagens';
 import Label, { LabelSN } from '@/components/Label';

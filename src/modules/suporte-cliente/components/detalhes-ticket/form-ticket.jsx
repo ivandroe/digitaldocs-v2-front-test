@@ -53,7 +53,7 @@ export function ActionForm({ dados, item = '', onClose, closeTicket, refetch }) 
     const formData = new FormData();
     const resolved = values?.item?.id === 'RESOLVED';
     const hasMsg = values?.message && values.message.trim() !== '';
-    const value = resolved ? { id: 'CLOSED', label: 'Encerrado (Não Resolvido)' } : values?.item;
+    const value = resolved ? { id: 'CLOSED', label: 'Fechado' } : values?.item;
 
     if (hasMsg) {
       const messagePayload = { content: values.message, visibility: values?.to_client ? 'BOTH' : 'INTERNAL' };

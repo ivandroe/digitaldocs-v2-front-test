@@ -5,7 +5,7 @@ import Card from '@mui/material/Card';
 import useTable from '@/hooks/useTable';
 import { useDispatch, useSelector } from '@/redux/store';
 import { getInSuporte } from '@/redux/slices/suporte-cliente';
-import { storageGet, storageSet, ratingList } from '../utils';
+import { storageGet, storageSet, ratingList } from '../../utils';
 // Components
 import TablePedidos from './table-pedidos';
 import { SearchAvaliacoes } from './search-toolbar';

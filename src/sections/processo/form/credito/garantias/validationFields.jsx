@@ -79,8 +79,46 @@ const shapeImoveis = (tipo) =>
       freguesia: Yup.mixed().required().label('Freguesia'),
       tipo_matriz: Yup.mixed().required().label('Tipo de matriz'),
       area: validacao(tipo === 'Terreno', Yup.string().required().label('Área')),
-      numero_andar: validacao(tipo === 'Apartamento', Yup.string().required().label('Nº de andar')),
       matriz_predial: validacao(tipo === 'Apartamento', Yup.string().required().label('Matriz predial')),
       identificacao_fracao: validacao(tipo === 'Apartamento', Yup.string().required().label('Identificação fração')),
+
+      nip: Yup.string()
+        .nullable()
+        .test(
+          'nip-ou-descricao-predial',
+          'Preencha o NIP ou o Nº de matriz + Nº de descrição predial',
+          function (value) {
+            const { numero_matriz, numero_descricao_predial } = this.parent;
+            const temNip = Boolean(value);
+            const temDescricaoPredial = Boolean(numero_matriz) && Boolean(numero_descricao_predial);
+            return temNip || temDescricaoPredial;
+          }
+        ),
+
+      numero_matriz: Yup.string()
+        .nullable()
+        .test(
+          'matriz-coexistencia',
+          'Nº de matriz é obrigatório quando Nº de descrição predial está preenchido',
+          function (value) {
+            const { nip, numero_descricao_predial } = this.parent;
+            if (nip) return true;
+            if (numero_descricao_predial) return Boolean(value);
+            return true;
+          }
+        ),
+
+      numero_descricao_predial: Yup.string()
+        .nullable()
+        .test(
+          'descricao-coexistencia',
+          'Nº de descrição predial é obrigatório quando Nº de matriz está preenchido',
+          function (value) {
+            const { nip, numero_matriz } = this.parent;
+            if (nip) return true;
+            if (numero_matriz) return Boolean(value);
+            return true;
+          }
+        ),
     })
   );

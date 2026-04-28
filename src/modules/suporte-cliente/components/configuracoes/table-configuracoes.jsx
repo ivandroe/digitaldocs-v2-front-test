@@ -37,7 +37,7 @@ import {
 import Categorias from './categorias';
 import DetalhesPrompt from './detalhes';
 import FormPrompt, { Eliminar } from './form-prompt';
-import { getDepartTypeLabel, LabelApply, LabelPhase, LabelRole } from '../utils';
+import { getDepartTypeLabel, LabelApply, LabelPhase, LabelRole } from '../../utils';
 
 // ---------------------------------------------------------------------------------------------------------------------
 

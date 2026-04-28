@@ -11,7 +11,7 @@ import DialogContent from '@mui/material/DialogContent';
 // utils
 import { mapConcelhoToBackend } from './utils';
 import { useSelector, useDispatch } from '@/redux/store';
-import { applyList, rolesList, phasesList } from '../utils';
+import { applyList, rolesList, phasesList } from '../../utils';
 import { createInSuporte, updateInSuporte } from '@/redux/slices/suporte-cliente';
 // components
 import {
@@ -26,6 +26,16 @@ import {
 import { DialogButons } from '@/components/Actions';
 import { FormLoading } from '@/components/skeleton';
 import { SearchNotFoundSmall } from '@/components/table/SearchNotFound';
+
+const DEFAULT_CONTEUDOS = [
+  'Confirmação de email',
+  'Descrição do módulo de suporte',
+  'Cabeçalho Portal',
+  'Cabeçalho Suporte',
+  'Cabeçalho EMI',
+  'Cabeçalho FAQ',
+  'Informação de cartão',
+];
 
 // ---------------------------------------------------------------------------------------------------------------------
 
@@ -173,10 +183,9 @@ export function ConteudoForm({ onClose }) {
       .map((item) => item.trim())
       .filter(Boolean);
 
-    return listaVite.filter((opcao) => {
-      const jaEstaSendoUsado = conteudos.some((item) => item.reference === opcao);
-      return !jaEstaSendoUsado;
-    });
+    const listaBase = listaVite.length > 0 ? [...new Set([...listaVite, ...DEFAULT_CONTEUDOS])] : DEFAULT_CONTEUDOS;
+
+    return listaBase.filter((opcao) => !conteudos.some((item) => item.reference === opcao));
   }, [conteudos]);
 
   const formSchema = Yup.object().shape({

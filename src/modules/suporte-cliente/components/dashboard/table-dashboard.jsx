@@ -12,7 +12,7 @@ import CardHeader from '@mui/material/CardHeader';
 import Typography from '@mui/material/Typography';
 import TableContainer from '@mui/material/TableContainer';
 // utils
-import { getColorRating } from '../utils';
+import { getColorRating } from '../../utils';
 import { noDados } from '@/components/Panel';
 import { toHourLabel } from '@/utils/formatTime';
 import { fNumber, fPercent } from '@/utils/formatNumber';

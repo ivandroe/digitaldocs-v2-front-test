@@ -3,7 +3,7 @@ import Stack from '@mui/material/Stack';
 import TextField from '@mui/material/TextField';
 import Autocomplete from '@mui/material/Autocomplete';
 // utils
-import { statusList } from '../utils';
+import { statusList } from '../../utils';
 
 // ---------------------------------------------------------------------------------------------------------------------
 
@@ -40,12 +40,12 @@ export function SearchAvaliacoes({ values, setValues, lists }) {
   const { ratingList = [], subjectsList = [] } = lists;
 
   return (
-    <Stack direction={{ xs: 'column', md: 'row' }} sx={{ pb: 1, pt: 0 }} spacing={1}>
+    <Stack direction={{ xs: 'column', sm: 'row' }} sx={{ pb: 1, pt: 0 }} spacing={1}>
       <SearchFilter
         value={rating}
         label="Avaliação"
         setValue={setRating}
-        sx={{ maxWidth: { xs: 1, sm: 250 } }}
+        sx={{ maxWidth: { xs: 1, sm: 230 } }}
         dados={ratingList?.map(({ rating, label }) => ({ id: rating, label }))}
       />
       <SearchFilter value={subject} dados={subjectsList} setValue={setSubject} label="Assunto" />

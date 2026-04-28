@@ -56,7 +56,7 @@ export default function ResumoDashboard({ data, periodo, department, departament
             <GridItem>
               <Asuntos dados={indicadores?.indicators_by_subject?.filter(({ count }) => count) ?? []} />
             </GridItem>
-            <GridItem>
+            <GridItem xl={6}>
               <Departamentos
                 dados={
                   indicadores?.indicators_by_department?.filter(
@@ -65,7 +65,7 @@ export default function ResumoDashboard({ data, periodo, department, departament
                 }
               />
             </GridItem>
-            <GridItem>
+            <GridItem xl={6}>
               <Desempenho dados={indicadores?.indicators_by_employee?.filter(({ closed }) => closed) ?? []} />
             </GridItem>
           </Grid>

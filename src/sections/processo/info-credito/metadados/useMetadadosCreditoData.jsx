@@ -13,7 +13,7 @@ import { LabelSN } from '../../../parametrizacao/details';
 
 export function useMetadadosCreditoData(dados) {
   return useMemo(() => {
-    if (!dados) return { financeiroPrincipal: [], cardsVisible: [] };
+    if (!dados) return { financeiroPrincipal: [], cards: [] };
 
     const financeiroPrincipal = [
       { label: 'Valor da prestação', value: fCurrency(dados?.valor_prestacao), color: 'primary' },
@@ -22,7 +22,7 @@ export function useMetadadosCreditoData(dados) {
       { label: 'Taxa de Mora', value: fPercent(Number(dados?.taxa_mora), 2), color: 'error' },
     ];
 
-    const allCards = [
+    const cards = [
       {
         titulo: 'Regime & Isenções',
         dados: [
@@ -140,13 +140,6 @@ export function useMetadadosCreditoData(dados) {
       },
     ];
 
-    const cardsVisible = allCards.filter((card) => {
-      if (card.id === 'objeto_ensino' || card.id === 'entidade_transferencia') {
-        return card.dados.some((d) => d.value && d.value !== '');
-      }
-      return true;
-    });
-
-    return { financeiroPrincipal, cardsVisible };
+    return { financeiroPrincipal, cards };
   }, [dados]);
 }

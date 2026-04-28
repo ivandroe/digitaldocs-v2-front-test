@@ -144,4 +144,4 @@ const DetalhesClausula = Loadable(lazy(() => import('../modules/gaji9/pages/deta
 
 // --------------------------------------------------- SUPORTE CLIENTE --------------------------------------------------
 
-const SuporteCliente = Loadable(lazy(() => import('../pages/page-gestao-suporte-cliente')));
+const SuporteCliente = Loadable(lazy(() => import('../modules/suporte-cliente/pages/gestao-suporte-cliente')));
