@@ -13,14 +13,12 @@ import { fCurrency, fPercent } from '@/utils/formatNumber';
 import {
   DonosBlock,
   ContasBlock,
-  PrediosBlock,
+  ImovelBlock,
   TitulosBlock,
-  TerrenosBlock,
   VeiculosBlock,
   FiadoresBlock,
   LivrancasBlock,
   SegurosV2Block,
-  ApartamentosBlock,
   SegurosLegacyBlock,
 } from './garantia-sub-components';
 import { SearchNotFound } from '@/components/table';
@@ -47,14 +45,16 @@ export function TabGarantias({ garantias, participantes, canChange, openForm }) 
 
 function MetadadosV2({ info_extra_v2 }) {
   if (!info_extra_v2) return null;
-  const meta = info_extra_v2.metadados;
+  const meta = info_extra_v2.metadados || {};
 
   return (
     <Stack spacing={2}>
       {meta?.fiadores?.length > 0 ? <FiadoresBlock fiadores={meta.fiadores} /> : null}
-      {meta?.imoveis?.predios?.length > 0 ? <PrediosBlock predios={meta.imoveis.predios} /> : null}
-      {meta?.imoveis?.apartamentos?.length > 0 ? <ApartamentosBlock apartamentos={meta.imoveis.apartamentos} /> : null}
-      {meta?.imoveis?.terrenos?.length > 0 ? <TerrenosBlock terrenos={meta.imoveis.terrenos} /> : null}
+      {meta?.imoveis?.predios?.length > 0 ? <ImovelBlock predios={meta.imoveis.predios} tipo="prédio" /> : null}
+      {meta?.imoveis?.apartamentos?.length > 0 ? (
+        <ImovelBlock apartamentos={meta.imoveis.apartamentos} tipo="apartamento" />
+      ) : null}
+      {meta?.imoveis?.terrenos?.length > 0 ? <ImovelBlock terrenos={meta.imoveis.terrenos} tipo="terreno" /> : null}
       {meta?.imoveis?.veiculos?.length > 0 ? <VeiculosBlock veiculos={meta.imoveis.veiculos} /> : null}
       {meta?.livrancas?.length > 0 ? <LivrancasBlock livrancas={meta.livrancas} /> : null}
       {meta?.seguros?.length > 0 ? <SegurosV2Block seguros={meta.seguros} raiz /> : null}

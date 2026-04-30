@@ -79,7 +79,7 @@ export function getDefaultsTaxas({ dadosStepper, dados, precario }) {
     taxa_mora: resolve('taxa_mora', 2),
     taxa_juro_desconto: taxaJuroDesconto,
     taxa_imposto_selo: resolve('taxa_imposto_selo', 3.5),
-    taxa_juro_precario: resolve('taxa_juro_precario', 11),
+    taxa_juro_precario: resolve('taxa_juro_precario', ''),
     taxa_comissao_abertura: resolve('taxa_comissao_abertura', 1.75),
     taxa_comissao_imobilizacao: resolve('taxa_comissao_imobilizacao', 0),
     taxa_imposto_selo_utilizacao: resolve('taxa_imposto_selo_utilizacao', 0.5),

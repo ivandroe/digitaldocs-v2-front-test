@@ -79,7 +79,7 @@ const shapeImoveis = (tipo) =>
       freguesia: Yup.mixed().required().label('Freguesia'),
       tipo_matriz: Yup.mixed().required().label('Tipo de matriz'),
       area: validacao(tipo === 'Terreno', Yup.string().required().label('Área')),
-      matriz_predial: validacao(tipo === 'Apartamento', Yup.string().required().label('Matriz predial')),
+      localizacao_conservatoria: Yup.mixed().required().label('Localização da conservatória'),
       identificacao_fracao: validacao(tipo === 'Apartamento', Yup.string().required().label('Identificação fração')),
 
       nip: Yup.string()

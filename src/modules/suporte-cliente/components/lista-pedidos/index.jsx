@@ -69,7 +69,7 @@ export default function Tickets({ utilizador, department, setDepartment }) {
     [setPage]
   );
 
-  const { tickets: data = [], total_elements: total = 0 } = tickets;
+  const { tickets: data = [], total_elements: total = 0 } = tickets || {};
   const dados = useMemo(
     () => injectCollaboratorName(data, utilizadores, colaboradores),
     [data, utilizadores, colaboradores]

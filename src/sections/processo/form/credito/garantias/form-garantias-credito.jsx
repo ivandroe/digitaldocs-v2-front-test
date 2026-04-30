@@ -10,6 +10,11 @@ import DialogContent from '@mui/material/DialogContent';
 import { vdt } from '@/utils/formatObject';
 import { useSelector, useDispatch } from '@/redux/store';
 import { createItem, updateItem } from '@/redux/slices/digitaldocs';
+//
+import { shapeGarantia } from './validationFields';
+import composeGarantiaPayload from './composePayload';
+import { construirSchemaImoveis } from './schemaFileds';
+import { listaGarantias } from '@/modules/gaji9/utils/applySortFilter';
 // components
 import GridItem from '@/components/GridItem';
 import { DialogButons } from '@/components/Actions';
@@ -23,10 +28,18 @@ import FormSeguros from './form-seguros';
 import FormVeiculos from './form-veiculos';
 import FormEntidades from './form-entidades';
 import FormLivrancas from './form-livrancas';
-import { shapeGarantia } from './validationFields';
-import composeGarantiaPayload from './composePayload';
-import { construirSchemaImoveis } from './schemaFileds';
-import { listaGarantias } from '@/modules/gaji9/utils/applySortFilter';
+
+const META_DEFAULTS = {
+  contas: [],
+  titulos: [],
+  seguros: [],
+  fiadores: [],
+  livrancas: [],
+  predios: [],
+  terrenos: [],
+  veiculos: [],
+  apartamentos: [],
+};
 
 // ---------------------------------------------------------------------------------------------------------------------
 
@@ -49,13 +62,13 @@ export default function FormGarantias({ dados, processoId, onClose }) {
       titulos: dados?.metadados?.titulos || [],
       seguros: dados?.metadados?.seguros || [],
       fiadores: dados?.metadados?.fiadores || [],
+      livrancas: dados?.metadados?.livrancas || [],
       percentagem_cobertura: dados?.percentagem_cobertura || '',
       predios: construirSchemaImoveis(dados?.metadados?.imoveis?.predios || []),
       terrenos: construirSchemaImoveis(dados?.metadados?.imoveis?.terrenos || []),
       veiculos: construirSchemaImoveis(dados?.metadados?.imoveis?.veiculos || []),
       apartamentos: construirSchemaImoveis(dados?.metadados?.imoveis?.apartamentos || []),
       subtipo_garantia: tipoGarantia?.subtipos?.find(({ id }) => id === dados?.subtipo_garantia_id) || null,
-      livrancas: dados?.metadados?.livrancas,
       tipo_garantia: tipoGarantia,
     }),
     [dados, tipoGarantia]
@@ -81,6 +94,12 @@ export default function FormGarantias({ dados, processoId, onClose }) {
     dispatch((isEdit ? updateItem : createItem)('garantias', JSON.stringify(formData), { ...params, onClose }));
   };
 
+  const resetMetaFields = () => {
+    Object.entries(META_DEFAULTS).forEach(([key, val]) => {
+      setValue(key, val, vdt);
+    });
+  };
+
   return (
     <Dialog open fullWidth maxWidth="lg">
       <DialogTitleAlt title={isEdit ? 'Editar garantia' : 'Adicionar garantia'} onClose={onClose} sx={{ pb: 2 }} />
@@ -91,11 +110,13 @@ export default function FormGarantias({ dados, processoId, onClose }) {
               <RHFAutocompleteObj
                 dc
                 label="Garantia"
+                disabled={isEdit}
                 options={garantiasList}
                 name="tipo_garantia"
                 onChange={(_, newValue) => {
                   setValue('tipo_garantia', newValue, vdt);
                   setValue('subtipo_garantia', null, vdt);
+                  resetMetaFields();
                 }}
               />
             </GridItem>
@@ -105,9 +126,13 @@ export default function FormGarantias({ dados, processoId, onClose }) {
                 <RHFAutocompleteObj
                   dc
                   label="Subtipo"
+                  disabled={isEdit}
                   options={subtipos}
                   name="subtipo_garantia"
-                  onChange={(_, newValue) => setValue('subtipo_garantia', newValue, vdt)}
+                  onChange={(_, newValue) => {
+                    setValue('subtipo_garantia', newValue, vdt);
+                    resetMetaFields();
+                  }}
                 />
               </GridItem>
             ) : null}

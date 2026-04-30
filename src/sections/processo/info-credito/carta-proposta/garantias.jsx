@@ -60,7 +60,7 @@ export const extrairDescricaoGarantias = (garantias = []) => {
       if (imoveisList.length > 0) {
         runs.push(new TextRun({ text: '• Hipoteca sobre imóvel: ', ...adicionarQuebraSeNecessario() }));
         imoveisList.forEach((p, i) => {
-          const desc = `Matriz nº ${p.numero_matriz || p.matriz_predial || '---'}, Descritivo: ${p.numero_descricao_predial || '---'}`;
+          const desc = `Matriz nº ${p.numero_matriz || '---'}, Descritivo: ${p.numero_descricao_predial || '---'}`;
           runs.push(new TextRun({ text: `${desc}${i < imoveisList.length - 1 ? '; ' : ';'}`, bold: true }));
         });
       }

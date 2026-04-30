@@ -172,6 +172,7 @@ export function IntervenienteForm({ id, versao, onClose }) {
   const dispatch = useDispatch();
   const { credito, selectedItem, isSaving } = useSelector((state) => state.gaji9);
   const dados = credito?.participantes?.filter(({ mutuario, fiador }) => mutuario || fiador) || [];
+
   const isProcuradorOnly = versao === 2;
   const garantiaId = selectedItem?.garantiaId || '';
 

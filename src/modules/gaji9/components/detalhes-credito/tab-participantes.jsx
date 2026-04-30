@@ -88,7 +88,7 @@ function ParticipanteCard({ p, canChange, versao, openForm }) {
             </Stack>
           </Box>
         </Stack>
-        {((canChange && !p.mutuario && versao === 1) || (versao === 2 && p.representante)) && (
+        {((canChange && !p.mutuario && versao !== 2) || (versao === 2 && p.representante)) && (
           <DefaultAction small label="ELIMINAR" onClick={() => openForm('eliminar-interv', p)} />
         )}
       </Stack>

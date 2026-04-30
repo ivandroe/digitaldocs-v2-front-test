@@ -174,6 +174,7 @@ export function getAccessibleDepartments(departamentos, currentUser) {
   if (currentUser.role === 'ADMINISTRATOR') return departamentos;
   return departamentos?.filter(({ id }) => id === currentUser?.department_id);
 }
+
 // ---------------------------------------------------------------------------------------------------------------------
 
 export function storageGet(key, fallback = null) {

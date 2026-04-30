@@ -57,7 +57,7 @@ export function TabFinanceiro({ credito }) {
         {/* Prestação */}
         <GridItem md={6} lg={4}>
           <CardBox title="Prestação">
-            <FieldRow label="N.º prestações" value={labelMeses(credito.numero_prestacao)} />
+            <FieldRow label="Nº prestações" value={labelMeses(credito.numero_prestacao)} />
             <FieldRow
               label="Valor prestação"
               sxValue={{ color: 'success.main' }}

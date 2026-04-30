@@ -88,12 +88,12 @@ function renderColumns(item, row) {
       details: [
         ['Área', row?.area],
         ['Tipo de matriz', row?.tipo_matriz],
-        ['Matriz predial', row?.matriz_predial],
         ['Nº de matriz', row?.numero_matriz],
         ['Nº de descrição predial', row?.numero_descricao_predial || undefined],
         ['NIP', row?.nip || undefined],
         ['Nº de andar', row?.numero_andar],
         ['Identificação fração', row?.identificacao_fracao],
+        ['Conservatória', row?.localizacao_conservatoria],
       ],
       address: [
         ['Ilha', row?.morada?.ilha],

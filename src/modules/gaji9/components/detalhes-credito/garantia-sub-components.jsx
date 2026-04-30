@@ -80,135 +80,6 @@ export function SegurosLegacyBlock({ seguros }) {
   );
 }
 
-// ─── Predios ---------------------------------------------------------------------------------------------------------
-
-export function PrediosBlock({ predios }) {
-  const lista = predios?.length > 1;
-  return (
-    <Stack spacing={2}>
-      {predios.map((p, i) => (
-        <Paper key={i} elevation={lista ? 2 : 0} sx={{ p: lista ? 2 : 1 }}>
-          <Stack direction={{ xs: 'column', md: 'row' }} spacing={2}>
-            <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} sx={{ width: 1 }}>
-              <Stack spacing={1} sx={{ width: 1 }}>
-                <InlineRow
-                  label="Cobertura"
-                  value={fPercent(p.percentagem_cobertura) || 'N/D'}
-                  sxValue={{ fontWeight: 'bold', color: 'success.main' }}
-                />
-                <InlineRow
-                  label="Valor cobertura"
-                  value={fCurrency(p.valor_cobertura)}
-                  sxValue={{ fontWeight: 'bold' }}
-                />
-                <InlineRow label="Valor PVT" value={fCurrency(p.valor_pvt)} sxValue={{ fontWeight: 'bold' }} />
-              </Stack>
-              <Stack spacing={1} sx={{ width: 1 }}>
-                <InlineRow label="NIP" value={p.nip} />
-                <InlineRow label="Tipo matriz" value={p.tipo_matriz} />
-                <InlineRow label="N.º matriz" value={p.numero_matriz} />
-                <InlineRow label="N.º descrição predial" value={p.numero_descricao_predial} />
-              </Stack>
-            </Stack>
-            <Stack spacing={1.5} sx={{ width: 1 }}>
-              <MoradaInline morada={p.morada} />
-              <DonosBlock donos={p.donos} item="prédio" />
-            </Stack>
-          </Stack>
-          {p.seguros?.length > 0 && <SegurosV2Block seguros={p.seguros} />}
-        </Paper>
-      ))}
-    </Stack>
-  );
-}
-
-// ─── Apartamentos ----------------------------------------------------------------------------------------------------
-
-export function ApartamentosBlock({ apartamentos }) {
-  const lista = apartamentos?.length > 1;
-  return (
-    <Stack spacing={2}>
-      {apartamentos.map((a, i) => (
-        <Paper key={i} elevation={lista ? 2 : 0} sx={{ p: lista ? 2 : 1 }}>
-          <Stack direction={{ xs: 'column', md: 'row' }} spacing={2}>
-            <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} sx={{ width: 1 }}>
-              <Stack spacing={1} sx={{ width: 1 }}>
-                <InlineRow
-                  label="Cobertura"
-                  value={fPercent(a.percentagem_cobertura) || 'N/D'}
-                  sxValue={{ fontWeight: 'bold', color: 'success.main' }}
-                />
-                <InlineRow
-                  label="Valor cobertura"
-                  value={fCurrency(a.valor_cobertura)}
-                  sxValue={{ fontWeight: 'bold' }}
-                />
-                <InlineRow label="Valor PVT" value={fCurrency(a.valor_pvt)} sxValue={{ fontWeight: 'bold' }} />
-              </Stack>
-              <Stack spacing={1} sx={{ width: 1 }}>
-                <InlineRow label="NIP" value={a.nip} />
-                <InlineRow label="N.º descrição predial" value={a.numero_descricao_predial} />
-                <InlineRow label="Matriz predial" value={a.matriz_predial} />
-                <InlineRow label="Identificação fração" value={a.identificacao_fracao} />
-                <InlineRow label="Tipo matriz" value={a.tipo_matriz} />
-                <InlineRow label="N.º andar" value={a.numero_andar} />
-              </Stack>
-            </Stack>
-            <Stack spacing={1.5} sx={{ width: 1 }}>
-              <MoradaInline morada={a.morada} />
-              <DonosBlock donos={a.donos} item="apartamento" />
-            </Stack>
-          </Stack>
-          {a.seguros?.length > 0 && <SegurosV2Block seguros={a.seguros} />}
-        </Paper>
-      ))}
-    </Stack>
-  );
-}
-
-// ─── Terrenos --------------------------------------------------------------------------------------------------------
-
-export function TerrenosBlock({ terrenos }) {
-  const lista = terrenos?.length > 1;
-  return (
-    <Stack spacing={2}>
-      {terrenos.map((t, i) => (
-        <Paper key={i} elevation={lista ? 2 : 0} sx={{ p: lista ? 2 : 1 }}>
-          <Stack direction={{ xs: 'column', md: 'row' }} spacing={2}>
-            <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} sx={{ width: 1 }}>
-              <Stack spacing={1} sx={{ width: 1 }}>
-                <InlineRow
-                  label="Cobertura"
-                  value={fPercent(t.percentagem_cobertura) || 'N/D'}
-                  sxValue={{ fontWeight: 'bold', color: 'success.main' }}
-                />
-                <InlineRow
-                  label="Valor cobertura"
-                  value={fCurrency(t.valor_cobertura)}
-                  sxValue={{ fontWeight: 'bold' }}
-                />
-                <InlineRow label="Valor PVT" value={fCurrency(t.valor_pvt)} sxValue={{ fontWeight: 'bold' }} />
-                <InlineRow label="Área" value={t.area} />
-              </Stack>
-              <Stack spacing={1} sx={{ width: 1 }}>
-                <InlineRow label="NIP" value={t.nip} />
-                <InlineRow label="Tipo matriz" value={t.tipo_matriz} />
-                <InlineRow label="N.º matriz" value={t.numero_matriz} />
-                <InlineRow label="N.º descrição predial" value={t.numero_descricao_predial} />
-              </Stack>
-            </Stack>
-            <Stack spacing={1.5} sx={{ width: 1 }}>
-              <MoradaInline morada={t.morada} />
-              <DonosBlock donos={t.donos} item="terreno" />
-            </Stack>
-          </Stack>
-          {t.seguros?.length > 0 && <SegurosV2Block seguros={t.seguros} />}
-        </Paper>
-      ))}
-    </Stack>
-  );
-}
-
 // ─── Veículos --------------------------------------------------------------------------------------------------------
 
 export function VeiculosBlock({ veiculos }) {
@@ -274,14 +145,14 @@ export function TitulosBlock({ titulos }) {
                   sxValue={{ fontWeight: 'bold' }}
                 />
                 <InlineRow label="Valor título" value={fCurrency(t.valor_titulo)} sxValue={{ fontWeight: 'bold' }} />
-                <InlineRow label="N.º títulos" value={t.numero_titulos} />
+                <InlineRow label="Nº títulos" value={t.numero_titulos} />
               </Stack>
               <Stack spacing={1} sx={{ width: 1 }}>
                 <InlineRow label="Código" value={t.codigo} />
                 <InlineRow label="Tipo título" value={t.tipo_titulo} />
                 <InlineRow label="Entidade emissora" value={t.nome_entidade_emissora} />
                 <InlineRow label="Instituição registo" value={t.nome_instituicao_registo} />
-                <InlineRow label="N.º cliente" value={t.numero_cliente} />
+                <InlineRow label="Nº cliente" value={t.numero_cliente} />
               </Stack>
             </Stack>
             <Stack spacing={1.5} sx={{ width: 1 }}>
@@ -320,7 +191,7 @@ export function ContasBlock({ contas }) {
                 <InlineRow label="Prazo" value={c.prazo} />
               </Stack>
               <Stack spacing={1} sx={{ width: 1 }}>
-                <InlineRow label="N.º conta" value={c.numero_conta} />
+                <InlineRow label="Nº conta" value={c.numero_conta} />
                 <InlineRow label="Balcão" value={c.balcao} />
                 <InlineRow label="Data constituição" value={ptDate(c.data_constituicao)} />
                 <InlineRow label="Data início" value={ptDate(c.data_inicio)} />
@@ -380,6 +251,55 @@ export function InfoEntidade({ row, boxSize = '', variant = 'body2' }) {
         )}
         {numero ? ` - ${nome}` : nome}
       </Typography>
+    </Stack>
+  );
+}
+
+// ─── Imóvel META -----------------------------------------------------------------------------------------------------
+
+export function ImovelBlock({ items = [], tipo }) {
+  const lista = items.length > 1;
+
+  return (
+    <Stack spacing={2}>
+      {items.map((item, i) => (
+        <Paper key={i} elevation={lista ? 2 : 0} sx={{ p: lista ? 2 : 1 }}>
+          <Stack direction={{ xs: 'column', md: 'row' }} spacing={2}>
+            <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} sx={{ width: 1 }}>
+              <Stack spacing={1} sx={{ width: 1 }}>
+                <InlineRow
+                  label="Cobertura"
+                  value={fPercent(item.percentagem_cobertura) || 'N/D'}
+                  sxValue={{ fontWeight: 'bold', color: 'success.main' }}
+                />
+                <InlineRow
+                  label="Valor cobertura"
+                  value={fCurrency(item.valor_cobertura)}
+                  sxValue={{ fontWeight: 'bold' }}
+                />
+                <InlineRow label="Valor PVT" value={fCurrency(item.valor_pvt)} sxValue={{ fontWeight: 'bold' }} />
+              </Stack>
+              <Stack spacing={1} sx={{ width: 1 }}>
+                <InlineRow label="NIP" value={item.nip} />
+                <InlineRow label="Tipo matriz" value={item.tipo_matriz} />
+                <InlineRow label="Nº matriz" value={item.numero_matriz} />
+                <InlineRow label="Nº descrição predial" value={item.numero_descricao_predial} />
+                {tipo === 'terreno' && <InlineRow label="Área" value={item.area} />}
+                {tipo === 'apartamento' && <InlineRow label="Identificação fração" value={item.identificacao_fracao} />}
+                {tipo === 'apartamento' && <InlineRow label="Nº andar" value={item.numero_andar} />}
+                <InlineRow label="Conservatória" value={item.localizacao_conservatoria} />
+              </Stack>
+            </Stack>
+
+            <Stack spacing={1.5} sx={{ width: 1 }}>
+              <MoradaInline morada={item.morada} />
+              <DonosBlock donos={item.donos} item={tipo} />
+            </Stack>
+          </Stack>
+
+          {item.seguros?.length > 0 && <SegurosV2Block seguros={item.seguros} />}
+        </Paper>
+      ))}
     </Stack>
   );
 }

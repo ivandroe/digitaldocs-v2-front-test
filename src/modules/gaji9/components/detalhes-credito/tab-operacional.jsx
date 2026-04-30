@@ -13,7 +13,7 @@ export function TabOperacional({ credito }) {
     <Grid container spacing={2}>
       <GridItem md={6}>
         <CardBox title="Cliente">
-          <FieldRow label="N.º cliente" value={credito.cliente} />
+          <FieldRow label="Nº cliente" value={credito.cliente} />
           <FieldRow label="Morada" value={credito.morada_cliente} />
           <FieldRow label="Email" value={credito.morada_eletronico_cliente} />
         </CardBox>
