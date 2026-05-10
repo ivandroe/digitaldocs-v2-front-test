@@ -50,21 +50,24 @@ function Imoveis({ fields = [], remove, prefixo, tipo }) {
       <Card key={item.id} sx={{ p: 1, boxShadow: (theme) => theme.customShadows.cardAlt }}>
         <Stack direction="row" alignItems="center" spacing={2}>
           <Grid container spacing={2} justifyContent="center">
-            <GridItem md={6}>
+            <GridItem md={4.8}>
               <RHFAutocompleteSmp
                 label="Localização da conservatória"
                 name={`${prefixo}[${index}].localizacao_conservatoria`}
                 options={listaFreguesias?.map(({ freguesia }) => freguesia)?.sort()}
               />
             </GridItem>
-            <GridItem sm={6} md={3}>
+            <GridItem sm={6} md={2.4}>
+              <RHFTextField label="Nº inscrição da hipoteca" name={`${prefixo}[${index}].numero_inscricao_hipoteca`} />
+            </GridItem>
+            <GridItem sm={6} md={2.4}>
               <RHFAutocompleteSmp
                 label="Tipo de matriz"
                 options={['Urbana', 'Rural']}
                 name={`${prefixo}[${index}].tipo_matriz`}
               />
             </GridItem>
-            <GridItem sm={6} md={3}>
+            <GridItem sm={6} md={2.4}>
               <RHFTextField
                 label="NIP"
                 name={`${prefixo}[${index}].nip`}

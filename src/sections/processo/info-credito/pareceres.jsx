@@ -1,6 +1,7 @@
 import { useEffect, useState, useMemo } from 'react';
 // @mui
 import Box from '@mui/material/Box';
+import Card from '@mui/material/Card';
 import Stack from '@mui/material/Stack';
 import Divider from '@mui/material/Divider';
 import Accordion from '@mui/material/Accordion';
@@ -53,75 +54,77 @@ export default function PareceresCredito({ infoCredito }) {
   );
 
   return (
-    <Stack spacing={3}>
-      {estado?.decisor && (
-        <Stack direction="column" justifyContent="center" spacing={2}>
-          {infoCredito && <ParecersLabel dados={{ estado, acessoParecer, pareceresAtuais, openModal }} />}
+    <Card sx={{ p: 1 }}>
+      <Stack spacing={3}>
+        {estado?.decisor && (
+          <Stack direction="column" justifyContent="center" spacing={2}>
+            {infoCredito && <ParecersLabel dados={{ estado, acessoParecer, pareceresAtuais, openModal }} />}
 
-          {processo?.condicao_aprovacao && (
-            <Stack direction="row" alignItems="center" spacing={2} sx={{ py: 1 }}>
-              <Typography variant="subtitle1" sx={{ color: 'success.main', mb: 0.5 }}>
-                Condições:
-              </Typography>
-              <Stack spacing={0.5}>
-                <Condicao label="Montante" value={fCurrency(processo?.condicao_aprovacao?.montante)} />
-                <Condicao label="Taxa de juro" value={fPercent(processo?.condicao_aprovacao?.taxa_juro)} />
-                <Condicao label="Prazo" value={`${processo?.condicao_aprovacao?.prazo} meses`} />
+            {processo?.condicao_aprovacao && (
+              <Stack direction="row" alignItems="center" spacing={2} sx={{ py: 1 }}>
+                <Typography variant="subtitle1" sx={{ color: 'success.main', mb: 0.5 }}>
+                  Condições:
+                </Typography>
+                <Stack spacing={0.5}>
+                  <Condicao label="Montante" value={fCurrency(processo?.condicao_aprovacao?.montante)} />
+                  <Condicao label="Taxa de juro" value={fPercent(processo?.condicao_aprovacao?.taxa_juro)} />
+                  <Condicao label="Prazo" value={`${processo?.condicao_aprovacao?.prazo} meses`} />
+                </Stack>
+                {gestor && estado?.nivel_decisao === processo?.credito?.nivel_decisao && (
+                  <DefaultAction small label="Editar" onClick={() => openModal('condicoes-aprovacao')} />
+                )}
               </Stack>
-              {gestor && estado?.nivel_decisao === processo?.credito?.nivel_decisao && (
-                <DefaultAction small label="Editar" onClick={() => openModal('condicoes-aprovacao')} />
-              )}
-            </Stack>
-          )}
+            )}
 
-          {pareceresAtuais?.length > 0
-            ? pareceresAtuais?.map((row) => (
-                <Parecer dados={row} openModal={openModal} key={`atual_${row?.id}`} acessoParecer={acessoParecer} />
-              ))
-            : boxNoDados(true)}
-        </Stack>
-      )}
+            {pareceresAtuais?.length > 0
+              ? pareceresAtuais?.map((row) => (
+                  <Parecer dados={row} openModal={openModal} key={`atual_${row?.id}`} acessoParecer={acessoParecer} />
+                ))
+              : boxNoDados(true)}
+          </Stack>
+        )}
 
-      {infoCredito && historicoPareceres?.length > 0 && (
-        <Stack spacing={3}>
-          <Typography variant="subtitle1" sx={{ color: 'text.secondary' }}>
-            Histórico
-          </Typography>
-          <Divider sx={{ mt: '5px !important', mb: '-15px !important' }} />
-          {agruparPorEstado(historicoPareceres)?.map((row) => (
-            <Stack key={row?.estado_id}>
-              <Typography variant="subtitle1" sx={{ pb: 1 }}>
-                {row?.estado}
-              </Typography>
-              <Stack spacing={2}>
-                {row?.pareceres?.map((parecer) => (
-                  <Parecer historico dados={parecer} openModal={openModal} key={`historico_${parecer?.id}`} />
-                ))}
+        {infoCredito && historicoPareceres?.length > 0 && (
+          <Stack spacing={3}>
+            <Typography variant="subtitle1" sx={{ color: 'text.secondary' }}>
+              Histórico
+            </Typography>
+            <Divider sx={{ mt: '5px !important', mb: '-15px !important' }} />
+            {agruparPorEstado(historicoPareceres)?.map((row) => (
+              <Stack key={row?.estado_id}>
+                <Typography variant="subtitle1" sx={{ pb: 1 }}>
+                  {row?.estado}
+                </Typography>
+                <Stack spacing={2}>
+                  {row?.pareceres?.map((parecer) => (
+                    <Parecer historico dados={parecer} openModal={openModal} key={`historico_${parecer?.id}`} />
+                  ))}
+                </Stack>
               </Stack>
-            </Stack>
-          ))}
-        </Stack>
-      )}
+            ))}
+          </Stack>
+        )}
 
-      {infoCredito && !estado?.decisor && historicoPareceres?.length === 0 && boxNoDados()}
+        {infoCredito && !estado?.decisor && historicoPareceres?.length === 0 && boxNoDados()}
 
-      {isOpenModal === 'parecer-cr' && (
-        <FormParecer
-          gestor={gestor}
-          pId={processo?.id}
-          onClose={() => openModal()}
-          fluxoId={processo?.fluxo_id}
-          estadoId={estado?.estado_id}
-        />
-      )}
-      {isOpenModal === 'condicoes-aprovacao' && (
-        <CondicoesForm
-          onClose={() => openModal()}
-          dados={processo?.condicao_aprovacao}
-          ids={{ id: processo?.id, creditoId: processo?.credito?.id }}
-        />
-      )}
-    </Stack>
+        {isOpenModal === 'parecer-cr' && (
+          <FormParecer
+            gestor={gestor}
+            pId={processo?.id}
+            onClose={() => openModal()}
+            fluxoId={processo?.fluxo_id}
+            estadoId={estado?.estado_id}
+          />
+        )}
+        {isOpenModal === 'condicoes-aprovacao' && (
+          <CondicoesForm
+            onClose={() => openModal()}
+            dados={processo?.condicao_aprovacao}
+            ids={{ id: processo?.id, creditoId: processo?.credito?.id }}
+          />
+        )}
+      </Stack>
+    </Card>
   );
 }
 

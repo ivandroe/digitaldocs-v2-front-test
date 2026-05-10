@@ -1,5 +1,6 @@
 import { useEffect, useMemo } from 'react';
 // @mui
+import Card from '@mui/material/Card';
 import Stack from '@mui/material/Stack';
 import Skeleton from '@mui/material/Skeleton';
 import Typography from '@mui/material/Typography';
@@ -47,7 +48,7 @@ export default function FichaAnalise() {
   const actionModal = ({ modal = '' }) => dispatch(setModal({ modal }));
 
   return (
-    <>
+    <Card sx={{ p: 1 }}>
       <Stack
         useFlexGap
         spacing={1}
@@ -86,6 +87,6 @@ export default function FichaAnalise() {
           )}
         </>
       )}
-    </>
+    </Card>
   );
 }

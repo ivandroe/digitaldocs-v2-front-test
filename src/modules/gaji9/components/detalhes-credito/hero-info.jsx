@@ -6,7 +6,7 @@ import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
 // utils
 import { fNumber } from '@/utils/formatNumber';
-//
+// components
 import GridItem from '@/components/GridItem';
 import { StatusBadge, SchemaBadge } from './shared';
 
@@ -29,7 +29,7 @@ export default function HeroCreditoDetail({ credito = {} }) {
           </Typography>
         </Box>
 
-        <Stack direction="row" spacing={0.75} flexWrap="wrap" sx={{ gap: '6px !important', pt: { sm: 0.5 } }}>
+        <Stack direction="row" spacing={0.25} flexWrap="wrap" sx={{ gap: '6px !important', pt: { sm: 0.5 } }}>
           <SchemaBadge version={credito.versao_schema} />
           <StatusBadge label={credito.ativo ? 'Ativo' : 'Inativo'} variant={credito.ativo ? 'active' : 'inactive'} />
           <StatusBadge
@@ -42,7 +42,7 @@ export default function HeroCreditoDetail({ credito = {} }) {
         <KpiCell label="Montante" value={credito.montante} sub={credito.moeda} colorStyle="success.main" />
         <KpiCell label="Custo total" value={credito.custo_total} sub={credito.moeda} />
         <KpiCell label="Prestação / mês" value={credito.valor_prestacao} sub={credito.moeda} />
-        <KpiCell label="Prazo" value={credito.prazo_contratual} sub="meses" />
+        <KpiCell label="Prazo contratual" value={credito.prazo_contratual} sub="meses" />
         <KpiCell label="TAEG" value={credito.taxa_taeg} colorStyle="warning.main" sub="%" />
         <KpiCell label="Taxa negociada" value={credito.taxa_juro_negociado} sub="%" colorStyle="success.main" />
       </Grid>

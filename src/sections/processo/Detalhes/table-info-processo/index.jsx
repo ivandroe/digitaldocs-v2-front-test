@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 // @mui
-import Box from '@mui/material/Box';
+import Card from '@mui/material/Card';
 import Stack from '@mui/material/Stack';
 import Table from '@mui/material/Table';
 import TableRow from '@mui/material/TableRow';
@@ -74,7 +74,7 @@ export default function TableInfoProcesso({ id, item }) {
   const openModal = (item, dados) => dispatch(setModal({ modal: item || '', dados: dados || null }));
 
   return (
-    <Box sx={{ p: 1 }}>
+    <Card sx={{ p: 1 }}>
       <Stack direction="row" spacing={1} alignItems="center" sx={{ pb: 1 }}>
         <Stack sx={{ flexGrow: 1 }}>
           <SearchToolbarSimple filter={filter} setFilter={setFilter} pb={0} />
@@ -123,6 +123,6 @@ export default function TableInfoProcesso({ id, item }) {
       )}
       {isOpenModal && <Enquadramentos id={processo?.id} modal={isOpenModal} openModal={openModal} />}
       {/* {isOpenModal === 'confidencialidade' && <ConfidencialidadesForm processoId={processo.id} />} */}
-    </Box>
+    </Card>
   );
 }

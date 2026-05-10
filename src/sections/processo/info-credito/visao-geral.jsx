@@ -2,6 +2,7 @@ import { useState } from 'react';
 // @mui
 import Chip from '@mui/material/Chip';
 import List from '@mui/material/List';
+import Card from '@mui/material/Card';
 import Stack from '@mui/material/Stack';
 import Paper from '@mui/material/Paper';
 import Typography from '@mui/material/Typography';
@@ -38,64 +39,66 @@ export default function VisaoGeral({ dados, modificar = false }) {
   const situacao = (dados?.situacao_final_mes || 'em análise').toLowerCase();
 
   return (
-    <Stack direction={{ xs: 'column', md: 'row' }} spacing={{ xs: 2, md: 4 }}>
-      <List sx={{ width: 1, p: 0 }}>
-        <TextItem title="Nº de proposta:" text={dados?.numero_proposta || 'Não definido'} />
-        <TextItem title="Componente:" text={dados?.componente || 'Não definido'} />
-        <TextItem title="Linha de crédito:" text={dados?.linha} />
-        <TextItem title="Tipo de titular:" text={dados?.tipo_titular || 'Não definido'} />
-        <TextItem title="Segmento:" text={dados?.segmento} />
-        <TextItem title="Garantia:" text={dados?.garantia} />
-        <TextItem title="Finalidade:" text={dados?.finalidade} />
-        <TextItem title="Ent. patronal/Set. atividade:" text={dados?.setor_atividade} />
-        {dados?.valor_divida && (
-          <Paper sx={{ p: 1, pb: 0.5, mt: 0.5, bgcolor: 'background.neutral', flexGrow: 1 }}>
-            <Label color="info" startIcon={<InfoOutlinedIcon />}>
-              Entidade com crédito em dívida
-            </Label>
-            <TextItem title="Valor:" text={fCurrency(dados?.valor_divida)} sx={itemStyleAlt} />
-            <TextItem title="Data:" text={ptDate(dados?.periodo)} sx={itemStyleAlt} />
-          </Paper>
-        )}
-      </List>
+    <Card sx={{ p: 3 }}>
+      <Stack direction={{ xs: 'column', md: 'row' }} spacing={{ xs: 2, md: 4 }}>
+        <List sx={{ width: 1, p: 0 }}>
+          <TextItem title="Nº de proposta:" text={dados?.numero_proposta || 'Não definido'} />
+          <TextItem title="Componente:" text={dados?.componente || 'Não definido'} />
+          <TextItem title="Linha de crédito:" text={dados?.linha} />
+          <TextItem title="Tipo de titular:" text={dados?.tipo_titular || 'Não definido'} />
+          <TextItem title="Segmento:" text={dados?.segmento} />
+          <TextItem title="Garantia:" text={dados?.garantia} />
+          <TextItem title="Finalidade:" text={dados?.finalidade} />
+          <TextItem title="Ent. patronal/Set. atividade:" text={dados?.setor_atividade} />
+          {dados?.valor_divida && (
+            <Paper sx={{ p: 1, pb: 0.5, mt: 0.5, bgcolor: 'background.neutral', flexGrow: 1 }}>
+              <Label color="info" startIcon={<InfoOutlinedIcon />}>
+                Entidade com crédito em dívida
+              </Label>
+              <TextItem title="Valor:" text={fCurrency(dados?.valor_divida)} sx={itemStyleAlt} />
+              <TextItem title="Data:" text={ptDate(dados?.periodo)} sx={itemStyleAlt} />
+            </Paper>
+          )}
+        </List>
 
-      <List sx={{ width: 1, p: 0 }}>
-        {modificar && (
-          <Stack direction="row" justifyContent="center" alignItems="center" spacing={2} sx={{ mb: 3 }}>
-            <DefaultAction small button icon="editar" label="Situação" onClick={() => setOpen('atualizar')} />
-            {gerencia && (
-              <>
-                {situacao === 'em análise' && (
-                  <DefaultAction small button icon="editar" label="Escalaão" onClick={() => setOpen('escalao')} />
-                )}
-                {situacao === 'aprovado' && <EnviarContratacao dados={dados} />}
-              </>
-            )}
-          </Stack>
-        )}
+        <List sx={{ width: 1, p: 0 }}>
+          {modificar && (
+            <Stack direction="row" justifyContent="center" alignItems="center" spacing={2} sx={{ mb: 3 }}>
+              <DefaultAction small button icon="editar" label="Situação" onClick={() => setOpen('atualizar')} />
+              {gerencia && (
+                <>
+                  {situacao === 'em análise' && (
+                    <DefaultAction small button icon="editar" label="Escalaão" onClick={() => setOpen('escalao')} />
+                  )}
+                  {situacao === 'aprovado' && <EnviarContratacao dados={dados} />}
+                </>
+              )}
+            </Stack>
+          )}
 
-        <TextItem label={<Datas dados={dados} arquivado={dados?.estado?.estado === 'Arquivo'} />} />
+          <TextItem label={<Datas dados={dados} arquivado={dados?.estado?.estado === 'Arquivo'} />} />
 
-        {dados?.enviado_para_contratacao && (
-          <Stack direction="row" justifyContent="center" alignItems="center" spacing={1} sx={{ my: 2 }}>
-            <Chip
-              color="success"
-              variant="outlined"
-              label="Enviado para GAJ-i9"
-              sx={{ typography: 'overline' }}
-              icon={<InfoOutlinedIcon sx={{ width: 22 }} />}
-            />
-          </Stack>
-        )}
+          {dados?.enviado_para_contratacao && (
+            <Stack direction="row" justifyContent="center" alignItems="center" spacing={1} sx={{ my: 2 }}>
+              <Chip
+                color="success"
+                variant="outlined"
+                label="Enviado para GAJ-i9"
+                sx={{ typography: 'overline' }}
+                icon={<InfoOutlinedIcon sx={{ width: 22 }} />}
+              />
+            </Stack>
+          )}
 
-        {situacao === 'em análise' && <Fincc />}
-        {situacao === 'aprovado' && <ModeloCartaProposta />}
-      </List>
+          {situacao === 'em análise' && <Fincc />}
+          {situacao === 'aprovado' && <ModeloCartaProposta />}
+        </List>
 
-      {open === 'eliminar' && <EliminarDadosSituacao dados={dados} onClose={() => setOpen('')} />}
-      {open === 'escalao' && <FormNivelDecisao id={dados?.processoId} onClose={() => setOpen('')} />}
-      {open === 'atualizar' && <FormSituacao dados={dados} onClose={() => setOpen('')} setOpen={setOpen} />}
-    </Stack>
+        {open === 'eliminar' && <EliminarDadosSituacao dados={dados} onClose={() => setOpen('')} />}
+        {open === 'escalao' && <FormNivelDecisao id={dados?.processoId} onClose={() => setOpen('')} />}
+        {open === 'atualizar' && <FormSituacao dados={dados} onClose={() => setOpen('')} setOpen={setOpen} />}
+      </Stack>
+    </Card>
   );
 }
 

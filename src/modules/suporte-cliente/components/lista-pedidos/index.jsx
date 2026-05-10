@@ -23,6 +23,7 @@ import HeaderBreadcrumbs from '@/components/HeaderBreadcrumbs';
 export default function Tickets({ utilizador, department, setDepartment }) {
   const dispatch = useDispatch();
   const { order, page, rowsPerPage, setPage, ...rest } = useTable({
+    defaultOrder: 'asc',
     defaultRowsPerPage: 10,
     defaultOrderBy: 'created_at',
   });

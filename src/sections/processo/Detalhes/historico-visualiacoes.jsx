@@ -1,5 +1,6 @@
 import { useState, useEffect, useMemo } from 'react';
 // @mui
+import Card from '@mui/material/Card';
 import Stack from '@mui/material/Stack';
 import Accordion from '@mui/material/Accordion';
 import Typography from '@mui/material/Typography';
@@ -36,48 +37,50 @@ export default function Views() {
   }, [dispatch, processo?.id]);
 
   return (
-    <Stack spacing={{ xs: 1, sm: 2 }} sx={{ p: { xs: 1, sm: 2 } }}>
-      {isLoading ? (
-        <SkeletonBar column={5} height={75} />
-      ) : (
-        <>
-          {viewsGroupByColaborador?.length === 0 ? (
-            <SearchNotFound message="Sem histórico de visualização disponível..." />
-          ) : (
-            viewsGroupByColaborador?.map(({ perfilId, views }, index) => {
-              const colaborador = colaboradores?.find(({ perfil_id: pid }) => pid === perfilId);
-              return (
-                <Accordion expanded={accord === perfilId} onChange={handleAccord(perfilId)} key={`vw_${index}`}>
-                  <AccordionSummary>
-                    <Stack direction="row" alignItems="center" sx={{ flexGrow: 1 }} justifyContent="space-between">
-                      <ColaboradorInfo
-                        label={colaborador?.uo_label}
-                        foto={colaborador?.foto_anexo}
-                        presence={colaborador?.presence}
-                        nome={colaborador?.nome || `Perfil: ${perfilId}`}
-                      />
-                      <Stack direction="row" alignItems="end" sx={{ pr: 2 }} spacing={0.5}>
-                        <Typography variant="subtitle1">{views?.length}</Typography>
-                        <Typography variant="body2">visualizaç{views?.length > 1 ? 'ões' : 'ão'}</Typography>
+    <Card>
+      <Stack spacing={{ xs: 1, sm: 2 }} sx={{ p: { xs: 1, sm: 2 } }}>
+        {isLoading ? (
+          <SkeletonBar column={5} height={75} />
+        ) : (
+          <>
+            {viewsGroupByColaborador?.length === 0 ? (
+              <SearchNotFound message="Sem histórico de visualização disponível..." />
+            ) : (
+              viewsGroupByColaborador?.map(({ perfilId, views }, index) => {
+                const colaborador = colaboradores?.find(({ perfil_id: pid }) => pid === perfilId);
+                return (
+                  <Accordion expanded={accord === perfilId} onChange={handleAccord(perfilId)} key={`vw_${index}`}>
+                    <AccordionSummary>
+                      <Stack direction="row" alignItems="center" sx={{ flexGrow: 1 }} justifyContent="space-between">
+                        <ColaboradorInfo
+                          label={colaborador?.uo_label}
+                          foto={colaborador?.foto_anexo}
+                          presence={colaborador?.presence}
+                          nome={colaborador?.nome || `Perfil: ${perfilId}`}
+                        />
+                        <Stack direction="row" alignItems="end" sx={{ pr: 2 }} spacing={0.5}>
+                          <Typography variant="subtitle1">{views?.length}</Typography>
+                          <Typography variant="body2">visualizaç{views?.length > 1 ? 'ões' : 'ão'}</Typography>
+                        </Stack>
                       </Stack>
-                    </Stack>
-                  </AccordionSummary>
-                  <AccordionDetails>
-                    <Stack useFlexGap flexWrap="wrap" direction="row" spacing={2} sx={{ pt: 1 }}>
-                      {views?.map(({ visto_em: visto, data_leitura: leitura }, index) => (
-                        <Label key={`view_${visto || leitura}_${index}`} sx={{ flexGrow: 1 }}>
-                          {ptDateTime(visto || leitura)}
-                        </Label>
-                      ))}
-                    </Stack>
-                  </AccordionDetails>
-                </Accordion>
-              );
-            })
-          )}
-        </>
-      )}
-    </Stack>
+                    </AccordionSummary>
+                    <AccordionDetails>
+                      <Stack useFlexGap flexWrap="wrap" direction="row" spacing={2} sx={{ pt: 1 }}>
+                        {views?.map(({ visto_em: visto, data_leitura: leitura }, index) => (
+                          <Label key={`view_${visto || leitura}_${index}`} sx={{ flexGrow: 1 }}>
+                            {ptDateTime(visto || leitura)}
+                          </Label>
+                        ))}
+                      </Stack>
+                    </AccordionDetails>
+                  </Accordion>
+                );
+              })
+            )}
+          </>
+        )}
+      </Stack>
+    </Card>
   );
 }
 

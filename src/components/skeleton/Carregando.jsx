@@ -110,7 +110,7 @@ export function SkeletonEntidade() {
 
 export function SkeletonProcesso() {
   return (
-    <Grid container spacing={5} sx={{ pt: 2 }}>
+    <Grid container spacing={5}>
       <GridItem md={5}>
         <Skeleton variant="text" sx={{ width: 0.5, height: 50 }} />
         <Skeleton variant="text" sx={{ width: 0.75, height: 50 }} />

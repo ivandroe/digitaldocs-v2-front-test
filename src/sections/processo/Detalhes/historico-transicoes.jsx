@@ -1,5 +1,6 @@
 import { add } from 'date-fns';
 // @mui
+import Card from '@mui/material/Card';
 import Stack from '@mui/material/Stack';
 import Paper from '@mui/material/Paper';
 import Typography from '@mui/material/Typography';
@@ -20,18 +21,20 @@ export default function Transicoes({ transicoes, assunto }) {
   const { colaboradores, uos } = useSelector((state) => state.intranet);
 
   return (
-    <Timeline position="right" sx={{ px: { xs: 1, sm: 2 }, pb: 2 }}>
-      {transicoes?.map((row, index) => (
-        <Transicao
-          uos={uos}
-          transicao={row}
-          assunto={assunto}
-          key={`transicao_${index}`}
-          colaboradores={colaboradores}
-          addConector={index !== transicoes?.length - 1}
-        />
-      ))}
-    </Timeline>
+    <Card>
+      <Timeline position="right" sx={{ px: { xs: 1, sm: 2 }, pb: 2 }}>
+        {transicoes?.map((row, index) => (
+          <Transicao
+            uos={uos}
+            transicao={row}
+            assunto={assunto}
+            key={`transicao_${index}`}
+            colaboradores={colaboradores}
+            addConector={index !== transicoes?.length - 1}
+          />
+        ))}
+      </Timeline>
+    </Card>
   );
 }
 

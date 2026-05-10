@@ -68,7 +68,7 @@ export function CardBox({ title = '', solid = false, children, sx }) {
           <Divider sx={{ pt: 0.5 }} />
         </Box>
       )}
-      <Stack spacing={1} divider={<Divider sx={{ borderStyle: solid ? 'solid' : 'dotted', pt: solid ? 1 : 0 }} />}>
+      <Stack spacing={0.75} divider={<Divider sx={{ borderStyle: solid ? 'solid' : 'dotted', pt: solid ? 1 : 0 }} />}>
         {children}
       </Stack>
     </Card>

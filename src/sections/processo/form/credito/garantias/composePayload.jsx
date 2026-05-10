@@ -15,10 +15,12 @@ const metaBuilders = {
   seguros: (form) => ({ seguros: (form?.seguros ?? []).map(mapSeguro) }),
   contas: (form) => ({ contas: (form?.contas ?? []).map(mapContas) }),
   titulos: (form) => ({ titulos: (form?.titulos ?? []).map(mapTitulo) }),
-  predios: (form) => ({ imoveis: { predios: (form?.predios ?? []).map(mapPredio) } }),
-  terrenos: (form) => ({ imoveis: { terrenos: (form?.terrenos ?? []).map(mapTerreno) } }),
   veiculos: (form) => ({ imoveis: { veiculos: (form?.veiculos ?? []).map(mapVeiculo) } }),
-  apartamentos: (form) => ({ imoveis: { apartamentos: (form?.apartamentos ?? []).map(mapApartamento) } }),
+  predios: (form) => ({ imoveis: { predios: (form?.predios ?? []).map((p) => mapImovel('predio', p)) } }),
+  terrenos: (form) => ({ imoveis: { terrenos: (form?.terrenos ?? []).map((t) => mapImovel('terreno', t)) } }),
+  apartamentos: (form) => ({
+    imoveis: { apartamentos: (form?.apartamentos ?? []).map((a) => mapImovel('apartamento', a)) },
+  }),
 };
 
 // Mapeadores principais -----------------------------------------------------------------------------------------------
@@ -69,51 +71,32 @@ function mapVeiculo(veiculo) {
 
 // Imóveis -------------------------------------------------------------------------------------------------------------
 
-function mapPredio(predio) {
-  return {
-    nip: predio?.nip ?? '',
-    tipo_matriz: predio?.tipo_matriz ?? '',
-    valor_pvt: String(predio?.valor_pvt ?? ''),
-    numero_matriz: predio?.numero_matriz ?? '',
-    numero_descricao_predial: predio?.numero_descricao_predial ?? '',
-    localizacao_conservatoria: predio?.localizacao_conservatoria ?? '',
-    percentagem_cobertura: String(predio?.percentagem_cobertura ?? ''),
-    morada: mapMorada(predio),
-    donos: (predio?.donos ?? []).map(mapDono),
-    seguros: (predio?.seguros ?? []).map(mapSeguro),
-  };
-}
+// Campos específicos por tipo de imóvel
+const IMOVEL_EXTRA_FIELDS = {
+  apartamento: (src) => ({
+    numero_andar: src?.numero_andar ?? '',
+    identificacao_fracao: src?.identificacao_fracao ?? '',
+  }),
+  terreno: (src) => ({ area: src?.area ?? '' }),
+  predio: () => ({}),
+};
 
-function mapApartamento(ap) {
-  return {
-    nip: ap?.nip ?? '',
-    tipo_matriz: ap?.tipo_matriz ?? '',
-    numero_andar: ap?.numero_andar ?? '',
-    valor_pvt: String(ap?.valor_pvt ?? ''),
-    numero_matriz: ap?.numero_matriz ?? '',
-    identificacao_fracao: ap?.identificacao_fracao ?? '',
-    numero_descricao_predial: ap?.numero_descricao_predial ?? '',
-    localizacao_conservatoria: ap?.localizacao_conservatoria ?? '',
-    percentagem_cobertura: String(ap?.percentagem_cobertura ?? ''),
-    morada: mapMorada(ap),
-    seguros: (ap?.seguros ?? []).map(mapSeguro),
-    donos: (ap?.donos ?? []).map(mapDono),
-  };
-}
+function mapImovel(tipo, src) {
+  const extraFields = IMOVEL_EXTRA_FIELDS[tipo];
 
-function mapTerreno(terreno) {
   return {
-    nip: terreno?.nip ?? '',
-    area: terreno?.area ?? '',
-    tipo_matriz: terreno?.tipo_matriz ?? '',
-    numero_matriz: terreno?.numero_matriz ?? '',
-    valor_pvt: String(terreno?.valor_pvt ?? ''),
-    numero_descricao_predial: terreno?.numero_descricao_predial ?? '',
-    localizacao_conservatoria: terreno?.localizacao_conservatoria ?? '',
-    percentagem_cobertura: String(terreno?.percentagem_cobertura ?? ''),
-    morada: mapMorada(terreno),
-    donos: (terreno?.donos ?? []).map(mapDono),
-    seguros: (terreno?.seguros ?? []).map(mapSeguro),
+    nip: src?.nip ?? '',
+    tipo_matriz: src?.tipo_matriz ?? '',
+    valor_pvt: String(src?.valor_pvt ?? ''),
+    numero_matriz: src?.numero_matriz ?? '',
+    numero_descricao_predial: src?.numero_descricao_predial ?? '',
+    numero_inscricao_hipoteca: src?.numero_inscricao_hipoteca ?? '',
+    localizacao_conservatoria: src?.localizacao_conservatoria ?? '',
+    percentagem_cobertura: String(src?.percentagem_cobertura ?? ''),
+    morada: mapMorada(src),
+    donos: (src?.donos ?? []).map(mapDono),
+    seguros: (src?.seguros ?? []).map(mapSeguro),
+    ...extraFields(src),
   };
 }
 

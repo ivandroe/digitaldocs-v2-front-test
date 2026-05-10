@@ -1,13 +1,12 @@
 import { useMemo, useCallback } from 'react';
 import { useParams, useSearchParams, useNavigate } from 'react-router-dom';
 // @mui
-import Box from '@mui/material/Box';
-import Card from '@mui/material/Card';
 import Stack from '@mui/material/Stack';
 import Container from '@mui/material/Container';
 // utils
 import { PATH_DIGITALDOCS } from '@/routes/paths';
 import { getProximoAnterior } from '@/utils/formatObject';
+import useMenuProcesso from '@/sections/processo/Detalhes/menu';
 import { pertencoEstadoId, gestorEstado, findColaboradores } from '@/utils/validarAcesso';
 // redux
 import { useAcesso } from '@/hooks/useAcesso';
@@ -20,8 +19,8 @@ import { useTabsSync } from '@/hooks/minimal-hooks/use-tabs-sync';
 import { useProcesso, useIdentificacao } from '@/hooks/useProcesso';
 // components
 import Page from '@/components/Page';
-import { TabCard } from '@/components/TabsWrapper';
 import { DefaultAction, Voltar } from '@/components/Actions';
+import { TabsWrapperSimple } from '@/components/TabsWrapper';
 import HeaderBreadcrumbs from '@/components/HeaderBreadcrumbs';
 import DialogPreviewDoc, { DialogConfirmar } from '@/components/CustomDialog';
 // sections
@@ -42,8 +41,6 @@ import ProcessoForm from '@/sections/processo/form/form-processo';
 import Intervencao from '@/sections/processo/intervencao-em-serie';
 import { DesarquivarForm } from '@/sections/processo/form/form-arquivo';
 import PareceresComites from '@/sections/processo/info-credito/dialog-pareceres';
-//
-import useMenuProcesso from '@/sections/processo/Detalhes/menu';
 
 // ---------------------------------------------------------------------------------------------------------------------
 
@@ -220,10 +217,8 @@ export default function PageProcesso() {
             </Stack>
           }
         />
-        <Card>
-          <TabCard tabs={tabsList} tab={tab} setTab={setTab} />
-          <Box>{tabsList?.find(({ value }) => value === tab)?.component}</Box>
-        </Card>
+        <TabsWrapperSimple sx={{ mb: 2 }} tabsList={tabsList} tab={tab} setTab={setTab} />
+        {tabsList?.find(({ value }) => value === tab)?.component}
 
         {(proxAnt?.anterior || proxAnt?.proximo) && (
           <Stack direction="row" spacing={3} justifyContent="space-between" sx={{ mt: 3 }}>

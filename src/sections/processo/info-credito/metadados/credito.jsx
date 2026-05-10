@@ -3,10 +3,7 @@ import Box from '@mui/material/Box';
 import Grid from '@mui/material/Grid';
 import Card from '@mui/material/Card';
 import Stack from '@mui/material/Stack';
-import Divider from '@mui/material/Divider';
-import CardHeader from '@mui/material/CardHeader';
 import Typography from '@mui/material/Typography';
-import CardContent from '@mui/material/CardContent';
 import { alpha, useTheme } from '@mui/material/styles';
 // utils
 import { dispatch, useSelector } from '@/redux/store';
@@ -18,6 +15,7 @@ import GridItem from '@/components/GridItem';
 import { noDados } from '@/components/Panel';
 import { DefaultAction } from '@/components/Actions';
 import { SearchNotFoundSmall } from '@/components/table/SearchNotFound';
+import { CardBox } from '@/modules/gaji9/components/detalhes-credito/shared';
 import MetadadosCreditoForm from '../../form/credito/form-metadados-credito';
 
 // ---------------------------------------------------------------------------------------------------------------------
@@ -33,10 +31,10 @@ export default function MetadadosCredito({ dados, outros, modificar = false, ids
   };
 
   return (
-    <Box sx={{ p: dados ? 1 : 0 }}>
+    <Box>
       {dados ? (
         <>
-          <Grid container spacing={2} sx={{ mb: 3 }}>
+          <Grid container spacing={2} sx={{ mb: 2 }}>
             {financeiroPrincipal.map((item) => (
               <GridItem xs={6} md={3} key={item.label}>
                 <Card
@@ -59,29 +57,26 @@ export default function MetadadosCredito({ dados, outros, modificar = false, ids
           </Grid>
 
           <Box
-            gap={3}
+            gap={2}
             display="grid"
             alignItems="center"
-            gridTemplateColumns={{ xs: '1fr', sm: 'repeat(2, 1fr)', lg: `repeat(3, 1fr)`, xl: `repeat(3, 1fr)` }}
+            gridTemplateColumns={{ xs: '1fr', sm: 'repeat(2, 1fr)', lg: 'repeat(3, 1fr)', xl: 'repeat(3, 1fr)' }}
           >
             {cards.map((card, index) => (
-              <Card key={index} sx={{ height: '100%', boxShadow: theme.customShadows.cardAlt, borderRadius: 0 }}>
-                <CardHeader
-                  title={card.titulo}
-                  titleTypographyProps={{
-                    variant: 'subtitle2',
-                    sx: { color: 'primary.main', textTransform: 'uppercase' },
-                  }}
-                  sx={{ py: 1.25, px: 2, bgcolor: 'background.neutral' }}
-                />
-                <CardContent sx={{ p: 2, paddingBottom: '12px !important' }}>
-                  <Stack spacing={0.5} divider={<Divider sx={{ borderStyle: 'dashed' }} />}>
-                    {card.dados.map((item, idx) => (
+              <CardBox key={card.id ?? index} title={card.titulo}>
+                {card.dados.map(
+                  (item, idx) =>
+                    (item?.empty && noDados(item?.label)) ||
+                    (item.isHeader && (
+                      <Typography key={idx} variant="caption" sx={{ color: 'primary.main', fontWeight: 700 }}>
+                        {item.title}
+                      </Typography>
+                    )) || (
                       <Box
                         key={idx}
                         sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 1 }}
                       >
-                        <Typography variant="caption" sx={{ color: 'text.secondary', fontWeight: 'medium' }}>
+                        <Typography variant="caption" sx={{ color: 'text.secondary' }}>
                           {item.title}:
                         </Typography>
                         <Box sx={{ textAlign: 'right' }}>
@@ -94,10 +89,9 @@ export default function MetadadosCredito({ dados, outros, modificar = false, ids
                           </Typography>
                         </Box>
                       </Box>
-                    ))}
-                  </Stack>
-                </CardContent>
-              </Card>
+                    )
+                )}
+              </CardBox>
             ))}
           </Box>
         </>

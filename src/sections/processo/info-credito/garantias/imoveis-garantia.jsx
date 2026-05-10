@@ -88,12 +88,12 @@ function renderColumns(item, row) {
       details: [
         ['Área', row?.area],
         ['Tipo de matriz', row?.tipo_matriz],
-        ['Nº de matriz', row?.numero_matriz],
+        ['Nº inscrição da hipotéca', row?.numero_inscricao_hipoteca],
+        ['Nº de matriz', row?.numero_matriz || undefined],
         ['Nº de descrição predial', row?.numero_descricao_predial || undefined],
         ['NIP', row?.nip || undefined],
         ['Nº de andar', row?.numero_andar],
         ['Identificação fração', row?.identificacao_fracao],
-        ['Conservatória', row?.localizacao_conservatoria],
       ],
       address: [
         ['Ilha', row?.morada?.ilha],
@@ -103,6 +103,7 @@ function renderColumns(item, row) {
         ['Rua', row?.morada?.rua || undefined],
         ['Nº de porta', row?.morada?.numero_porta || undefined],
         ['Descritivo', row?.morada?.descritivo || undefined],
+        ['Conservatória', row?.localizacao_conservatoria],
       ],
     },
     titulos: {

@@ -21,7 +21,9 @@ import { TableSearchNotFound } from '@/components/table/SearchNotFound';
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-export function Asuntos({ dados }) {
+export function Asuntos({ dados, total }) {
+  const resolvedTotal = total ?? dados.reduce((acc, row) => acc + row.count, 0);
+
   return (
     <TableDashboard
       title="Tickets por assunto"
@@ -35,8 +37,22 @@ export function Asuntos({ dados }) {
       body={dados.map((row) => (
         <TableRow key={row.subject} hover>
           <TableCell>{row.subject}</TableCell>
-          <TableCell align="center">{row.count}</TableCell>
-          <TableCell align="center">{row.resolved}</TableCell>
+          <TableCell align="center">
+            <Typography variant="body2">
+              {row.count}{' '}
+              <Typography component="span" variant="caption" color="text.secondary">
+                ({resolvedTotal > 0 ? fPercent((row.count / resolvedTotal) * 100, 2) : '—'})
+              </Typography>
+            </Typography>
+          </TableCell>
+          <TableCell align="center">
+            <Typography variant="body2">
+              {row.resolved}{' '}
+              <Typography component="span" variant="caption" color="text.secondary">
+                ({row.count > 0 ? fPercent((row.resolved / row.count) * 100, 2) : '—'})
+              </Typography>
+            </Typography>
+          </TableCell>
           <TableCell align="center">{toHourLabel(row.avg_response_time)}</TableCell>
           <Avaliacao rating={row.rating} />
         </TableRow>
@@ -139,7 +155,7 @@ export function Avaliacao({ rating, hideLabel = false, extra = null }) {
           <Rating readOnly size="small" precision={0.1} value={rating} sx={{ color: 'success.main' }} />
           {!hideLabel && (
             <Typography variant="caption" sx={{ fontWeight: 'bold', color: getColorRating(rating) }}>
-              ({rating})
+              ({fNumber(rating, 1)})
             </Typography>
           )}
         </Stack>

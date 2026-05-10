@@ -1,5 +1,6 @@
 import { useEffect, useState, useMemo } from 'react';
 // @mui
+import Card from '@mui/material/Card';
 import Stack from '@mui/material/Stack';
 import Accordion from '@mui/material/Accordion';
 import Typography from '@mui/material/Typography';
@@ -39,50 +40,52 @@ export default function Versoes({ id }) {
   const handleAccord = (panel) => (event, isExpanded) => setManualAccord(isExpanded ? panel : '');
 
   return (
-    <Stack spacing={{ xs: 1, sm: 2 }} sx={{ p: { xs: 1, sm: 2 } }}>
-      {isLoading ? (
-        <SkeletonBar column={3} height={150} />
-      ) : (
-        <>
-          {versoesOrdenadas.length === 0 ? (
-            <SearchNotFound message="O processo ainda não foi modificado..." />
-          ) : (
-            versoesOrdenadas.map((row, index) => {
-              const colaborador = colaboradores?.find(
-                ({ email }) => email?.toLowerCase() === row?.feito_por?.toLowerCase()
-              );
+    <Card>
+      <Stack spacing={{ xs: 1, sm: 2 }} sx={{ p: { xs: 1, sm: 2 } }}>
+        {isLoading ? (
+          <SkeletonBar column={3} height={150} />
+        ) : (
+          <>
+            {versoesOrdenadas.length === 0 ? (
+              <SearchNotFound message="O processo ainda não foi modificado..." />
+            ) : (
+              versoesOrdenadas.map((row, index) => {
+                const colaborador = colaboradores?.find(
+                  ({ email }) => email?.toLowerCase() === row?.feito_por?.toLowerCase()
+                );
 
-              return (
-                <Accordion
-                  key={`vr_${index}`}
-                  expanded={activeAccord === row?.feito_em}
-                  onChange={handleAccord(row?.feito_em)}
-                >
-                  <AccordionSummary>
-                    <Stack spacing={1} direction="row" sx={{ flexGrow: 1, pr: 2 }} justifyContent="space-between">
-                      <Stack>
-                        <Typography variant="body2" sx={{ color: 'text.secondary' }}>
-                          Alterado em:
-                        </Typography>
-                        <Typography variant="subtitle2">{ptDateTime(row?.feito_em)}</Typography>
+                return (
+                  <Accordion
+                    key={`vr_${index}`}
+                    expanded={activeAccord === row?.feito_em}
+                    onChange={handleAccord(row?.feito_em)}
+                  >
+                    <AccordionSummary>
+                      <Stack spacing={1} direction="row" sx={{ flexGrow: 1, pr: 2 }} justifyContent="space-between">
+                        <Stack>
+                          <Typography variant="body2" sx={{ color: 'text.secondary' }}>
+                            Alterado em:
+                          </Typography>
+                          <Typography variant="subtitle2">{ptDateTime(row?.feito_em)}</Typography>
+                        </Stack>
+                        <ColaboradorInfo
+                          label={colaborador?.uo_label}
+                          foto={colaborador?.foto_anexo}
+                          presence={colaborador?.presence}
+                          nome={colaborador?.nome || row.feito_por}
+                        />
                       </Stack>
-                      <ColaboradorInfo
-                        label={colaborador?.uo_label}
-                        foto={colaborador?.foto_anexo}
-                        presence={colaborador?.presence}
-                        nome={colaborador?.nome || row.feito_por}
-                      />
-                    </Stack>
-                  </AccordionSummary>
-                  <AccordionDetails>
-                    <DetalhesProcesso processo={row} versoes />
-                  </AccordionDetails>
-                </Accordion>
-              );
-            })
-          )}
-        </>
-      )}
-    </Stack>
+                    </AccordionSummary>
+                    <AccordionDetails>
+                      <DetalhesProcesso processo={row} versoes />
+                    </AccordionDetails>
+                  </Accordion>
+                );
+              })
+            )}
+          </>
+        )}
+      </Stack>
+    </Card>
   );
 }

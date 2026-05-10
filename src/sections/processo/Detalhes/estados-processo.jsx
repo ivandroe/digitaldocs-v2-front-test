@@ -1,6 +1,7 @@
 import { useState } from 'react';
 // @mui
 import Box from '@mui/material/Box';
+import Card from '@mui/material/Card';
 import Stack from '@mui/material/Stack';
 import Divider from '@mui/material/Divider';
 import Accordion from '@mui/material/Accordion';
@@ -35,7 +36,7 @@ export default function Estados({ handleAceitar }) {
   const handleAccord = (panel) => (event, isExpanded) => setAccord(isExpanded ? panel : false);
 
   return (
-    <Box sx={{ pb: { xs: 1, sm: 2 } }}>
+    <Card sx={{ pb: { xs: 1, sm: 2 } }}>
       {estados?.map((row) => {
         const {
           id,
@@ -164,7 +165,7 @@ export default function Estados({ handleAceitar }) {
           </Stack>
         );
       })}
-    </Box>
+    </Card>
   );
 }
 

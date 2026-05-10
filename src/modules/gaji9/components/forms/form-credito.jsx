@@ -51,7 +51,6 @@ export default function CreditoForm({ onClose }) {
           conta_do_renda: Yup.number().min(0).required().label('Conta DO débito'),
           valor_juro: Yup.number().min(0).required().label('Valor total de juros'),
           taxa_imposto_selo: Yup.number().min(0).required().label('Taxa imposto de selo'),
-          prazo_contratual: Yup.number().positive(0).required().label('Prazo contratual'),
           valor_comissao: Yup.number().min(0).required().label('Valor total de comissões'),
           taxa_juro_precario: Yup.number().min(0).required().label('Taxa de juros preçário'),
           valor_imposto_selo: Yup.number().min(0).required().label('Valor total de imposto selo'),
@@ -140,9 +139,6 @@ export default function CreditoForm({ onClose }) {
                 <RHFNumberField label="Meses de vencimento" name="meses_vencimento" tipo="meses" />
               </GridItem>
               <GridItem xs={6} md={4} children={<RHFNumberField label="TAEG" name="taxa_taeg" tipo="%" />} />
-              <GridItem xs={6} md={4}>
-                <RHFNumberField label="Prazo contratual" name="prazo_contratual" tipo="meses" />
-              </GridItem>
               <GridItem xs={6} md={4} children={<RHFSwitch name="isento_comissao" label="Isento de comissão" mt />} />
               <GridItem xs={6} md={3}>
                 <RHFNumberField label="Taxa de juros preçário" name="taxa_juro_precario" tipo="%" />

@@ -1,6 +1,7 @@
 import { useMemo } from 'react';
 // @mui
 import Grid from '@mui/material/Grid';
+import Card from '@mui/material/Card';
 import Stack from '@mui/material/Stack';
 // utils
 import { useSelector } from '@/redux/store';
@@ -25,31 +26,27 @@ export default function DadosGerais({ processo }) {
     [processo?.fluxo]
   );
 
+  if (isLoadingP) return <Card sx={{ p: 3 }} children={<SkeletonProcesso />} />;
+
   return (
-    <Stack sx={{ p: { xs: 1, sm: 3 }, mt: { xs: 0, sm: -2 } }}>
-      {isLoadingP ? (
-        <SkeletonProcesso />
-      ) : (
-        <>
-          {processo ? (
-            <Grid container spacing={3}>
-              <GridItem lg={anexosAtivos?.length ? 5 : 12}>
-                <Stack id="detalhes">
-                  {!isPS && processo?.nota && <NotaProcesso nota={processo?.nota} segmento={processo?.segmento} />}
-                  <DetalhesProcesso isPS={isPS} processo={processo} />
-                </Stack>
-              </GridItem>
-              {!!anexosAtivos?.length && (
-                <GridItem lg={7}>
-                  <Anexos anexos={applySort(anexosAtivos, getComparator('asc', 'id'))} />
-                </GridItem>
-              )}
-            </Grid>
-          ) : (
-            <SearchNotFound404 message="Processo não encontrado ou não tens acesso..." noShadow />
+    <Card sx={{ p: { xs: 1, sm: 3 }, pt: { xs: 1, sm: 1.5 } }}>
+      {processo ? (
+        <Grid container spacing={3}>
+          <GridItem lg={anexosAtivos?.length ? 5 : 12}>
+            <Stack id="detalhes">
+              {!isPS && processo?.nota && <NotaProcesso nota={processo?.nota} segmento={processo?.segmento} />}
+              <DetalhesProcesso isPS={isPS} processo={processo} />
+            </Stack>
+          </GridItem>
+          {!!anexosAtivos?.length && (
+            <GridItem lg={7}>
+              <Anexos anexos={applySort(anexosAtivos, getComparator('asc', 'id'))} />
+            </GridItem>
           )}
-        </>
+        </Grid>
+      ) : (
+        <SearchNotFound404 message="Processo não encontrado ou não tens acesso..." noShadow />
       )}
-    </Stack>
+    </Card>
   );
 }

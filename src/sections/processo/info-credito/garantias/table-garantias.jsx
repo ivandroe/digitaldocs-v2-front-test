@@ -1,7 +1,8 @@
 import { useState } from 'react';
 // @mui
-import Table from '@mui/material/Table';
+import Card from '@mui/material/Card';
 import Stack from '@mui/material/Stack';
+import Table from '@mui/material/Table';
 import TableRow from '@mui/material/TableRow';
 import TableCell from '@mui/material/TableCell';
 import TableBody from '@mui/material/TableBody';
@@ -35,7 +36,7 @@ export default function TableGarantias({ dados, outros = {} }) {
   };
 
   return (
-    <>
+    <Card sx={{ p: 1 }}>
       <Table>
         <TableHead>
           <TableRow sx={{ '& .MuiTableCell-root': modificar ? { py: 1 } : null }}>
@@ -93,6 +94,6 @@ export default function TableGarantias({ dados, outros = {} }) {
       {(item?.modal === 'add' || item?.modal === 'update') && (
         <FormGarantias processoId={processoId} dados={item} onClose={() => setItem(null)} />
       )}
-    </>
+    </Card>
   );
 }

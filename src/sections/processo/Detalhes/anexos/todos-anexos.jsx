@@ -1,8 +1,8 @@
 import { useMemo } from 'react';
 // @mui
+import Card from '@mui/material/Card';
 import Stack from '@mui/material/Stack';
 import Divider from '@mui/material/Divider';
-import CardContent from '@mui/material/CardContent';
 import Typography from '@mui/material/Typography';
 // utils
 import { idCheck } from '@/utils/formatObject';
@@ -45,7 +45,7 @@ export default function TodosAnexos() {
     );
 
   return (
-    <CardContent>
+    <Card sx={{ p: { xs: 1, sm: 3 }, pt: { xs: 1, sm: 2 } }}>
       <Stack spacing={3}>
         {anexosList?.length || anexosEntidades?.length ? (
           <>
@@ -59,7 +59,7 @@ export default function TodosAnexos() {
           <SearchNotFound message="Nenhum anexo encontrado..." />
         )}
       </Stack>
-    </CardContent>
+    </Card>
   );
 }
 

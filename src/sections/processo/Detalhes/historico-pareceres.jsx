@@ -1,6 +1,7 @@
 import { useState } from 'react';
 // @mui
 import Box from '@mui/material/Box';
+import Card from '@mui/material/Card';
 import Stack from '@mui/material/Stack';
 import Accordion from '@mui/material/Accordion';
 import Typography from '@mui/material/Typography';
@@ -26,7 +27,7 @@ export default function Pareceres({ pareceres, estado, estadoId, assunto }) {
   const handleAccord = (panel) => (event, isExpanded) => setAccord(isExpanded ? panel : false);
 
   return (
-    <Box sx={{ pb: 3 }}>
+    <Card sx={{ pb: 3 }}>
       {pareceres?.map((row) => (
         <Parecer
           accord={accord}
@@ -38,7 +39,7 @@ export default function Pareceres({ pareceres, estado, estadoId, assunto }) {
           handleEditar={(item) => dispatch(setModal({ modal: 'parecer-individual', dados: item }))}
         />
       ))}
-    </Box>
+    </Card>
   );
 }
 
@@ -115,7 +116,7 @@ export function PareceresEstado({ pareceres, assunto }) {
   const handleAccord = (panel) => (event, isExpanded) => setAccord(isExpanded ? panel : false);
 
   return (
-    <Box sx={{ pb: 3 }}>
+    <Card sx={{ pb: 3 }}>
       {pareceres?.map((row) => {
         const { id, nome, estado_id: estadoId, estado, perfil_id: perfilId, parecer_obs: obs = '', parecer = '' } = row;
         const criador = colaboradores?.find(({ perfil_id: pid }) => pid === perfilId);
@@ -160,6 +161,6 @@ export function PareceresEstado({ pareceres, assunto }) {
           </Stack>
         );
       })}
-    </Box>
+    </Card>
   );
 }

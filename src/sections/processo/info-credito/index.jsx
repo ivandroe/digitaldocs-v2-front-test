@@ -40,7 +40,11 @@ export default function InfoCredito({ dados }) {
         <MetadadosCredito
           modificar={modificar}
           dados={dados?.gaji9_metadados}
-          outros={{ prazo: dados?.prazo_amortizacao || '', taxa_juro: dados?.taxa_juro || '' }}
+          outros={{
+            taxa_juro: dados?.taxa_juro || '',
+            prazo: dados?.prazo_amortizacao || '',
+            entidades: dados?.entidade?.split(';') || [],
+          }}
           ids={{
             creditoId: dados?.id,
             linhaId: dados?.linha_id,
@@ -66,9 +70,9 @@ export default function InfoCredito({ dados }) {
   const [tab, setTab] = useTabsSync(tabsList, 'Visão geral', '');
 
   return (
-    <Stack sx={{ p: { xs: 1, sm: 3 } }}>
+    <Stack spacing={2}>
       <Kpis credito={dados} />
-      <TabsWrapperSimple sx={{ mb: 3 }} tabsList={tabsList} tab={tab} setTab={setTab} />
+      <TabsWrapperSimple sx={{ boxShadow: 'none' }} tabsList={tabsList} tab={tab} setTab={setTab} />
       <Box>{tabsList?.find(({ value }) => value === tab)?.component}</Box>
     </Stack>
   );

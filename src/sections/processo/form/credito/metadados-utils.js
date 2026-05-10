@@ -2,7 +2,7 @@ import * as Yup from 'yup';
 // utils
 import { fillData, formatDate } from '@/utils/formatTime';
 // form
-import { shapeText } from '@/components/hook-form/yup-shape';
+import { shapeText, shapeNumber, shapeMixed } from '@/components/hook-form/yup-shape';
 
 // ── Helpers base -----------------------------------------------------------------------------------------------------
 
@@ -53,6 +53,23 @@ export function getDefaultsCondicoes({ dadosStepper, dados, precario }) {
   };
 }
 
+export function getDefaultsComissoes({ dadosStepper, dados, precario }) {
+  const resolveBool = (key) => resolveField(key, { dadosStepper, dados, precario, fallback: false });
+
+  return {
+    comissao_avaliacao: resolveBool('comissao_avaliacao'),
+    comissao_avaliacao_valor: dadosStepper?.comissao_avaliacao_valor || dados?.comissao_avaliacao?.valor || '',
+    comissao_avaliacao_prazo: dadosStepper?.comissao_avaliacao_prazo || dados?.comissao_avaliacao?.prazo || '',
+    comissao_avaliacao_periodicidade:
+      dadosStepper?.comissao_avaliacao_periodicidade || dados?.comissao_avaliacao?.periodicidade || '',
+    comissao_vistoria: resolveBool('comissao_vistoria'),
+    comissao_vistoria_valor: dadosStepper?.comissao_vistoria_valor || dados?.comissao_vistoria?.valor || '',
+    comissao_vistoria_prazo: dadosStepper?.comissao_vistoria_prazo || dados?.comissao_vistoria?.prazo || '',
+    comissao_vistoria_periodicidade:
+      dadosStepper?.comissao_vistoria_periodicidade || dados?.comissao_vistoria?.periodicidade || '',
+  };
+}
+
 export function getDefaultsTaxas({ dadosStepper, dados, precario }) {
   const resolve = (key, fallback = '') => resolveField(key, { dadosStepper, dados, precario, fallback });
 
@@ -97,6 +114,7 @@ export function getDefaultsObjeto({ dadosStepper, dados, imoveisList }) {
 
 export function getDefaultsEntidade({ dadosStepper, dados }) {
   return {
+    entidades_patronais: dadosStepper?.entidades_patronais || dados?.entidades_patronais || [],
     nome_empresa_fornecedora: dadosStepper?.nome_empresa_fornecedora || dados?.nome_empresa_fornecedora || '',
     nib_vendedor_ou_fornecedor: dadosStepper?.nib_vendedor_ou_fornecedor || dados?.nib_vendedor_ou_fornecedor || '',
     instituicao_credito_conta_vendedor_ou_fornecedor:
@@ -130,7 +148,6 @@ export const schemaTaxas = Yup.object().shape({
   taxa_comissao_imobilizacao: Yup.number().min(0).max(100).required().label('Taxa de comissão imobilização'),
 });
 
-// schemaCondicoes depende de dadosStepper em runtime, por isso é uma função
 export const getSchemaCondicoes = (dadosStepper) =>
   Yup.object().shape({
     numero_prestacao: Yup.number().positive().integer().required().label('Nº de prestações'),
@@ -138,6 +155,25 @@ export const getSchemaCondicoes = (dadosStepper) =>
       ? Yup.number().positive().required().label('Capital máx. isento imp. selo')
       : Yup.mixed().notRequired(),
   });
+
+export const schemaComissoes = Yup.object().shape({
+  comissao_avaliacao_prazo: shapeNumber('Prazo', true, '', 'comissao_avaliacao'),
+  comissao_avaliacao_valor: shapeNumber('Valor', true, '', 'comissao_avaliacao'),
+  comissao_avaliacao_periodicidade: shapeMixed('Periodicidade', true, '', 'comissao_avaliacao'),
+  //
+  comissao_vistoria_prazo: shapeNumber('Prazo', true, '', 'comissao_vistoria'),
+  comissao_vistoria_valor: shapeNumber('Valor', true, '', 'comissao_vistoria'),
+  comissao_vistoria_periodicidade: shapeMixed('Periodicidade', true, '', 'comissao_vistoria'),
+});
+
+export const schemaEntidades = Yup.object().shape({
+  entidades_patronais: Yup.array(
+    Yup.object({
+      numero_entidade_mutuario: Yup.mixed().required().label('Mutuário'),
+      numero_entidade_patronal: Yup.string().required().label('Entidade patronal'),
+    })
+  ),
+});
 
 // ── Payload final (onSubmit do step Entidade) ------------------------------------------------------------------------
 
@@ -168,6 +204,21 @@ export function buildPayload(rawData) {
     taxa_imposto_selo_utilizacao: String(rawData.taxa_imposto_selo_utilizacao || '0'),
     taxa_comissao_imobilizacao: rawData.taxa_comissao_imobilizacao
       ? String(rawData.taxa_comissao_imobilizacao)
+      : undefined,
+    // Comissões
+    comissao_avaliacao: rawData.comissao_avaliacao
+      ? {
+          valor: rawData.comissao_avaliacao_valor,
+          prazo: rawData.comissao_avaliacao_prazo,
+          periodicidade: rawData.comissao_avaliacao_periodicidade?.toLowerCase(),
+        }
+      : undefined,
+    comissao_vistoria: rawData.comissao_vistoria
+      ? {
+          valor: rawData.comissao_vistoria_valor,
+          prazo: rawData.comissao_vistoria_prazo,
+          periodicidade: rawData.comissao_vistoria_periodicidade?.toLowerCase(),
+        }
       : undefined,
     // Opcionais
     capital_max_isento_imposto_selo: rawData.capital_max_isento_imposto_selo
@@ -203,6 +254,8 @@ export function buildPayload(rawData) {
     estabelecimento_ensino: rawData?.credibolsa ? String(rawData.estabelecimento_ensino) : '',
     localizacao_estabelecimento_ensino: rawData?.credibolsa ? rawData.localizacao_estabelecimento_ensino : '',
     montante_tranches_credibolsa: rawData?.credibolsa ? String(rawData.montante_tranches_credibolsa) : undefined,
+    // Entidades patronais
+    entidades_patronais: rawData.entidades_patronais?.length > 0 ? rawData.entidades_patronais : undefined,
   };
 
   return Object.fromEntries(Object.entries(dataFormatted).filter(([, value]) => value !== undefined && value !== ''));

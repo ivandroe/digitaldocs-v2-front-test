@@ -11,6 +11,27 @@ import { LabelSN } from '../../../parametrizacao/details';
 
 // ---------------------------------------------------------------------------------------------------------------------
 
+function comissaoRows(label, obj) {
+  if (!obj || !(Number(obj.valor) > 0)) return [];
+  return [
+    { title: label, isHeader: true },
+    { title: 'Valor', value: fCurrency(obj.valor) },
+    { title: 'Prazo', value: obj.prazo ? labelMeses(obj.prazo) : '' },
+    { title: 'Periodicidade', value: obj.periodicidade || '' },
+  ];
+}
+
+function entidadesRows(list) {
+  if (!list?.length) return [];
+  return list.flatMap((e) => [
+    { title: `Mutuário: ${e.numero_entidade_mutuario}`, isHeader: true },
+    { title: 'Entidade patronal', value: e.nome_entidade_patronal || '' },
+    { title: 'Nº de entidade', value: e.numero_entidade_patronal || '' },
+  ]);
+}
+
+// ---------------------------------------------------------------------------------------------------------------------
+
 export function useMetadadosCreditoData(dados) {
   return useMemo(() => {
     if (!dados) return { financeiroPrincipal: [], cards: [] };
@@ -22,12 +43,19 @@ export function useMetadadosCreditoData(dados) {
       { label: 'Taxa de Mora', value: fPercent(Number(dados?.taxa_mora), 2), color: 'error' },
     ];
 
+    const rowsComissoes = [
+      ...comissaoRows('Comissão de avaliação', dados?.comissao_avaliacao),
+      ...comissaoRows('Comissão de vistoria', dados?.comissao_vistoria),
+    ];
+
+    const rowsEntidades = entidadesRows(dados?.entidades_patronais);
+
     const cards = [
       {
         titulo: 'Regime & Isenções',
         dados: [
-          ...(dados?.bonificado ||
-          dados?.revolving ||
+          ...(dados?.revolving ||
+          dados?.bonificado ||
           dados?.jovem_bonificado ||
           dados?.habitacao_propria_1 ||
           dados?.colaborador_empresa_parceira
@@ -50,10 +78,7 @@ export function useMetadadosCreditoData(dados) {
           { title: 'Isento Imposto Selo', value: <LabelSN item={dados?.tem_isencao_imposto_selo} /> },
           {
             title: 'Capital Máx. Isento Selo',
-            value:
-              Number(dados?.capital_max_isento_imposto_selo) > 0
-                ? fCurrency(dados?.capital_max_isento_imposto_selo)
-                : '',
+            value: fCurrency(dados?.capital_max_isento_imposto_selo),
           },
           { title: 'Conta DO Renda', value: dados?.conta_do_renda, bold: true },
         ],
@@ -77,10 +102,7 @@ export function useMetadadosCreditoData(dados) {
             value: <Label color="info">{dados?.modo_taxa_equivalente ? 'Equivalente' : 'Proporcional'}</Label>,
           },
           { title: 'Juro precário', value: fPercent(dados?.taxa_juro_precario) },
-          ...(dados?.taxa_juro_desconto && Number(dados?.taxa_juro_desconto) > 0
-            ? [{ title: 'Spread', value: fPercent(dados?.taxa_juro_desconto), bold: true }]
-            : []),
-
+          { title: 'Spread', value: fPercent(dados?.taxa_juro_desconto), bold: true },
           { title: 'Comissão de abertura', value: fPercent(dados?.taxa_comissao_abertura) },
           {
             title: 'Comissão de imobilização',
@@ -103,21 +125,34 @@ export function useMetadadosCreditoData(dados) {
         ],
       },
       {
-        id: 'objeto_ensino',
-        titulo: 'Objeto & Ensino/Credibolsa',
+        id: 'comissoes',
+        titulo: 'Comissões',
+        dados: rowsComissoes?.length ? rowsComissoes : [{ empty: true, label: '(Sem comissões...)' }],
+      },
+      ...(rowsEntidades.length > 0
+        ? [{ id: 'entidades_patronais', titulo: 'Entidades Patronais', dados: rowsEntidades }]
+        : []),
+      {
+        id: 'credibolsa',
+        titulo: 'Credibolsa',
         dados: [
-          { title: 'Tipo de imóvel', value: dados?.tipo_imovel?.label || dados?.tipo_imovel || dados?.tipo_imovel_id },
-          { title: 'Bem/Serviço', value: dados?.bem_servico_financiado, noWrap: false },
-          { title: 'Finalidade', value: dados?.finalidade_credito_habitacao, noWrap: false },
           { title: 'Nível de formação', value: dados?.nivel_formacao },
           { title: 'Curso', value: dados?.designacao_curso, noWrap: false },
           {
             title: 'Tranches da credibolsa',
-            value:
-              Number(dados?.montante_tranches_credibolsa) > 0 ? fCurrency(dados?.montante_tranches_credibolsa) : '',
+            value: fCurrency(dados?.montante_tranches_credibolsa),
           },
           { title: 'Estabelecimento de ensino', value: dados?.estabelecimento_ensino, noWrap: false },
           { title: 'Localização', value: dados?.localizacao_estabelecimento_ensino, noWrap: false },
+        ],
+      },
+      {
+        id: 'objeto_financiamento',
+        titulo: 'Objeto de financiamento',
+        dados: [
+          { title: 'Tipo de imóvel', value: dados?.tipo_imovel?.label || dados?.tipo_imovel || dados?.tipo_imovel_id },
+          { title: 'Bem/Serviço', value: dados?.bem_servico_financiado, noWrap: false },
+          { title: 'Finalidade', value: dados?.finalidade_credito_habitacao, noWrap: false },
         ],
       },
       {
@@ -129,10 +164,7 @@ export function useMetadadosCreditoData(dados) {
           { title: 'Banco/Instituição', value: dados?.instituicao_credito_conta_vendedor_ou_fornecedor },
           {
             title: 'Valor a transferir',
-            value:
-              Number(dados?.valor_transferir_conta_vendedor_ou_fornecedor) > 0
-                ? fCurrency(dados?.valor_transferir_conta_vendedor_ou_fornecedor)
-                : '',
+            value: fCurrency(dados?.valor_transferir_conta_vendedor_ou_fornecedor),
             bold: true,
             color: 'primary.main',
           },
