@@ -1,3 +1,4 @@
+import { useMemo } from 'react';
 // @mui
 import List from '@mui/material/List';
 import Table from '@mui/material/Table';
@@ -22,15 +23,53 @@ import { Resgisto, TableRowItem } from '../../../parametrizacao/details';
 
 // ---------------------------------------------------------------------------------------------------------------------
 
+function normalizarMetadadosGarantia(metadados) {
+  if (!metadados) {
+    return { contas: [], seguros: [], titulos: [], imoveis: {}, fiadores: [], livrancas: [] };
+  }
+  // Formato antigo
+  if (metadados?.imoveis || metadados?.fiadores || metadados?.livrancas) {
+    return {
+      contas: metadados?.contas ?? [],
+      seguros: metadados?.seguros ?? [],
+      titulos: metadados?.titulos ?? [],
+      imoveis: metadados?.imoveis ?? {},
+      fiadores: metadados?.fiadores ?? [],
+      livrancas: metadados?.livrancas ?? [],
+    };
+  }
+  // Formato v2 — { numero_livranca, bens[], garantidores[] }
+  const bens = metadados?.bens ?? [];
+  const grupo = (tipo) => bens.filter((b) => b?.tipo === tipo);
+  const livrancas = metadados?.numero_livranca
+    ? [{ numero_livranca: metadados.numero_livranca, avalistas: metadados?.garantidores ?? [] }]
+    : [];
+  return {
+    contas: grupo('dp'),
+    seguros: grupo('seguro'),
+    titulos: grupo('titulo'),
+    imoveis: {
+      predios: grupo('predio'),
+      terrenos: grupo('terreno'),
+      apartamentos: grupo('apartamento'),
+      veiculos: grupo('veiculo'),
+    },
+    fiadores: livrancas.length ? [] : (metadados?.garantidores ?? []),
+    livrancas,
+  };
+}
+
+// ---------------------------------------------------------------------------------------------------------------------
+
 export default function DetalhesGarantia({ dados, onClose }) {
   const {
     contas = [],
     seguros = [],
     titulos = [],
-    imoveis = [],
+    imoveis = {},
     fiadores = [],
     livrancas = [],
-  } = dados?.metadados || {};
+  } = useMemo(() => normalizarMetadadosGarantia(dados?.metadados), [dados?.metadados]);
 
   const tabsList = [
     { value: 'Info', component: <InfoGarantia dados={dados} info /> },

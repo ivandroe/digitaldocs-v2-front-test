@@ -35,7 +35,16 @@ export function getDefaultsRegime({ dadosStepper, dados, precario }) {
       dadosStepper?.montante_tranches_credibolsa || dados?.montante_tranches_credibolsa || '',
     localizacao_estabelecimento_ensino:
       dadosStepper?.localizacao_estabelecimento_ensino || dados?.localizacao_estabelecimento_ensino || '',
+    entidades_patronais: normalizarEntidadesPatronais(dadosStepper?.entidades_patronais ?? dados?.entidades_patronais),
   };
+}
+
+function normalizarEntidadesPatronais(lista) {
+  if (!Array.isArray(lista) || lista.length === 0) return [];
+  return lista.map((row) => ({
+    numero_entidade_mutuario: row?.numero_entidade_mutuario ?? '',
+    numero_entidade_patronal: row?.numero_entidade_patronal ?? '',
+  }));
 }
 
 export function getDefaultsCondicoes({ dadosStepper, dados, precario }) {
@@ -69,6 +78,8 @@ export function getDefaultsTaxas({ dadosStepper, dados, precario }) {
     }
   }
 
+  const comissaoOrig = (key) => dadosStepper?.[key] ?? dados?.[key] ?? null;
+
   return {
     modo_taxa_equivalente: resolveField('modo_taxa_equivalente', {
       dadosStepper,
@@ -83,6 +94,20 @@ export function getDefaultsTaxas({ dadosStepper, dados, precario }) {
     taxa_comissao_abertura: resolve('taxa_comissao_abertura', 1.75),
     taxa_comissao_imobilizacao: resolve('taxa_comissao_imobilizacao', 0),
     taxa_imposto_selo_utilizacao: resolve('taxa_imposto_selo_utilizacao', 0.5),
+    comissao_avaliacao_ativa: !!comissaoOrig('comissao_avaliacao'),
+    comissao_avaliacao: normalizarComissao(comissaoOrig('comissao_avaliacao')),
+    comissao_vistoria_ativa: !!comissaoOrig('comissao_vistoria'),
+    comissao_vistoria: normalizarComissao(comissaoOrig('comissao_vistoria')),
+  };
+}
+
+export const PERIODICIDADES_COMISSAO = ['mensal', 'trimestral', 'semestral', 'anual'];
+
+function normalizarComissao(comissao) {
+  return {
+    valor: comissao?.valor ?? '',
+    prazo: comissao?.prazo ?? '',
+    periodicidade: comissao?.periodicidade ?? '',
   };
 }
 
@@ -92,7 +117,53 @@ export function getDefaultsObjeto({ dadosStepper, dados, imoveisList }) {
     finalidade_credito_habitacao:
       dadosStepper?.finalidade_credito_habitacao || dados?.finalidade_credito_habitacao || '',
     tipo_imovel_id: dadosStepper?.tipo_imovel_id || imoveisList?.find((i) => i.id === dados?.tipo_imovel_id) || null,
+    bens_financiados: normalizarBensFinanciados(dadosStepper?.bens_financiados ?? dados?.bens_financiados),
   };
+}
+
+export const TIPOS_BEM_FINANCIADO = [
+  { id: 'apartamento', label: 'Apartamento' },
+  { id: 'predio', label: 'Prédio' },
+  { id: 'terreno', label: 'Terreno' },
+  { id: 'veiculo', label: 'Veículo' },
+  { id: 'equipamento', label: 'Equipamento' },
+  { id: 'outro', label: 'Outro' },
+];
+
+export const bemFinanciadoSchema = {
+  tipo: null,
+  nip: '',
+  numero_descricao_predial: '',
+  numero_matriz: '',
+  tipo_matriz: '',
+  identificacao_fracao: '',
+  numero_andar: '',
+  area: '',
+  numero_inscricao_hipoteca: '',
+  localizacao_conservatoria: '',
+  ilha: '',
+  concelho: '',
+  freguesia: '',
+  zona: '',
+  rua: '',
+  numero_porta: '',
+  matricula: '',
+  marca: '',
+  modelo: '',
+  ano_fabrico: '',
+  nura: '',
+  valor: '',
+  valor_avaliacao: '',
+  descritivo: '',
+};
+
+function normalizarBensFinanciados(lista) {
+  if (!Array.isArray(lista) || lista.length === 0) return [];
+  return lista.map((row) => ({
+    ...bemFinanciadoSchema,
+    ...row,
+    tipo: row?.tipo ? TIPOS_BEM_FINANCIADO.find((t) => t.id === row.tipo) || null : null,
+  }));
 }
 
 export function getDefaultsEntidade({ dadosStepper, dados }) {
@@ -118,7 +189,50 @@ export const schemaRegime = Yup.object().shape({
   localizacao_estabelecimento_ensino: shapeText('credibolsa', [true], 'Localização'),
   estabelecimento_ensino: shapeText('credibolsa', [true], 'Estabelecimento de ensino'),
   montante_tranches_credibolsa: shapeText('credibolsa', [true], 'Montante das tranches'),
+  entidades_patronais: Yup.array().when('colaborador_empresa_parceira', {
+    is: true,
+    then: (s) =>
+      s.min(1, 'Indique pelo menos uma entidade patronal').of(
+        Yup.object({
+          numero_entidade_mutuario: Yup.number()
+            .transform((v, o) => (o === '' ? undefined : v))
+            .positive()
+            .integer()
+            .required()
+            .label('Nº entidade mutuário'),
+          numero_entidade_patronal: Yup.number()
+            .transform((v, o) => (o === '' ? undefined : v))
+            .positive()
+            .integer()
+            .required()
+            .label('Nº entidade patronal'),
+        })
+      ),
+    otherwise: (s) => s.notRequired(),
+  }),
 });
+
+const shapeComissao = (ativaKey) =>
+  Yup.object({
+    valor: Yup.number()
+      .transform((v, o) => (o === '' ? undefined : v))
+      .positive()
+      .required()
+      .label('Valor'),
+    prazo: Yup.number()
+      .transform((v, o) => (o === '' ? undefined : v))
+      .positive()
+      .integer()
+      .required()
+      .label('Prazo (meses)'),
+    periodicidade: Yup.string()
+      .oneOf(PERIODICIDADES_COMISSAO, 'Periodicidade inválida')
+      .required()
+      .label('Periodicidade'),
+  }).when(ativaKey, {
+    is: false,
+    then: (s) => s.strip(),
+  });
 
 export const schemaTaxas = Yup.object().shape({
   taxa_mora: Yup.number().min(0).max(100).required().label('Taxa de mora'),
@@ -128,6 +242,16 @@ export const schemaTaxas = Yup.object().shape({
   taxa_comissao_abertura: Yup.number().min(0).max(100).required().label('Taxa de comissão abertura'),
   taxa_imposto_selo_utilizacao: Yup.number().min(0).max(100).required().label('Taxa imp. selo utilização'),
   taxa_comissao_imobilizacao: Yup.number().min(0).max(100).required().label('Taxa de comissão imobilização'),
+  comissao_avaliacao: Yup.mixed().when('comissao_avaliacao_ativa', {
+    is: true,
+    then: () => shapeComissao('comissao_avaliacao_ativa'),
+    otherwise: () => Yup.mixed().notRequired(),
+  }),
+  comissao_vistoria: Yup.mixed().when('comissao_vistoria_ativa', {
+    is: true,
+    then: () => shapeComissao('comissao_vistoria_ativa'),
+    otherwise: () => Yup.mixed().notRequired(),
+  }),
 });
 
 // schemaCondicoes depende de dadosStepper em runtime, por isso é uma função
@@ -138,6 +262,36 @@ export const getSchemaCondicoes = (dadosStepper) =>
       ? Yup.number().positive().required().label('Capital máx. isento imp. selo')
       : Yup.mixed().notRequired(),
   });
+
+const tiposImovel = ['apartamento', 'predio', 'terreno'];
+
+const bemFinanciadoShape = Yup.object({
+  tipo: Yup.mixed().required().label('Tipo do bem'),
+  matricula: Yup.string()
+    .nullable()
+    .test('matricula-veiculo', 'Matrícula é obrigatória para veículo', function (value) {
+      const tipoId = this.parent?.tipo?.id ?? this.parent?.tipo;
+      return tipoId === 'veiculo' ? Boolean(value) : true;
+    }),
+  nip: Yup.string()
+    .nullable()
+    .test('identificador-imovel', 'Indique NIP ou Nº matriz + descrição predial', function (value) {
+      const tipoId = this.parent?.tipo?.id ?? this.parent?.tipo;
+      if (!tiposImovel.includes(tipoId)) return true;
+      const { numero_matriz, numero_descricao_predial } = this.parent;
+      return Boolean(value) || (Boolean(numero_matriz) && Boolean(numero_descricao_predial));
+    }),
+  descritivo: Yup.string()
+    .nullable()
+    .test('descritivo-outro', 'Descritivo é obrigatório', function (value) {
+      const tipoId = this.parent?.tipo?.id ?? this.parent?.tipo;
+      return tipoId === 'equipamento' || tipoId === 'outro' ? Boolean(value) : true;
+    }),
+});
+
+export const schemaObjeto = Yup.object().shape({
+  bens_financiados: Yup.array().of(bemFinanciadoShape),
+});
 
 // ── Payload final (onSubmit do step Entidade) ------------------------------------------------------------------------
 
@@ -203,7 +357,72 @@ export function buildPayload(rawData) {
     estabelecimento_ensino: rawData?.credibolsa ? String(rawData.estabelecimento_ensino) : '',
     localizacao_estabelecimento_ensino: rawData?.credibolsa ? rawData.localizacao_estabelecimento_ensino : '',
     montante_tranches_credibolsa: rawData?.credibolsa ? String(rawData.montante_tranches_credibolsa) : undefined,
+    // v2 — entidades patronais (obrigatório se colaborador_empresa_parceira)
+    entidades_patronais: rawData?.colaborador_empresa_parceira
+      ? mapEntidadesPatronais(rawData?.entidades_patronais)
+      : undefined,
+    // v2 — comissões adicionais (opcionais, entram no cálculo de TAEG)
+    comissao_avaliacao: rawData?.comissao_avaliacao_ativa ? mapComissao(rawData?.comissao_avaliacao) : undefined,
+    comissao_vistoria: rawData?.comissao_vistoria_ativa ? mapComissao(rawData?.comissao_vistoria) : undefined,
+    // v2 — bens financiados
+    bens_financiados: mapBensFinanciados(rawData?.bens_financiados),
   };
 
   return Object.fromEntries(Object.entries(dataFormatted).filter(([, value]) => value !== undefined && value !== ''));
+}
+
+function mapEntidadesPatronais(lista) {
+  const valid = (lista ?? []).filter((row) => row?.numero_entidade_mutuario && row?.numero_entidade_patronal);
+  if (valid.length === 0) return undefined;
+  return valid.map((row) => ({
+    numero_entidade_mutuario: Number(row.numero_entidade_mutuario),
+    numero_entidade_patronal: Number(row.numero_entidade_patronal),
+  }));
+}
+
+function mapComissao(comissao) {
+  if (!comissao?.valor || !comissao?.prazo || !comissao?.periodicidade) return undefined;
+  return {
+    valor: String(comissao.valor),
+    prazo: Number(comissao.prazo),
+    periodicidade: comissao.periodicidade,
+  };
+}
+
+function mapBensFinanciados(lista) {
+  const valid = (lista ?? []).filter((bem) => bem?.tipo?.id || bem?.tipo);
+  if (valid.length === 0) return undefined;
+  return valid.map((bem) => {
+    const tipo = bem?.tipo?.id ?? bem?.tipo;
+    const out = { tipo };
+    [
+      'nip',
+      'numero_descricao_predial',
+      'numero_matriz',
+      'tipo_matriz',
+      'identificacao_fracao',
+      'numero_andar',
+      'area',
+      'numero_inscricao_hipoteca',
+      'localizacao_conservatoria',
+      'ilha',
+      'concelho',
+      'freguesia',
+      'zona',
+      'rua',
+      'numero_porta',
+      'matricula',
+      'marca',
+      'modelo',
+      'ano_fabrico',
+      'nura',
+      'descritivo',
+    ].forEach((key) => {
+      if (bem?.[key] !== undefined && bem?.[key] !== '' && bem?.[key] !== null) out[key] = String(bem[key]);
+    });
+    if (bem?.valor !== undefined && bem?.valor !== '' && bem?.valor !== null) out.valor = String(bem.valor);
+    if (bem?.valor_avaliacao !== undefined && bem?.valor_avaliacao !== '' && bem?.valor_avaliacao !== null)
+      out.valor_avaliacao = String(bem.valor_avaliacao);
+    return out;
+  });
 }

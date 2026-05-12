@@ -12,7 +12,7 @@ import { useSelector, useDispatch } from '@/redux/store';
 import { createItem, updateItem } from '@/redux/slices/digitaldocs';
 //
 import { shapeGarantia } from './validationFields';
-import composeGarantiaPayload from './composePayload';
+import composeGarantiaPayload, { unpackGarantiaMetadados } from './composePayload';
 import { construirSchemaImoveis } from './schemaFileds';
 import { listaGarantias } from '@/modules/gaji9/utils/applySortFilter';
 // components
@@ -56,23 +56,28 @@ export default function FormGarantias({ dados, processoId, onClose }) {
   );
 
   const formSchema = shapeGarantia();
-  const defaultValues = useMemo(
-    () => ({
-      contas: dados?.metadados?.contas || [],
-      titulos: dados?.metadados?.titulos || [],
-      seguros: dados?.metadados?.seguros || [],
-      fiadores: dados?.metadados?.fiadores || [],
-      livrancas: dados?.metadados?.livrancas || [],
+  const chaveInicial = useMemo(() => {
+    const subtipo = tipoGarantia?.subtipos?.find(({ id }) => id === dados?.subtipo_garantia_id);
+    return subtipo?.chave_meta ?? tipoGarantia?.chave_meta ?? null;
+  }, [tipoGarantia, dados?.subtipo_garantia_id]);
+
+  const defaultValues = useMemo(() => {
+    const grupos = unpackGarantiaMetadados(dados?.metadados, chaveInicial);
+    return {
+      contas: grupos.contas,
+      titulos: grupos.titulos,
+      seguros: grupos.seguros,
+      fiadores: grupos.fiadores,
+      livrancas: grupos.livrancas,
       percentagem_cobertura: dados?.percentagem_cobertura || '',
-      predios: construirSchemaImoveis(dados?.metadados?.imoveis?.predios || []),
-      terrenos: construirSchemaImoveis(dados?.metadados?.imoveis?.terrenos || []),
-      veiculos: construirSchemaImoveis(dados?.metadados?.imoveis?.veiculos || []),
-      apartamentos: construirSchemaImoveis(dados?.metadados?.imoveis?.apartamentos || []),
+      predios: construirSchemaImoveis(grupos.predios),
+      terrenos: construirSchemaImoveis(grupos.terrenos),
+      veiculos: construirSchemaImoveis(grupos.veiculos),
+      apartamentos: construirSchemaImoveis(grupos.apartamentos),
       subtipo_garantia: tipoGarantia?.subtipos?.find(({ id }) => id === dados?.subtipo_garantia_id) || null,
       tipo_garantia: tipoGarantia,
-    }),
-    [dados, tipoGarantia]
-  );
+    };
+  }, [dados, tipoGarantia, chaveInicial]);
 
   const methods = useForm({ resolver: yupResolver(formSchema), defaultValues });
   const { handleSubmit, watch, reset, setValue } = methods;

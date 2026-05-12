@@ -18,12 +18,18 @@ import { AddItem, DefaultAction } from '@/components/Actions';
 export default function FormLivrancas() {
   const { control } = useFormContext();
   const { fields, append, remove } = useFieldArray({ control, name: 'livrancas' });
+  const podeAdicionar = fields.length === 0;
 
   return (
     <Stack sx={{ flexGrow: 1, pt: 1 }}>
       <Stack direction="row" justifyContent="space-between" alignItems="flex-end">
-        <Typography variant="overline">Livrança(s)</Typography>
-        <AddItem onClick={() => append({ numero_livranca: '' })} dados={{ label: 'Livrança', small: true }} />
+        <Typography variant="overline">Livrança</Typography>
+        {podeAdicionar && (
+          <AddItem
+            dados={{ label: 'Livrança', small: true }}
+            onClick={() => append({ numero_livranca: '', avalistas: [] })}
+          />
+        )}
       </Stack>
       <Divider sx={{ my: 1 }} />
       <Stack spacing={2}>

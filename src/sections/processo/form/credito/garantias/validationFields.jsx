@@ -81,6 +81,7 @@ const shapeImoveis = (tipo) =>
       area: validacao(tipo === 'Terreno', Yup.string().required().label('Área')),
       localizacao_conservatoria: Yup.mixed().required().label('Localização da conservatória'),
       identificacao_fracao: validacao(tipo === 'Apartamento', Yup.string().required().label('Identificação fração')),
+      numero_inscricao_hipoteca: Yup.string().required().label('Nº inscrição hipoteca'),
 
       nip: Yup.string()
         .nullable()

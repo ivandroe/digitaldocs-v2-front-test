@@ -1,15 +1,20 @@
 import { useMemo, useEffect, useCallback } from 'react';
 // form
-import { useForm, useWatch } from 'react-hook-form';
+import { useForm, useWatch, useFormContext, useFieldArray } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 // @mui
 import Grid from '@mui/material/Grid';
+import Card from '@mui/material/Card';
+import Stack from '@mui/material/Stack';
 import Paper from '@mui/material/Paper';
 import Dialog from '@mui/material/Dialog';
+import Divider from '@mui/material/Divider';
+import Typography from '@mui/material/Typography';
 import DialogContent from '@mui/material/DialogContent';
 // utils
 import {
   schemaTaxas,
+  schemaObjeto,
   buildPayload,
   schemaRegime,
   getDefaultsTaxas,
@@ -18,6 +23,9 @@ import {
   getSchemaCondicoes,
   getDefaultsEntidade,
   getDefaultsCondicoes,
+  bemFinanciadoSchema,
+  TIPOS_BEM_FINANCIADO,
+  PERIODICIDADES_COMISSAO,
 } from './metadados-utils';
 // redux
 import { updateItem } from '@/redux/slices/digitaldocs';
@@ -32,11 +40,13 @@ import {
   RHFDatePicker,
   RHFNumberField,
   RHFAutocompleteObj,
+  RHFAutocompleteSmp,
 } from '@/components/hook-form';
 import Steps from '@/components/Steps';
 import GridItem from '@/components/GridItem';
+import { SemDados } from '@/components/Panel';
 import { FormLoading } from '@/components/skeleton';
-import { ButtonsStepper } from '@/components/Actions';
+import { AddItem, DefaultAction, ButtonsStepper } from '@/components/Actions';
 import { DialogTitleAlt } from '@/components/CustomDialog';
 
 // ---------------------------------------------------------------------------------------------------------------------
@@ -121,6 +131,7 @@ function RegimeEspecial({ onClose, dados, dispatch, dadosStepper, precario }) {
         <GridItem sm={6}>
           <RHFSwitch name="tem_isencao_imposto_selo" label="Isento de imposto de selo" mt />
         </GridItem>
+        {values?.colaborador_empresa_parceira && <GridItem children={<EntidadesPatronaisField />} />}
         {values?.credibolsa && (
           <>
             <GridItem sm={6} md={3}>
@@ -225,6 +236,22 @@ function Taxas({ dados, dadosStepper, precario }) {
         <GridItem xs={6} md={4}>
           <RHFNumberField name="taxa_comissao_imobilizacao" label="Taxa comissão imobilização" tipo="%" />
         </GridItem>
+        <GridItem>
+          <ComissaoAdicionalField
+            ativaKey="comissao_avaliacao_ativa"
+            valueKey="comissao_avaliacao"
+            label="Comissão de avaliação"
+            ativa={values?.comissao_avaliacao_ativa}
+          />
+        </GridItem>
+        <GridItem>
+          <ComissaoAdicionalField
+            ativaKey="comissao_vistoria_ativa"
+            valueKey="comissao_vistoria"
+            label="Comissão de vistoria"
+            ativa={values?.comissao_vistoria_ativa}
+          />
+        </GridItem>
       </Grid>
       <ButtonsStepper onClose={() => dispatch(updateDados({ backward: true, dados: values }))} />
     </FormProvider>
@@ -238,7 +265,7 @@ function Objeto({ dados, dispatch, dadosStepper }) {
   const imoveisList = useMemo(() => tiposImoveis.map((i) => ({ id: i?.id, label: i?.tipo })), [tiposImoveis]);
 
   const defaultValues = getDefaultsObjeto({ dadosStepper, dados, imoveisList });
-  const methods = useForm({ defaultValues });
+  const methods = useForm({ resolver: yupResolver(schemaObjeto), defaultValues });
   const { control, handleSubmit } = methods;
   const values = useWatch({ control });
 
@@ -258,6 +285,7 @@ function Objeto({ dados, dispatch, dadosStepper }) {
         <GridItem>
           <RHFTextField name="finalidade_credito_habitacao" label="Finalidade cred. habitação" />
         </GridItem>
+        <GridItem children={<BensFinanciadosField />} />
       </Grid>
       <ButtonsStepper onClose={() => dispatch(updateDados({ backward: true, dados: values }))} />
     </FormProvider>
@@ -314,5 +342,237 @@ function Title({ title }) {
     >
       {title}
     </Paper>
+  );
+}
+
+// ---------------------------------------------------------------------------------------------------------------------
+
+function EntidadesPatronaisField() {
+  const { control } = useFormContext();
+  const { fields, append, remove } = useFieldArray({ control, name: 'entidades_patronais' });
+
+  return (
+    <Stack sx={{ flexGrow: 1, pt: 1 }}>
+      <Stack direction="row" justifyContent="space-between" alignItems="flex-end">
+        <Typography variant="overline">Entidade(s) patronal(is)</Typography>
+        <AddItem
+          dados={{ label: 'Entidade patronal', small: true }}
+          onClick={() => append({ numero_entidade_mutuario: '', numero_entidade_patronal: '' })}
+        />
+      </Stack>
+      <Divider sx={{ my: 1 }} />
+      <Grid container spacing={2} justifyContent="center">
+        {fields.length ? (
+          fields.map((item, index) => (
+            <GridItem md={6} key={item.id}>
+              <Card sx={{ p: 1, boxShadow: (theme) => theme.customShadows.cardAlt }}>
+                <Stack direction="row" alignItems="center" spacing={1}>
+                  <Stack direction="row" spacing={2} sx={{ flexGrow: 1 }}>
+                    <RHFNumberField
+                      noFormat
+                      label="Nº mutuário"
+                      name={`entidades_patronais[${index}].numero_entidade_mutuario`}
+                    />
+                    <RHFNumberField
+                      noFormat
+                      label="Nº entidade patronal"
+                      name={`entidades_patronais[${index}].numero_entidade_patronal`}
+                    />
+                  </Stack>
+                  <DefaultAction small label="Eliminar" icon="Remover" onClick={() => remove(index)} />
+                </Stack>
+              </Card>
+            </GridItem>
+          ))
+        ) : (
+          <GridItem children={<SemDados message="Nenhuma entidade patronal adicionada..." sx={{ p: 1.5 }} />} />
+        )}
+      </Grid>
+    </Stack>
+  );
+}
+
+// ---------------------------------------------------------------------------------------------------------------------
+
+function ComissaoAdicionalField({ ativaKey, valueKey, label, ativa }) {
+  return (
+    <Stack sx={{ flexGrow: 1, pt: 1 }}>
+      <Stack direction="row" justifyContent="space-between" alignItems="center">
+        <Typography variant="overline">{label}</Typography>
+        <RHFSwitch name={ativaKey} label="Aplicar" />
+      </Stack>
+      <Divider sx={{ my: 1 }} />
+      {ativa ? (
+        <Grid container spacing={2}>
+          <GridItem sm={4}>
+            <RHFNumberField name={`${valueKey}.valor`} label="Valor" tipo="CVE" />
+          </GridItem>
+          <GridItem sm={4}>
+            <RHFNumberField name={`${valueKey}.prazo`} label="Prazo" tipo="meses" />
+          </GridItem>
+          <GridItem sm={4}>
+            <RHFAutocompleteSmp
+              label="Periodicidade"
+              name={`${valueKey}.periodicidade`}
+              options={PERIODICIDADES_COMISSAO}
+            />
+          </GridItem>
+        </Grid>
+      ) : null}
+    </Stack>
+  );
+}
+
+// ---------------------------------------------------------------------------------------------------------------------
+
+function BensFinanciadosField() {
+  const { control, watch, setValue } = useFormContext();
+  const { fields, append, remove } = useFieldArray({ control, name: 'bens_financiados' });
+  const bens = watch('bens_financiados') ?? [];
+
+  return (
+    <Stack sx={{ flexGrow: 1, pt: 1 }}>
+      <Stack direction="row" justifyContent="space-between" alignItems="flex-end">
+        <Typography variant="overline">Bens financiados</Typography>
+        <AddItem dados={{ label: 'Bem', small: true }} onClick={() => append(bemFinanciadoSchema)} />
+      </Stack>
+      <Divider sx={{ my: 1 }} />
+      <Stack spacing={2}>
+        {fields.length ? (
+          fields.map((item, index) => {
+            const tipoId = bens?.[index]?.tipo?.id;
+            const isImovel = ['apartamento', 'predio', 'terreno'].includes(tipoId);
+            const isAp = tipoId === 'apartamento';
+            const isTerreno = tipoId === 'terreno';
+            const isVeiculo = tipoId === 'veiculo';
+            const isOutroOuEquip = tipoId === 'equipamento' || tipoId === 'outro';
+            return (
+              <Card key={item.id} sx={{ p: 1, boxShadow: (theme) => theme.customShadows.cardAlt }}>
+                <Stack direction="row" alignItems="flex-start" spacing={1}>
+                  <Grid container spacing={2} sx={{ flexGrow: 1 }}>
+                    <GridItem sm={6} md={4}>
+                      <RHFAutocompleteObj
+                        label="Tipo do bem"
+                        name={`bens_financiados[${index}].tipo`}
+                        options={TIPOS_BEM_FINANCIADO}
+                        onChange={(_, newValue) => {
+                          setValue(`bens_financiados[${index}]`, { ...bemFinanciadoSchema, tipo: newValue });
+                        }}
+                      />
+                    </GridItem>
+                    {isImovel && (
+                      <>
+                        <GridItem sm={6} md={4}>
+                          <RHFTextField name={`bens_financiados[${index}].nip`} label="NIP" />
+                        </GridItem>
+                        <GridItem sm={6} md={4}>
+                          <RHFTextField
+                            name={`bens_financiados[${index}].numero_descricao_predial`}
+                            label="Nº descrição predial"
+                          />
+                        </GridItem>
+                        <GridItem sm={6} md={4}>
+                          <RHFTextField name={`bens_financiados[${index}].numero_matriz`} label="Nº de matriz" />
+                        </GridItem>
+                        <GridItem sm={6} md={4}>
+                          <RHFAutocompleteSmp
+                            label="Tipo de matriz"
+                            options={['Urbana', 'Rural']}
+                            name={`bens_financiados[${index}].tipo_matriz`}
+                          />
+                        </GridItem>
+                        <GridItem sm={6} md={4}>
+                          <RHFTextField
+                            name={`bens_financiados[${index}].numero_inscricao_hipoteca`}
+                            label="Nº inscrição hipoteca"
+                          />
+                        </GridItem>
+                        {isAp && (
+                          <>
+                            <GridItem sm={6} md={4}>
+                              <RHFTextField
+                                name={`bens_financiados[${index}].identificacao_fracao`}
+                                label="Identificação fração"
+                              />
+                            </GridItem>
+                            <GridItem sm={6} md={4}>
+                              <RHFTextField name={`bens_financiados[${index}].numero_andar`} label="Nº andar" />
+                            </GridItem>
+                          </>
+                        )}
+                        {isTerreno && (
+                          <GridItem sm={6} md={4}>
+                            <RHFTextField name={`bens_financiados[${index}].area`} label="Área" />
+                          </GridItem>
+                        )}
+                        <GridItem md={6}>
+                          <RHFTextField
+                            name={`bens_financiados[${index}].localizacao_conservatoria`}
+                            label="Conservatória"
+                          />
+                        </GridItem>
+                        <GridItem sm={4} md={3}>
+                          <RHFTextField name={`bens_financiados[${index}].freguesia`} label="Freguesia" />
+                        </GridItem>
+                        <GridItem sm={4} md={3}>
+                          <RHFTextField name={`bens_financiados[${index}].zona`} label="Zona" />
+                        </GridItem>
+                        <GridItem sm={4} md={3}>
+                          <RHFTextField name={`bens_financiados[${index}].rua`} label="Rua" />
+                        </GridItem>
+                        <GridItem sm={4} md={3}>
+                          <RHFTextField name={`bens_financiados[${index}].numero_porta`} label="Nº porta" />
+                        </GridItem>
+                      </>
+                    )}
+                    {isVeiculo && (
+                      <>
+                        <GridItem sm={6} md={4}>
+                          <RHFTextField name={`bens_financiados[${index}].matricula`} label="Matrícula" />
+                        </GridItem>
+                        <GridItem sm={6} md={4}>
+                          <RHFTextField name={`bens_financiados[${index}].marca`} label="Marca" />
+                        </GridItem>
+                        <GridItem sm={6} md={4}>
+                          <RHFTextField name={`bens_financiados[${index}].modelo`} label="Modelo" />
+                        </GridItem>
+                        <GridItem sm={6} md={4}>
+                          <RHFTextField name={`bens_financiados[${index}].ano_fabrico`} label="Ano fabrico" />
+                        </GridItem>
+                        <GridItem sm={6} md={4}>
+                          <RHFTextField name={`bens_financiados[${index}].nura`} label="NURA" />
+                        </GridItem>
+                      </>
+                    )}
+                    {isOutroOuEquip && (
+                      <GridItem>
+                        <RHFTextField name={`bens_financiados[${index}].descritivo`} label="Descritivo" />
+                      </GridItem>
+                    )}
+                    {tipoId && (
+                      <>
+                        <GridItem sm={6} md={3}>
+                          <RHFNumberField name={`bens_financiados[${index}].valor`} label="Valor" tipo="CVE" />
+                        </GridItem>
+                        <GridItem sm={6} md={3}>
+                          <RHFNumberField
+                            name={`bens_financiados[${index}].valor_avaliacao`}
+                            label="Valor avaliação"
+                            tipo="CVE"
+                          />
+                        </GridItem>
+                      </>
+                    )}
+                  </Grid>
+                  <DefaultAction small label="Eliminar" icon="Remover" onClick={() => remove(index)} />
+                </Stack>
+              </Card>
+            );
+          })
+        ) : (
+          <SemDados message="Nenhum bem financiado adicionado..." sx={{ p: 1.5 }} />
+        )}
+      </Stack>
+    </Stack>
   );
 }

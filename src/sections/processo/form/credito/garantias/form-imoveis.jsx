@@ -113,6 +113,9 @@ function Imoveis({ fields = [], remove, prefixo, tipo }) {
               </GridItem>
             )}
             <GridItem sm={6} md={4} lg={(isTerreno && 2.4) || (isAp && 2) || 3}>
+              <RHFTextField name={`${prefixo}[${index}].numero_inscricao_hipoteca`} label="Nº inscrição hipoteca" />
+            </GridItem>
+            <GridItem sm={6} md={4} lg={(isTerreno && 2.4) || (isAp && 2) || 3}>
               <RHFNumberField name={`${prefixo}[${index}].valor_pvt`} label="Valor PVT" tipo="CVE" />
             </GridItem>
             <GridItem sm={6} md={4} lg={(isTerreno && 2.4) || (isAp && 2) || 3}>

@@ -1,5 +1,13 @@
+// Composição/unpacking de metadados de garantia (formato v2 — bens[]/garantidores[]/numero_livranca)
+// O estado interno do formulário mantém a forma antiga (predios, terrenos, contas, ...) para minimizar
+// disrupção nos componentes; a conversão acontece apenas nas fronteiras (submit / load).
+
+const TIPO_IMOVEL = { predios: 'predio', terrenos: 'terreno', apartamentos: 'apartamento' };
+
+// ── Submit -----------------------------------------------------------------------------------------------------------
+
 export default function composeGarantiaPayload(form, chaveMeta) {
-  const metadados = chaveMeta && metaBuilders[chaveMeta] ? metaBuilders[chaveMeta](form) : {};
+  const metadados = buildMetadados(form, chaveMeta);
 
   return {
     tipo_garantia_id: form?.tipo_garantia?.id ?? null,
@@ -9,139 +17,207 @@ export default function composeGarantiaPayload(form, chaveMeta) {
   };
 }
 
-const metaBuilders = {
-  fiadores: (form) => ({ fiadores: (form?.fiadores ?? []).map(mapFiador) }),
-  livrancas: (form) => ({ livrancas: (form?.livrancas ?? []).map(mapLivranca) }),
-  seguros: (form) => ({ seguros: (form?.seguros ?? []).map(mapSeguro) }),
-  contas: (form) => ({ contas: (form?.contas ?? []).map(mapContas) }),
-  titulos: (form) => ({ titulos: (form?.titulos ?? []).map(mapTitulo) }),
-  predios: (form) => ({ imoveis: { predios: (form?.predios ?? []).map(mapPredio) } }),
-  terrenos: (form) => ({ imoveis: { terrenos: (form?.terrenos ?? []).map(mapTerreno) } }),
-  veiculos: (form) => ({ imoveis: { veiculos: (form?.veiculos ?? []).map(mapVeiculo) } }),
-  apartamentos: (form) => ({ imoveis: { apartamentos: (form?.apartamentos ?? []).map(mapApartamento) } }),
-};
+function buildMetadados(form, chaveMeta) {
+  const meta = { bens: [], garantidores: [] };
 
-// Mapeadores principais -----------------------------------------------------------------------------------------------
+  switch (chaveMeta) {
+    case 'fiadores':
+      meta.garantidores = (form?.fiadores ?? []).map(mapGarantidor);
+      break;
+    case 'livrancas': {
+      const primeira = (form?.livrancas ?? [])[0];
+      if (primeira?.numero_livranca) meta.numero_livranca = String(primeira.numero_livranca);
+      meta.garantidores = (primeira?.avalistas ?? []).map(mapGarantidor);
+      break;
+    }
+    case 'contas':
+      meta.bens = (form?.contas ?? []).map((row) => ({ tipo: 'dp', ...mapContaDp(row) }));
+      break;
+    case 'titulos':
+      meta.bens = (form?.titulos ?? []).map((row) => ({ tipo: 'titulo', ...mapTitulo(row) }));
+      break;
+    case 'seguros':
+      // Quando o seguro é o próprio bem dado em garantia
+      meta.bens = (form?.seguros ?? []).map((row) => ({ tipo: 'seguro', ...mapSeguroComoBem(row) }));
+      break;
+    case 'predios':
+    case 'terrenos':
+    case 'apartamentos':
+      meta.bens = (form?.[chaveMeta] ?? []).map((row) => ({ tipo: TIPO_IMOVEL[chaveMeta], ...mapImovel(row) }));
+      break;
+    case 'veiculos':
+      meta.bens = (form?.veiculos ?? []).map((row) => ({ tipo: 'veiculo', ...mapVeiculo(row) }));
+      break;
+    default:
+      break;
+  }
 
-function mapFiador(fiador) {
-  return { numero_entidade: fiador?.numero_entidade ?? '' };
+  return meta;
 }
 
-function mapLivranca(livranca) {
-  return livranca;
+// ── Unpack (carregar do backend para o form) -------------------------------------------------------------------------
+
+export function unpackGarantiaMetadados(metadados, chaveMeta) {
+  const empty = {
+    contas: [],
+    titulos: [],
+    seguros: [],
+    fiadores: [],
+    livrancas: [],
+    predios: [],
+    terrenos: [],
+    veiculos: [],
+    apartamentos: [],
+  };
+  if (!metadados) return empty;
+
+  // Compatibilidade: se vier no formato antigo, devolve directamente os arrays existentes
+  if (metadados?.imoveis || metadados?.fiadores || metadados?.livrancas) {
+    return {
+      ...empty,
+      contas: metadados?.contas ?? [],
+      titulos: metadados?.titulos ?? [],
+      seguros: metadados?.seguros ?? [],
+      fiadores: metadados?.fiadores ?? [],
+      livrancas: metadados?.livrancas ?? [],
+      predios: metadados?.imoveis?.predios ?? [],
+      terrenos: metadados?.imoveis?.terrenos ?? [],
+      veiculos: metadados?.imoveis?.veiculos ?? [],
+      apartamentos: metadados?.imoveis?.apartamentos ?? [],
+    };
+  }
+
+  // Formato v2 — { numero_livranca, bens[], garantidores[] }
+  const bens = metadados?.bens ?? [];
+  const grupos = {
+    apartamento: [],
+    predio: [],
+    terreno: [],
+    veiculo: [],
+    dp: [],
+    titulo: [],
+    seguro: [],
+  };
+  bens.forEach((bem) => {
+    if (bem?.tipo && grupos[bem.tipo]) grupos[bem.tipo].push(bem);
+  });
+
+  const out = {
+    ...empty,
+    predios: grupos.predio,
+    terrenos: grupos.terreno,
+    apartamentos: grupos.apartamento,
+    veiculos: grupos.veiculo,
+    contas: grupos.dp,
+    titulos: grupos.titulo,
+    seguros: grupos.seguro,
+  };
+
+  if (chaveMeta === 'livrancas' && metadados?.numero_livranca) {
+    out.livrancas = [{ numero_livranca: metadados.numero_livranca, avalistas: metadados?.garantidores ?? [] }];
+  } else {
+    out.fiadores = metadados?.garantidores ?? [];
+  }
+  return out;
 }
 
-function mapSeguro(seguro) {
+// ── Mapeadores --------------------------------------------------------------------------------------------------------
+
+function mapGarantidor(row) {
+  return {
+    numero_entidade: row?.numero_entidade ? Number(row.numero_entidade) : undefined,
+  };
+}
+
+function mapContaDp(row) {
+  return {
+    numero_conta: row?.numero_conta ?? '',
+    percentagem_cobertura: String(row?.percentagem_cobertura ?? ''),
+  };
+}
+
+function mapTitulo(row) {
+  return {
+    codigo: row?.codigo ?? '',
+    numero_cliente: row?.numero_cliente ? Number(row.numero_cliente) : undefined,
+    percentagem_cobertura: String(row?.percentagem_cobertura ?? ''),
+    seguros: (row?.seguros ?? []).map(mapSeguroDoBem),
+  };
+}
+
+function mapVeiculo(row) {
+  return {
+    nura: row?.nura ?? '',
+    marca: row?.marca ?? '',
+    modelo: row?.modelo ?? '',
+    matricula: row?.matricula ?? '',
+    ano_fabrico: row?.ano_fabrico ? String(row.ano_fabrico) : '',
+    valor: row?.valor ? String(row.valor) : '',
+    valor_avaliacao: row?.valor_pvt ? String(row.valor_pvt) : '',
+    percentagem_cobertura: String(row?.percentagem_cobertura ?? ''),
+    donos: (row?.donos ?? []).map(mapDono),
+    seguros: (row?.seguros ?? []).map(mapSeguroDoBem),
+  };
+}
+
+function mapImovel(row) {
+  const morada = mapMorada(row);
+  return {
+    nip: row?.nip ?? '',
+    tipo_matriz: row?.tipo_matriz ?? '',
+    numero_matriz: row?.numero_matriz ?? '',
+    numero_descricao_predial: row?.numero_descricao_predial ?? '',
+    numero_inscricao_hipoteca: row?.numero_inscricao_hipoteca ?? '',
+    localizacao_conservatoria: row?.localizacao_conservatoria ?? '',
+    identificacao_fracao: row?.identificacao_fracao ?? '',
+    numero_andar: row?.numero_andar ?? '',
+    area: row?.area ?? '',
+    valor_avaliacao: row?.valor_pvt ? String(row.valor_pvt) : '',
+    percentagem_cobertura: String(row?.percentagem_cobertura ?? ''),
+    ...morada,
+    donos: (row?.donos ?? []).map(mapDono),
+    seguros: (row?.seguros ?? []).map(mapSeguroDoBem),
+  };
+}
+
+function mapSeguroDoBem(seguro) {
   return {
     apolice: seguro?.apolice ?? '',
     valor: String(seguro?.valor ?? ''),
     seguradora: seguro?.seguradora ?? '',
     premio: String(seguro?.premio ?? ''),
-    tipo_seguro_id: seguro?.tipo?.id ?? null,
+    tipo_seguro_id: seguro?.tipo?.id ?? seguro?.tipo_seguro_id ?? null,
     periodicidade: seguro?.periodicidade ?? '',
     percentagem_cobertura: String(seguro?.percentagem_cobertura ?? ''),
   };
 }
 
-function mapContas(contas) {
+function mapSeguroComoBem(seguro) {
+  // O seguro é o próprio bem em garantia (tipo='seguro' no DTO v2)
   return {
-    numero_conta: contas?.numero_conta ?? '',
-    percentagem_cobertura: String(contas?.percentagem_cobertura ?? ''),
+    apolice: seguro?.apolice ?? '',
+    seguradora: seguro?.seguradora ?? '',
+    tipo_seguro_id: seguro?.tipo?.id ?? seguro?.tipo_seguro_id ?? null,
+    premio: String(seguro?.premio ?? ''),
+    periodicidade: seguro?.periodicidade ?? '',
+    valor: String(seguro?.valor ?? ''),
+    percentagem_cobertura: String(seguro?.percentagem_cobertura ?? ''),
   };
 }
 
-// Veículos ------------------------------------------------------------------------------------------------------------
-
-function mapVeiculo(veiculo) {
-  return {
-    nura: veiculo?.nura,
-    marca: veiculo?.marca,
-    modelo: veiculo?.modelo,
-    matricula: veiculo?.matricula,
-    valor: String(veiculo?.valor ?? ''),
-    ano_fabrico: String(veiculo?.ano_fabrico),
-    valor_pvt: String(veiculo?.valor_pvt ?? ''),
-    donos: (veiculo?.donos ?? []).map(mapDono),
-    seguros: (veiculo?.seguros ?? []).map(mapSeguro),
-    percentagem_cobertura: String(veiculo?.percentagem_cobertura ?? ''),
-  };
-}
-
-// Imóveis -------------------------------------------------------------------------------------------------------------
-
-function mapPredio(predio) {
-  return {
-    nip: predio?.nip ?? '',
-    tipo_matriz: predio?.tipo_matriz ?? '',
-    valor_pvt: String(predio?.valor_pvt ?? ''),
-    numero_matriz: predio?.numero_matriz ?? '',
-    numero_descricao_predial: predio?.numero_descricao_predial ?? '',
-    localizacao_conservatoria: predio?.localizacao_conservatoria ?? '',
-    percentagem_cobertura: String(predio?.percentagem_cobertura ?? ''),
-    morada: mapMorada(predio),
-    donos: (predio?.donos ?? []).map(mapDono),
-    seguros: (predio?.seguros ?? []).map(mapSeguro),
-  };
-}
-
-function mapApartamento(ap) {
-  return {
-    nip: ap?.nip ?? '',
-    tipo_matriz: ap?.tipo_matriz ?? '',
-    numero_andar: ap?.numero_andar ?? '',
-    valor_pvt: String(ap?.valor_pvt ?? ''),
-    numero_matriz: ap?.numero_matriz ?? '',
-    identificacao_fracao: ap?.identificacao_fracao ?? '',
-    numero_descricao_predial: ap?.numero_descricao_predial ?? '',
-    localizacao_conservatoria: ap?.localizacao_conservatoria ?? '',
-    percentagem_cobertura: String(ap?.percentagem_cobertura ?? ''),
-    morada: mapMorada(ap),
-    seguros: (ap?.seguros ?? []).map(mapSeguro),
-    donos: (ap?.donos ?? []).map(mapDono),
-  };
-}
-
-function mapTerreno(terreno) {
-  return {
-    nip: terreno?.nip ?? '',
-    area: terreno?.area ?? '',
-    tipo_matriz: terreno?.tipo_matriz ?? '',
-    numero_matriz: terreno?.numero_matriz ?? '',
-    valor_pvt: String(terreno?.valor_pvt ?? ''),
-    numero_descricao_predial: terreno?.numero_descricao_predial ?? '',
-    localizacao_conservatoria: terreno?.localizacao_conservatoria ?? '',
-    percentagem_cobertura: String(terreno?.percentagem_cobertura ?? ''),
-    morada: mapMorada(terreno),
-    donos: (terreno?.donos ?? []).map(mapDono),
-    seguros: (terreno?.seguros ?? []).map(mapSeguro),
-  };
-}
-
-// Títulos -------------------------------------------------------------------------------------------------------------
-
-function mapTitulo(titulo) {
-  return {
-    codigo: titulo?.codigo ?? '',
-    numero_cliente: titulo?.numero_cliente ?? '',
-    percentagem_cobertura: String(titulo?.percentagem_cobertura ?? ''),
-    seguros: (titulo?.seguros ?? []).map(mapSeguro),
-  };
-}
-
-// Utilitários ---------------------------------------------------------------------------------------------------------
-
-function mapMorada(morada) {
+function mapMorada(row) {
+  // Aceita morada nested (formato antigo) ou flat (formato v2 já normalizado)
+  const morada = row?.morada ?? row;
   return {
     rua: morada?.rua ?? '',
     zona: morada?.zona ?? '',
-    ilha: morada?.freguesia?.ilha ?? '',
-    descritivo: morada?.descritivo ?? '',
+    ilha: morada?.ilha ?? row?.freguesia?.ilha ?? '',
+    concelho: morada?.concelho ?? row?.freguesia?.concelho ?? '',
+    freguesia: morada?.freguesia ?? row?.freguesia?.freguesia ?? '',
     numero_porta: morada?.numero_porta ?? '',
-    concelho: morada?.freguesia?.concelho ?? '',
-    freguesia: morada?.freguesia?.freguesia ?? '',
   };
 }
 
 function mapDono(dono) {
-  return { numero: dono?.numero_entidade ?? '' };
+  return { numero_entidade: dono?.numero_entidade ?? dono?.numero ?? '' };
 }

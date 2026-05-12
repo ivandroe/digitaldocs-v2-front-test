@@ -138,8 +138,83 @@ export function useMetadadosCreditoData(dados) {
           },
         ],
       },
+      ...buildComissoesCard(dados),
+      ...buildEntidadesPatronaisCard(dados),
+      ...buildBensFinanciadosCard(dados),
     ];
 
     return { financeiroPrincipal, cards };
   }, [dados]);
+}
+
+// ---------------------------------------------------------------------------------------------------------------------
+
+function buildComissoesCard(dados) {
+  const ca = dados?.comissao_avaliacao;
+  const cv = dados?.comissao_vistoria;
+  if (!ca && !cv) return [];
+
+  const linhasComissao = (label, c) =>
+    c
+      ? [
+          { title: `${label} - Valor`, value: fCurrency(c?.valor) },
+          { title: `${label} - Prazo`, value: labelMeses(c?.prazo) },
+          { title: `${label} - Periodicidade`, value: c?.periodicidade },
+        ]
+      : [];
+
+  return [
+    {
+      id: 'comissoes_adicionais',
+      titulo: 'Comissões adicionais (TAEG)',
+      dados: [...linhasComissao('Avaliação', ca), ...linhasComissao('Vistoria', cv)],
+    },
+  ];
+}
+
+function buildEntidadesPatronaisCard(dados) {
+  const lista = Array.isArray(dados?.entidades_patronais) ? dados.entidades_patronais : [];
+  if (!lista.length) return [];
+
+  return [
+    {
+      id: 'entidades_patronais',
+      titulo: 'Entidades patronais',
+      dados: lista.map((row) => ({
+        title: `Mutuário ${row?.numero_entidade_mutuario}`,
+        value: `${row?.numero_entidade_patronal}${row?.nome_entidade_patronal ? ` - ${row.nome_entidade_patronal}` : ''}`,
+        noWrap: false,
+      })),
+    },
+  ];
+}
+
+function buildBensFinanciadosCard(dados) {
+  const lista = Array.isArray(dados?.bens_financiados) ? dados.bens_financiados : [];
+  if (!lista.length) return [];
+
+  return [
+    {
+      id: 'bens_financiados',
+      titulo: 'Bens financiados',
+      dados: lista.map((bem, i) => ({
+        title: `${i + 1}. ${bem?.tipo || '—'}`,
+        value: descreverBemFinanciado(bem),
+        noWrap: false,
+      })),
+    },
+  ];
+}
+
+function descreverBemFinanciado(bem) {
+  const partes = [];
+  if (bem?.marca || bem?.modelo) partes.push([bem?.marca, bem?.modelo].filter(Boolean).join(' '));
+  if (bem?.matricula) partes.push(`Matr. ${bem.matricula}`);
+  if (bem?.nip) partes.push(`NIP ${bem.nip}`);
+  if (bem?.numero_matriz) partes.push(`Mtz ${bem.numero_matriz}`);
+  if (bem?.identificacao_fracao) partes.push(`Frac. ${bem.identificacao_fracao}`);
+  if (bem?.area) partes.push(`${bem.area} m²`);
+  if (bem?.descritivo) partes.push(bem.descritivo);
+  if (bem?.valor) partes.push(fCurrency(bem.valor));
+  return partes.length ? partes.join(' · ') : '—';
 }
