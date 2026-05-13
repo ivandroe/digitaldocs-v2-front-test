@@ -93,7 +93,7 @@ export default function FormGarantias({ dados, processoId, onClose }) {
         ? hidratarSegurosNested(
             {
               ...grupos.veiculo,
-              valor_pvt: grupos.veiculo?.valor_pvt ?? grupos.veiculo?.valor_avaliacao ?? '',
+              valor_avaliacao: grupos.veiculo?.valor_avaliacao ?? '',
               bem_financiado: Boolean(grupos.veiculo?.bem_financiado),
             },
             tiposSeguros

@@ -47,7 +47,7 @@ export default function FormVeiculos() {
                 <RHFNumberField name="veiculo.valor" label="Valor" tipo="CVE" />
               </GridItem>
               <GridItem sm={6} md={3}>
-                <RHFNumberField name="veiculo.valor_pvt" label="Valor PVT" tipo="CVE" />
+                <RHFNumberField name="veiculo.valor_avaliacao" label="Valor avaliação" tipo="CVE" />
               </GridItem>
               <GridItem children={<FormEntidades label="Dono" name="veiculo.donos" />} />
             </>

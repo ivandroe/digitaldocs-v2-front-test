@@ -101,7 +101,7 @@ export function VeiculosBlock({ veiculos }) {
                   value={fCurrency(v.valor_cobertura)}
                   sxValue={{ fontWeight: 'bold' }}
                 />
-                <InlineRow label="Valor PVT" value={fCurrency(v.valor_pvt)} sxValue={{ fontWeight: 'bold' }} />
+                <InlineRow label="Valor avaliação" value={fCurrency(v.valor_avaliacao)} sxValue={{ fontWeight: 'bold' }} />
                 <InlineRow label="Valor" value={fCurrency(v.valor)} />
               </Stack>
               <Stack spacing={1} sx={{ width: 1 }}>
@@ -277,7 +277,7 @@ export function ImovelBlock({ items = [], tipo }) {
                   value={fCurrency(item.valor_cobertura)}
                   sxValue={{ fontWeight: 'bold' }}
                 />
-                <InlineRow label="Valor PVT" value={fCurrency(item.valor_pvt)} sxValue={{ fontWeight: 'bold' }} />
+                <InlineRow label="Valor avaliação" value={fCurrency(item.valor_avaliacao)} sxValue={{ fontWeight: 'bold' }} />
               </Stack>
               <Stack spacing={1} sx={{ width: 1 }}>
                 <InlineRow label="NIP" value={item.nip} />

@@ -49,10 +49,10 @@ export const shapeGarantia = () =>
           then: () => Yup.mixed().notRequired(),
           otherwise: () => shapeNumberStd('Valor'),
         }),
-        valor_pvt: Yup.mixed().when('bem_financiado', {
+        valor_avaliacao: Yup.mixed().when('bem_financiado', {
           is: true,
           then: () => Yup.mixed().notRequired(),
-          otherwise: () => shapeNumberStd('Valor PVT'),
+          otherwise: () => shapeNumberStd('Valor avaliação'),
         }),
         marca: Yup.string().when('bem_financiado', {
           is: true,
@@ -117,10 +117,10 @@ const shapeImovel = (tipo) =>
         otherwise: () => shapeEntidades(),
       }),
       seguros: shapeSegurosLista(true),
-      valor_pvt: Yup.mixed().when('bem_financiado', {
+      valor_avaliacao: Yup.mixed().when('bem_financiado', {
         is: true,
         then: () => Yup.mixed().notRequired(),
-        otherwise: () => shapeNumberStd('Valor PVT'),
+        otherwise: () => shapeNumberStd('Valor avaliação'),
       }),
       zona: Yup.string().when('bem_financiado', {
         is: true,

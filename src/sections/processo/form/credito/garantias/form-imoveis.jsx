@@ -111,7 +111,7 @@ function Bem({ name, isAp, isTerreno, bemFinanciado }) {
               <RHFTextField name={`${name}.numero_inscricao_hipoteca`} label="Nº inscrição hipoteca" />
             </GridItem>
             <GridItem sm={6} md={4} lg={(isTerreno && 2.4) || (isAp && 2) || 3}>
-              <RHFNumberField name={`${name}.valor_pvt`} label="Valor PVT" tipo="CVE" />
+              <RHFNumberField name={`${name}.valor_avaliacao`} label="Valor avaliação" tipo="CVE" />
             </GridItem>
             <GridItem>
               <LocalizacaoBlock name={name} />

@@ -67,7 +67,7 @@ function renderColumns(item, row) {
     veiculos: {
       kpis: [
         ['Valor cobertura', fCurrency(row?.valor_cobertura)],
-        ['Valor PVT', fCurrency(row?.valor_avaliacao ?? row?.valor_pvt)],
+        ['Valor avaliação', fCurrency(row?.valor_avaliacao)],
       ],
       details: [
         ['Marca', row?.marca],
@@ -81,7 +81,7 @@ function renderColumns(item, row) {
     imoveis: {
       kpis: [
         ['Valor cobertura', fCurrency(row?.valor_cobertura)],
-        ['Valor PVT', fCurrency(row?.valor_avaliacao ?? row?.valor_pvt)],
+        ['Valor avaliação', fCurrency(row?.valor_avaliacao)],
       ],
       details: [
         ['Área', row?.area],

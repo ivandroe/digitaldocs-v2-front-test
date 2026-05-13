@@ -177,7 +177,7 @@ function mapVeiculo(row) {
     matricula: row?.matricula ?? '',
     ano_fabrico: row?.ano_fabrico ? String(row.ano_fabrico) : '',
     valor: row?.valor ? String(row.valor) : '',
-    valor_avaliacao: row?.valor_pvt ? String(row.valor_pvt) : '',
+    valor_avaliacao: row?.valor_avaliacao ? String(row.valor_avaliacao) : '',
     seguros: (row?.seguros ?? []).map(mapSeguroDoBem),
   };
   if (bemFinanciado) return { ...base, bem_financiado: true };
@@ -197,7 +197,7 @@ function mapImovel(row) {
     identificacao_fracao: row?.identificacao_fracao ?? '',
     numero_andar: row?.numero_andar ?? '',
     area: row?.area ?? '',
-    valor_avaliacao: row?.valor_pvt ? String(row.valor_pvt) : '',
+    valor_avaliacao: row?.valor_avaliacao ? String(row.valor_avaliacao) : '',
     ...morada,
     seguros: (row?.seguros ?? []).map(mapSeguroDoBem),
   };
