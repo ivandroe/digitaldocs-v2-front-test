@@ -27,8 +27,8 @@ function normalizarMetadadosGarantia(metadados) {
   if (!metadados) {
     return { contas: [], seguros: [], titulos: [], imoveis: {}, fiadores: [], livrancas: [] };
   }
-  // Formato antigo
-  if (metadados?.imoveis || metadados?.fiadores || metadados?.livrancas) {
+  // Formato antigo (imoveis aninhado em chave)
+  if (metadados?.imoveis) {
     return {
       contas: metadados?.contas ?? [],
       seguros: metadados?.seguros ?? [],
@@ -38,8 +38,8 @@ function normalizarMetadadosGarantia(metadados) {
       livrancas: metadados?.livrancas ?? [],
     };
   }
-  // Formato v2 — { numero_livranca, bens[], garantidores[] }
-  const bens = metadados?.bens ?? [];
+  // Formato v2 — { numero_livranca?, bem?, bens?[], garantidores[] }
+  const bens = metadados?.bem ? [metadados.bem] : (metadados?.bens ?? []);
   const grupo = (tipo) => bens.filter((b) => b?.tipo === tipo);
   const livrancas = metadados?.numero_livranca
     ? [{ numero_livranca: metadados.numero_livranca, avalistas: metadados?.garantidores ?? [] }]

@@ -1,3 +1,4 @@
+import { useState } from 'react';
 // @mui
 import Box from '@mui/material/Box';
 import Grid from '@mui/material/Grid';
@@ -19,6 +20,7 @@ import { noDados } from '@/components/Panel';
 import { DefaultAction } from '@/components/Actions';
 import { SearchNotFoundSmall } from '@/components/table/SearchNotFound';
 import MetadadosCreditoForm from '../../form/credito/form-metadados-credito';
+import BemFinanciadoDetalhes from './bem-financiado-detalhes';
 
 // ---------------------------------------------------------------------------------------------------------------------
 
@@ -26,6 +28,7 @@ export default function MetadadosCredito({ dados, outros, modificar = false, ids
   const theme = useTheme();
   const isOpenModal = useSelector((state) => state.digitaldocs.isOpenModal);
   const { financeiroPrincipal, cards } = useMetadadosCreditoData(dados);
+  const [bemDetalhe, setBemDetalhe] = useState(null);
 
   const openModal = () => {
     dispatch(setModal({ modal: 'form-metadados' }));
@@ -84,15 +87,20 @@ export default function MetadadosCredito({ dados, outros, modificar = false, ids
                         <Typography variant="caption" sx={{ color: 'text.secondary', fontWeight: 'medium' }}>
                           {item.title}:
                         </Typography>
-                        <Box sx={{ textAlign: 'right' }}>
-                          <Typography
-                            variant="body2"
-                            noWrap={!item.noWrap}
-                            sx={{ fontWeight: item.bold ? 700 : 400, color: item.color || 'text.primary', pr: 0.25 }}
-                          >
-                            {item.value || noDados('(N/D)')}
-                          </Typography>
-                        </Box>
+                        <Stack direction="row" spacing={0.5} alignItems="center">
+                          <Box sx={{ textAlign: 'right' }}>
+                            <Typography
+                              variant="body2"
+                              noWrap={!item.noWrap}
+                              sx={{ fontWeight: item.bold ? 700 : 400, color: item.color || 'text.primary', pr: 0.25 }}
+                            >
+                              {item.value || noDados('(N/D)')}
+                            </Typography>
+                          </Box>
+                          {item.bem && (
+                            <DefaultAction small label="DETALHES" onClick={() => setBemDetalhe(item.bem)} />
+                          )}
+                        </Stack>
                       </Box>
                     ))}
                   </Stack>
@@ -117,6 +125,8 @@ export default function MetadadosCredito({ dados, outros, modificar = false, ids
       {isOpenModal === 'form-metadados' && (
         <MetadadosCreditoForm onClose={() => dispatch(setModal())} dados={dados} ids={ids} outros={outros} />
       )}
+
+      {bemDetalhe && <BemFinanciadoDetalhes bem={bemDetalhe} onClose={() => setBemDetalhe(null)} />}
     </Box>
   );
 }

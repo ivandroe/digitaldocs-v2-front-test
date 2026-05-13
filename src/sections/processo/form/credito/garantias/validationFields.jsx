@@ -8,6 +8,7 @@ export const shapeGarantia = () =>
   Yup.object({
     percentagem_cobertura: shapePercentagem('Cobertura'),
     tipo_garantia: Yup.mixed().required().label('Garantia'),
+    bem_financiado: Yup.boolean(),
     subtipo_garantia: Yup.mixed().when('tipo_garantia', {
       is: (tipo) => Boolean(tipo?.subtipos),
       then: (schema) => schema.required().label('Subtipo'),
@@ -16,46 +17,71 @@ export const shapeGarantia = () =>
     livrancas: Yup.array(
       Yup.object({ numero_livranca: Yup.string().required().label('Nº de livrança'), avalistas: shapeEntidades() })
     ),
-    contas: Yup.array(
-      Yup.object({
-        percentagem_cobertura: shapePercentagem('Cobertura'),
+    conta: Yup.object()
+      .nullable()
+      .shape({
         numero_conta: Yup.string().required().label('Nº de conta'),
-      })
-    ),
+      }),
     fiadores: shapeEntidades(),
-    seguros: shapeSeguros(false),
-    predios: shapeImoveis('Prédio'),
-    terrenos: shapeImoveis('Terreno'),
-    apartamentos: shapeImoveis('Apartamento'),
-    titulos: Yup.array(
-      Yup.object({
-        seguros: shapeSeguros(true),
+    seguro: shapeSeguro(false),
+    predio: shapeImovel('Prédio'),
+    terreno: shapeImovel('Terreno'),
+    apartamento: shapeImovel('Apartamento'),
+    titulo: Yup.object()
+      .nullable()
+      .shape({
+        seguros: shapeSegurosLista(true),
         codigo: Yup.string().required().label('Código'),
         numero_cliente: shapeNumberStd('Nº de cliente'),
-        percentagem_cobertura: shapePercentagem('Cobertura'),
-      })
-    ),
-    veiculos: Yup.array(
-      Yup.object({
-        donos: shapeEntidades(),
-        seguros: shapeSeguros(true),
-        valor: shapeNumberStd('Valor'),
-        valor_pvt: shapeNumberStd('Valor PVT'),
-        // nura: Yup.string().required().label('NURA'),
-        marca: Yup.string().required().label('Marca'),
-        modelo: Yup.string().required().label('Modelo'),
-        // ano_fabrico: shapeNumberStd('Ano de fabricação'),
-        percentagem_cobertura: shapePercentagem('Cobertura'),
-        // matricula: Yup.string().required().label('Matrícula'),
-      })
-    ),
+      }),
+    veiculo: Yup.object()
+      .nullable()
+      .shape({
+        bem_financiado: Yup.boolean(),
+        donos: Yup.array().when('bem_financiado', {
+          is: true,
+          then: () => Yup.array().notRequired(),
+          otherwise: () => shapeEntidades(),
+        }),
+        seguros: shapeSegurosLista(true),
+        valor: Yup.mixed().when('bem_financiado', {
+          is: true,
+          then: () => Yup.mixed().notRequired(),
+          otherwise: () => shapeNumberStd('Valor'),
+        }),
+        valor_pvt: Yup.mixed().when('bem_financiado', {
+          is: true,
+          then: () => Yup.mixed().notRequired(),
+          otherwise: () => shapeNumberStd('Valor PVT'),
+        }),
+        marca: Yup.string().when('bem_financiado', {
+          is: true,
+          then: (s) => s.notRequired(),
+          otherwise: (s) => s.required().label('Marca'),
+        }),
+        modelo: Yup.string().when('bem_financiado', {
+          is: true,
+          then: (s) => s.notRequired(),
+          otherwise: (s) => s.required().label('Modelo'),
+        }),
+        matricula: Yup.string()
+          .nullable()
+          .test('matricula-ou-nura', 'Indique a matrícula ou o NURA', function (value) {
+            return Boolean(value) || Boolean(this.parent?.nura);
+          }),
+        nura: Yup.string()
+          .nullable()
+          .test('nura-ou-matricula', 'Indique a matrícula ou o NURA', function (value) {
+            return Boolean(value) || Boolean(this.parent?.matricula);
+          }),
+      }),
   });
 
 // ---------------------------------------------------------------------------------------------------------------------
 
 const shapeEntidades = () => Yup.array(Yup.object({ numero_entidade: shapeNumberStd('Nº de entidade') }));
 
-const shapeSeguros = (tipo) =>
+const shapeSegurosLista = (tipo) =>
   Yup.array(
     Yup.object({
       valor: shapeNumberStd('Valor'),
@@ -68,20 +94,70 @@ const shapeSeguros = (tipo) =>
     })
   );
 
-const shapeImoveis = (tipo) =>
-  Yup.array(
-    Yup.object({
-      donos: shapeEntidades(),
-      seguros: shapeSeguros(true),
-      valor_pvt: shapeNumberStd('Valor PVT'),
-      zona: Yup.string().required().label('Zona'),
-      percentagem_cobertura: shapePercentagem('Cobertura'),
-      freguesia: Yup.mixed().required().label('Freguesia'),
-      tipo_matriz: Yup.mixed().required().label('Tipo de matriz'),
-      area: validacao(tipo === 'Terreno', Yup.string().required().label('Área')),
-      localizacao_conservatoria: Yup.mixed().required().label('Localização da conservatória'),
-      identificacao_fracao: validacao(tipo === 'Apartamento', Yup.string().required().label('Identificação fração')),
-      numero_inscricao_hipoteca: Yup.string().required().label('Nº inscrição hipoteca'),
+const shapeSeguro = (tipo) =>
+  Yup.object()
+    .nullable()
+    .shape({
+      valor: shapeNumberStd('Valor'),
+      premio: shapeNumberStd('Prémio'),
+      apolice: Yup.string().required().label('Apólice'),
+      seguradora: Yup.mixed().required().label('Seguradora'),
+      tipo: validacao(tipo, Yup.mixed().required().label('Tipo')),
+      periodicidade: Yup.mixed().required().label('Periodicidade'),
+    });
+
+const shapeImovel = (tipo) =>
+  Yup.object()
+    .nullable()
+    .shape({
+      bem_financiado: Yup.boolean(),
+      donos: Yup.array().when('bem_financiado', {
+        is: true,
+        then: () => Yup.array().notRequired(),
+        otherwise: () => shapeEntidades(),
+      }),
+      seguros: shapeSegurosLista(true),
+      valor_pvt: Yup.mixed().when('bem_financiado', {
+        is: true,
+        then: () => Yup.mixed().notRequired(),
+        otherwise: () => shapeNumberStd('Valor PVT'),
+      }),
+      zona: Yup.string().when('bem_financiado', {
+        is: true,
+        then: (s) => s.notRequired(),
+        otherwise: (s) => s.required().label('Zona'),
+      }),
+      freguesia: Yup.mixed().when('bem_financiado', {
+        is: true,
+        then: (s) => s.notRequired(),
+        otherwise: (s) => s.required().label('Freguesia'),
+      }),
+      tipo_matriz: Yup.mixed().when('bem_financiado', {
+        is: true,
+        then: (s) => s.notRequired(),
+        otherwise: (s) => s.required().label('Tipo de matriz'),
+      }),
+      area: Yup.mixed().when('bem_financiado', {
+        is: true,
+        then: (s) => s.notRequired(),
+        otherwise: () => validacao(tipo === 'Terreno', Yup.string().required().label('Área')),
+      }),
+      localizacao_conservatoria: Yup.mixed().when('bem_financiado', {
+        is: true,
+        then: (s) => s.notRequired(),
+        otherwise: (s) => s.required().label('Localização da conservatória'),
+      }),
+      identificacao_fracao: Yup.mixed().when('bem_financiado', {
+        is: true,
+        then: (s) => s.notRequired(),
+        otherwise: () =>
+          validacao(tipo === 'Apartamento', Yup.string().required().label('Identificação fração')),
+      }),
+      numero_inscricao_hipoteca: Yup.string().when('bem_financiado', {
+        is: true,
+        then: (s) => s.notRequired(),
+        otherwise: (s) => s.required().label('Nº inscrição hipoteca'),
+      }),
 
       nip: Yup.string()
         .nullable()
@@ -121,5 +197,4 @@ const shapeImoveis = (tipo) =>
             return true;
           }
         ),
-    })
-  );
+    });

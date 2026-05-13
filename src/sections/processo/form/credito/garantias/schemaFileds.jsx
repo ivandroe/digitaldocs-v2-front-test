@@ -10,11 +10,11 @@ export const seguroSchema = {
   apolice: '',
   periodicidade: null,
   percentagem_cobertura: '',
-};
+}; // mantém-se cobertura para seguros nested (apólices sobre o bem)
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-export const tituloSchema = { codigo: '', numero_cliente: '', percentagem_cobertura: '', seguros: [] };
+export const tituloSchema = { codigo: '', numero_cliente: '', seguros: [] };
 
 // ---------------------------------------------------------------------------------------------------------------------
 
@@ -30,11 +30,13 @@ export const imovelSchema = {
   numero_matriz: '',
   numero_inscricao_hipoteca: '',
   identificacao_fracao: '',
-  percentagem_cobertura: '',
   numero_descricao_predial: '',
   localizacao_conservatoria: '',
+  ilha: '',
+  concelho: '',
   freguesia: null,
   tipo_matriz: null,
+  bem_financiado: false,
   donos: [],
   seguros: [],
 };
@@ -49,38 +51,46 @@ export const veiculoSchema = {
   valor_pvt: '',
   matricula: '',
   ano_fabrico: '',
-  percentagem_cobertura: '',
+  bem_financiado: false,
   donos: [],
   seguros: [],
 };
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-export function construirSchemaImoveis(dados = []) {
+export function construirSchemaImovel(row, tiposSeguros = []) {
+  if (!row) return null;
   const seguros = (rows) =>
-    rows?.map((row) => ({ ...row, tipo: { id: row?.tipo_seguro_id, label: row?.tipo_seguro } }));
+    rows?.map((s) => {
+      const id = s?.tipo?.id ?? s?.tipo_seguro_id;
+      const label =
+        s?.tipo?.label ||
+        s?.tipo_seguro ||
+        (tiposSeguros ?? []).find((t) => t?.id === id)?.designacao ||
+        '';
+      return { ...s, tipo: id ? { id, label } : null };
+    });
 
-  return dados?.map((row) => {
-    // Aceita morada nested (formato antigo) ou flat (formato v2)
-    const morada = row?.morada ?? row;
-    const freg = listaFreguesias?.find(
-      ({ ilha, freguesia }) => ilha === morada?.ilha && freguesia === morada?.freguesia
-    );
+  const morada = row?.morada ?? row;
+  const freg = listaFreguesias?.find(
+    ({ ilha, freguesia }) => ilha === morada?.ilha && freguesia === morada?.freguesia
+  );
 
-    return {
-      ...row,
-      numero_inscricao_hipoteca: row?.numero_inscricao_hipoteca ?? '',
-      rua: morada?.rua ?? '',
-      zona: morada?.zona ?? '',
-      descritivo: morada?.descritivo ?? '',
-      numero_porta: morada?.numero_porta ?? '',
-      freguesia: freg ? { ...freg, label: freg.freguesia } : null,
-      // valor_pvt mantém-se como campo da UI; em v2 chega como valor_avaliacao
-      valor_pvt: row?.valor_pvt ?? row?.valor_avaliacao ?? '',
-      seguros: Array.isArray(row?.seguros) ? seguros(row.seguros) : [],
-      donos: Array.isArray(row?.donos)
-        ? row.donos.map((d) => ({ numero_entidade: d.numero ?? d.numero_entidade ?? '' }))
-        : [],
-    };
-  });
+  return {
+    ...row,
+    numero_inscricao_hipoteca: row?.numero_inscricao_hipoteca ?? '',
+    rua: morada?.rua ?? '',
+    zona: morada?.zona ?? '',
+    descritivo: morada?.descritivo ?? '',
+    numero_porta: morada?.numero_porta ?? '',
+    ilha: morada?.ilha ?? row?.ilha ?? freg?.ilha ?? '',
+    concelho: morada?.concelho ?? row?.concelho ?? freg?.concelho ?? '',
+    freguesia: freg ? { ...freg, label: freg.freguesia } : null,
+    valor_pvt: row?.valor_pvt ?? row?.valor_avaliacao ?? '',
+    bem_financiado: Boolean(row?.bem_financiado),
+    seguros: Array.isArray(row?.seguros) ? seguros(row.seguros) : [],
+    donos: Array.isArray(row?.donos)
+      ? row.donos.map((d) => ({ numero_entidade: d.numero ?? d.numero_entidade ?? '' }))
+      : [],
+  };
 }

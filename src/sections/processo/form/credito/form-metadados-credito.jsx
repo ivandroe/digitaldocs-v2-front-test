@@ -78,7 +78,7 @@ export default function MetadadosCreditoForm({ onClose, dados = null, outros, id
           <Steps
             sx={{ mt: 4, mb: 3 }}
             activeStep={activeStep}
-            steps={['Regime', 'Condições', 'Taxas', 'Objeto', 'Entidade']}
+            steps={['Regime', 'Condições', 'Taxas', 'Bens', 'Entidade']}
           />
         }
       />
@@ -261,10 +261,7 @@ function Taxas({ dados, dadosStepper, precario }) {
 // ---------------------------------------------------------------------------------------------------------------------
 
 function Objeto({ dados, dispatch, dadosStepper }) {
-  const { tiposImoveis } = useSelector((state) => state.gaji9);
-  const imoveisList = useMemo(() => tiposImoveis.map((i) => ({ id: i?.id, label: i?.tipo })), [tiposImoveis]);
-
-  const defaultValues = getDefaultsObjeto({ dadosStepper, dados, imoveisList });
+  const defaultValues = getDefaultsObjeto({ dadosStepper, dados });
   const methods = useForm({ resolver: yupResolver(schemaObjeto), defaultValues });
   const { control, handleSubmit } = methods;
   const values = useWatch({ control });
@@ -274,17 +271,8 @@ function Objeto({ dados, dispatch, dadosStepper }) {
       methods={methods}
       onSubmit={handleSubmit(() => dispatch(updateDados({ forward: true, dados: values })))}
     >
-      <Title title="Objeto do Financiamento" />
+      <Title title="Bens ou serviços financiados" />
       <Grid container spacing={3} sx={{ mt: 3 }}>
-        <GridItem sm={6}>
-          <RHFAutocompleteObj name="tipo_imovel_id" label="Tipo de imóvel" options={imoveisList} />
-        </GridItem>
-        <GridItem sm={6}>
-          <RHFTextField name="bem_servico_financiado" label="Bem/Serviço financiado" />
-        </GridItem>
-        <GridItem>
-          <RHFTextField name="finalidade_credito_habitacao" label="Finalidade cred. habitação" />
-        </GridItem>
         <GridItem children={<BensFinanciadosField />} />
       </Grid>
       <ButtonsStepper onClose={() => dispatch(updateDados({ backward: true, dados: values }))} />
@@ -350,6 +338,23 @@ function Title({ title }) {
 function EntidadesPatronaisField() {
   const { control } = useFormContext();
   const { fields, append, remove } = useFieldArray({ control, name: 'entidades_patronais' });
+  const processo = useSelector((state) => state.digitaldocs.processo);
+  const mutuariosOptions = useMemo(
+    () =>
+      (processo?.entidade ?? '')
+        .split(';')
+        .map((v) => v.trim())
+        .filter(Boolean),
+    [processo?.entidade]
+  );
+
+  useEffect(() => {
+    if (fields.length === 0) {
+      const preenchido = mutuariosOptions.length === 1 ? mutuariosOptions[0] : '';
+      append({ numero_entidade_mutuario: preenchido, numero_entidade_patronal: '' });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   return (
     <Stack sx={{ flexGrow: 1, pt: 1 }}>
@@ -368,9 +373,9 @@ function EntidadesPatronaisField() {
               <Card sx={{ p: 1, boxShadow: (theme) => theme.customShadows.cardAlt }}>
                 <Stack direction="row" alignItems="center" spacing={1}>
                   <Stack direction="row" spacing={2} sx={{ flexGrow: 1 }}>
-                    <RHFNumberField
-                      noFormat
+                    <RHFAutocompleteSmp
                       label="Nº mutuário"
+                      options={mutuariosOptions}
                       name={`entidades_patronais[${index}].numero_entidade_mutuario`}
                     />
                     <RHFNumberField
@@ -426,7 +431,7 @@ function ComissaoAdicionalField({ ativaKey, valueKey, label, ativa }) {
 // ---------------------------------------------------------------------------------------------------------------------
 
 function BensFinanciadosField() {
-  const { control, watch, setValue } = useFormContext();
+  const { control, watch } = useFormContext();
   const { fields, append, remove } = useFieldArray({ control, name: 'bens_financiados' });
   const bens = watch('bens_financiados') ?? [];
 
@@ -455,9 +460,6 @@ function BensFinanciadosField() {
                         label="Tipo do bem"
                         name={`bens_financiados[${index}].tipo`}
                         options={TIPOS_BEM_FINANCIADO}
-                        onChange={(_, newValue) => {
-                          setValue(`bens_financiados[${index}]`, { ...bemFinanciadoSchema, tipo: newValue });
-                        }}
                       />
                     </GridItem>
                     {isImovel && (

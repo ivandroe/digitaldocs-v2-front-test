@@ -104,11 +104,8 @@ export function useMetadadosCreditoData(dados) {
       },
       {
         id: 'objeto_ensino',
-        titulo: 'Objeto & Ensino/Credibolsa',
+        titulo: 'Ensino/Credibolsa',
         dados: [
-          { title: 'Tipo de imóvel', value: dados?.tipo_imovel?.label || dados?.tipo_imovel || dados?.tipo_imovel_id },
-          { title: 'Bem/Serviço', value: dados?.bem_servico_financiado, noWrap: false },
-          { title: 'Finalidade', value: dados?.finalidade_credito_habitacao, noWrap: false },
           { title: 'Nível de formação', value: dados?.nivel_formacao },
           { title: 'Curso', value: dados?.designacao_curso, noWrap: false },
           {
@@ -189,6 +186,15 @@ function buildEntidadesPatronaisCard(dados) {
   ];
 }
 
+const TIPO_BEM_LABEL = {
+  apartamento: 'Apartamento',
+  predio: 'Prédio',
+  terreno: 'Terreno',
+  veiculo: 'Veículo',
+  equipamento: 'Equipamento',
+  outro: 'Outro',
+};
+
 function buildBensFinanciadosCard(dados) {
   const lista = Array.isArray(dados?.bens_financiados) ? dados.bens_financiados : [];
   if (!lista.length) return [];
@@ -198,23 +204,31 @@ function buildBensFinanciadosCard(dados) {
       id: 'bens_financiados',
       titulo: 'Bens financiados',
       dados: lista.map((bem, i) => ({
-        title: `${i + 1}. ${bem?.tipo || '—'}`,
+        title: `${i + 1}. ${TIPO_BEM_LABEL[bem?.tipo] || bem?.tipo || '—'}`,
         value: descreverBemFinanciado(bem),
         noWrap: false,
+        bem,
       })),
     },
   ];
 }
 
 function descreverBemFinanciado(bem) {
-  const partes = [];
-  if (bem?.marca || bem?.modelo) partes.push([bem?.marca, bem?.modelo].filter(Boolean).join(' '));
-  if (bem?.matricula) partes.push(`Matr. ${bem.matricula}`);
-  if (bem?.nip) partes.push(`NIP ${bem.nip}`);
-  if (bem?.numero_matriz) partes.push(`Mtz ${bem.numero_matriz}`);
-  if (bem?.identificacao_fracao) partes.push(`Frac. ${bem.identificacao_fracao}`);
-  if (bem?.area) partes.push(`${bem.area} m²`);
-  if (bem?.descritivo) partes.push(bem.descritivo);
-  if (bem?.valor) partes.push(fCurrency(bem.valor));
-  return partes.length ? partes.join(' · ') : '—';
+  const id = identBem(bem);
+  const avaliacao = bem?.valor_avaliacao ? fCurrency(bem.valor_avaliacao) : '';
+  return [id, avaliacao].filter(Boolean).join(' · ') || '—';
+}
+
+const valido = (v) => v !== null && v !== undefined && v !== '' && v !== 'null';
+
+function identBem(bem) {
+  if (bem?.tipo === 'veiculo')
+    return (valido(bem?.matricula) && bem.matricula) || [bem?.marca, bem?.modelo].filter(valido).join(' ') || '';
+  if (['apartamento', 'predio', 'terreno'].includes(bem?.tipo)) {
+    if (valido(bem?.nip)) return `NIP ${bem.nip}`;
+    if (valido(bem?.numero_matriz)) return `Mtz ${bem.numero_matriz}`;
+    return '';
+  }
+  if (bem?.tipo === 'equipamento' || bem?.tipo === 'outro') return valido(bem?.descritivo) ? bem.descritivo : '';
+  return '';
 }

@@ -79,6 +79,8 @@ export function getDefaultsTaxas({ dadosStepper, dados, precario }) {
   }
 
   const comissaoOrig = (key) => dadosStepper?.[key] ?? dados?.[key] ?? null;
+  const comissaoAtiva = (key) =>
+    dadosStepper?.[`${key}_ativa`] !== undefined ? Boolean(dadosStepper[`${key}_ativa`]) : Boolean(dados?.[key]);
 
   return {
     modo_taxa_equivalente: resolveField('modo_taxa_equivalente', {
@@ -94,9 +96,9 @@ export function getDefaultsTaxas({ dadosStepper, dados, precario }) {
     taxa_comissao_abertura: resolve('taxa_comissao_abertura', 1.75),
     taxa_comissao_imobilizacao: resolve('taxa_comissao_imobilizacao', 0),
     taxa_imposto_selo_utilizacao: resolve('taxa_imposto_selo_utilizacao', 0.5),
-    comissao_avaliacao_ativa: !!comissaoOrig('comissao_avaliacao'),
+    comissao_avaliacao_ativa: comissaoAtiva('comissao_avaliacao'),
     comissao_avaliacao: normalizarComissao(comissaoOrig('comissao_avaliacao')),
-    comissao_vistoria_ativa: !!comissaoOrig('comissao_vistoria'),
+    comissao_vistoria_ativa: comissaoAtiva('comissao_vistoria'),
     comissao_vistoria: normalizarComissao(comissaoOrig('comissao_vistoria')),
   };
 }
@@ -111,12 +113,8 @@ function normalizarComissao(comissao) {
   };
 }
 
-export function getDefaultsObjeto({ dadosStepper, dados, imoveisList }) {
+export function getDefaultsObjeto({ dadosStepper, dados }) {
   return {
-    bem_servico_financiado: dadosStepper?.bem_servico_financiado || dados?.bem_servico_financiado || '',
-    finalidade_credito_habitacao:
-      dadosStepper?.finalidade_credito_habitacao || dados?.finalidade_credito_habitacao || '',
-    tipo_imovel_id: dadosStepper?.tipo_imovel_id || imoveisList?.find((i) => i.id === dados?.tipo_imovel_id) || null,
     bens_financiados: normalizarBensFinanciados(dadosStepper?.bens_financiados ?? dados?.bens_financiados),
   };
 }
@@ -236,7 +234,7 @@ const shapeComissao = (ativaKey) =>
 
 export const schemaTaxas = Yup.object().shape({
   taxa_mora: Yup.number().min(0).max(100).required().label('Taxa de mora'),
-  taxa_juro_desconto: Yup.number().min(0).max(100).required().label('Spread'),
+  taxa_juro_desconto: Yup.number().min(-100).max(100).required().label('Spread'),
   taxa_imposto_selo: Yup.number().positive().max(100).required().label('Taxa de imposto selo'),
   taxa_juro_precario: Yup.number().positive().max(100).required().label('Taxa de juros precário'),
   taxa_comissao_abertura: Yup.number().min(0).max(100).required().label('Taxa de comissão abertura'),
@@ -311,7 +309,6 @@ export function buildPayload(rawData) {
     meses_vencimento: rawData.meses_vencimento ? Number(rawData.meses_vencimento) : undefined,
     periodo_carencia: rawData.periodo_carencia ? Number(rawData.periodo_carencia) : undefined,
     prazo_utilizacao: rawData.prazo_utilizacao ? Number(rawData.prazo_utilizacao) : undefined,
-    tipo_imovel_id: rawData.tipo_imovel_id?.id ? Number(rawData.tipo_imovel_id?.id) : undefined,
     // Taxas
     taxa_mora: String(rawData.taxa_mora || '0'),
     taxa_imposto_selo: String(rawData.taxa_imposto_selo || '0'),
@@ -344,10 +341,8 @@ export function buildPayload(rawData) {
       ? formatDate(rawData.data_vencimento_prestacao1, 'yyyy-MM-dd')
       : '',
     // Strings
-    bem_servico_financiado: String(rawData.bem_servico_financiado || ''),
     nome_empresa_fornecedora: String(rawData.nome_empresa_fornecedora || ''),
     nib_vendedor_ou_fornecedor: String(rawData.nib_vendedor_ou_fornecedor || ''),
-    finalidade_credito_habitacao: String(rawData.finalidade_credito_habitacao || ''),
     instituicao_credito_conta_vendedor_ou_fornecedor: String(
       rawData.instituicao_credito_conta_vendedor_ou_fornecedor || ''
     ),
@@ -389,35 +384,64 @@ function mapComissao(comissao) {
   };
 }
 
+const CAMPOS_POR_TIPO_BEM = {
+  apartamento: [
+    'nip',
+    'numero_descricao_predial',
+    'numero_matriz',
+    'tipo_matriz',
+    'numero_inscricao_hipoteca',
+    'identificacao_fracao',
+    'numero_andar',
+    'localizacao_conservatoria',
+    'ilha',
+    'concelho',
+    'freguesia',
+    'zona',
+    'rua',
+    'numero_porta',
+  ],
+  predio: [
+    'nip',
+    'numero_descricao_predial',
+    'numero_matriz',
+    'tipo_matriz',
+    'numero_inscricao_hipoteca',
+    'localizacao_conservatoria',
+    'ilha',
+    'concelho',
+    'freguesia',
+    'zona',
+    'rua',
+    'numero_porta',
+  ],
+  terreno: [
+    'nip',
+    'numero_descricao_predial',
+    'numero_matriz',
+    'tipo_matriz',
+    'numero_inscricao_hipoteca',
+    'area',
+    'localizacao_conservatoria',
+    'ilha',
+    'concelho',
+    'freguesia',
+    'zona',
+    'rua',
+    'numero_porta',
+  ],
+  veiculo: ['matricula', 'marca', 'modelo', 'ano_fabrico', 'nura'],
+  equipamento: ['descritivo'],
+  outro: ['descritivo'],
+};
+
 function mapBensFinanciados(lista) {
   const valid = (lista ?? []).filter((bem) => bem?.tipo?.id || bem?.tipo);
   if (valid.length === 0) return undefined;
   return valid.map((bem) => {
     const tipo = bem?.tipo?.id ?? bem?.tipo;
     const out = { tipo };
-    [
-      'nip',
-      'numero_descricao_predial',
-      'numero_matriz',
-      'tipo_matriz',
-      'identificacao_fracao',
-      'numero_andar',
-      'area',
-      'numero_inscricao_hipoteca',
-      'localizacao_conservatoria',
-      'ilha',
-      'concelho',
-      'freguesia',
-      'zona',
-      'rua',
-      'numero_porta',
-      'matricula',
-      'marca',
-      'modelo',
-      'ano_fabrico',
-      'nura',
-      'descritivo',
-    ].forEach((key) => {
+    (CAMPOS_POR_TIPO_BEM[tipo] ?? []).forEach((key) => {
       if (bem?.[key] !== undefined && bem?.[key] !== '' && bem?.[key] !== null) out[key] = String(bem[key]);
     });
     if (bem?.valor !== undefined && bem?.valor !== '' && bem?.valor !== null) out.valor = String(bem.valor);

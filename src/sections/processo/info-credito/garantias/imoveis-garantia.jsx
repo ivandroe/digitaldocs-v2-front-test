@@ -7,9 +7,9 @@ import Typography from '@mui/material/Typography';
 // utils
 import { ptDate } from '@/utils/formatTime';
 import { useSelector } from '@/redux/store';
-import { fNumber, fCurrency, fPercent } from '@/utils/formatNumber';
+import { fNumber, fCurrency } from '@/utils/formatNumber';
 // components
-import { noDados } from '@/components/Panel';
+import Label from '@/components/Label';
 import TableInfoGarantias from './table-info-garantias';
 import { DonosBlock } from '@/modules/gaji9/components/detalhes-credito/garantia-sub-components';
 
@@ -33,10 +33,11 @@ export default function ImoveisGarantia({ dados = [], item }) {
       {item !== 'livrancas' &&
         dados.map((row, index) => (
           <GarantiaLayout
-            donos={row?.donos}
+            donos={row?.bem_financiado ? [] : row?.donos}
             seguros={row?.seguros}
             key={row?.id ?? `${item}_${index}`}
             donosTitle={`Dono(s) do ${LABEL_MAP[item] || 'item'}`}
+            bemFinanciado={row?.bem_financiado}
           >
             {renderColumns(item, row)}
           </GarantiaLayout>
@@ -51,24 +52,22 @@ function renderColumns(item, row) {
   const specs = {
     contas: {
       kpis: [
-        ['Cobertura', fPercent(row?.percentagem_cobertura)],
         ['Valor cobertura', fCurrency(row?.valor_cobertura)],
-        ['Saldo', `${fNumber(row?.saldo)} ${row?.moeda}`],
+        ['Saldo', row?.saldo ? `${fNumber(row.saldo)} ${row?.moeda ?? ''}`.trim() : null],
       ],
       details: [
         ['Nº de conta', row?.numero_conta],
         ['Constituição', ptDate(row?.data_constituicao)],
         ['Início', ptDate(row?.data_inicio)],
         ['Vencimento', ptDate(row?.data_vencimento)],
-        ['Prazo', row?.prazo ? `${row?.prazo} dias` : ''],
+        ['Prazo', row?.prazo ? `${row?.prazo} dias` : null],
         ['Balcão', row?.balcao],
       ],
     },
     veiculos: {
       kpis: [
-        ['Cobertura', fPercent(row?.percentagem_cobertura)],
         ['Valor cobertura', fCurrency(row?.valor_cobertura)],
-        ['Valor PVT', fCurrency(row?.valor_pvt)],
+        ['Valor PVT', fCurrency(row?.valor_avaliacao ?? row?.valor_pvt)],
       ],
       details: [
         ['Marca', row?.marca],
@@ -76,22 +75,21 @@ function renderColumns(item, row) {
         ['Matrícula', row?.matricula],
         ['NURA', row?.nura],
         ['Ano fabricação', row?.ano_fabrico],
-        ['Valor', fCurrency(row?.valor)],
+        ['Valor', row?.valor ? fCurrency(row.valor) : null],
       ],
     },
     imoveis: {
       kpis: [
-        ['Cobertura', fPercent(row?.percentagem_cobertura)],
         ['Valor cobertura', fCurrency(row?.valor_cobertura)],
-        ['Valor PVT', fCurrency(row?.valor_pvt || row?.valor_avaliacao)],
+        ['Valor PVT', fCurrency(row?.valor_avaliacao ?? row?.valor_pvt)],
       ],
       details: [
         ['Área', row?.area],
         ['Tipo de matriz', row?.tipo_matriz],
         ['Nº de matriz', row?.numero_matriz],
-        ['Nº de descrição predial', row?.numero_descricao_predial || undefined],
-        ['NIP', row?.nip || undefined],
-        ['Nº inscrição hipoteca', row?.numero_inscricao_hipoteca || undefined],
+        ['Nº de descrição predial', row?.numero_descricao_predial],
+        ['NIP', row?.nip],
+        ['Nº inscrição hipoteca', row?.numero_inscricao_hipoteca],
         ['Nº de andar', row?.numero_andar],
         ['Identificação fração', row?.identificacao_fracao],
         ['Conservatória', row?.localizacao_conservatoria],
@@ -101,14 +99,13 @@ function renderColumns(item, row) {
         ['Concelho', row?.morada?.concelho ?? row?.concelho],
         ['Freguesia', row?.morada?.freguesia ?? row?.freguesia],
         ['Zona', row?.morada?.zona ?? row?.zona],
-        ['Rua', row?.morada?.rua ?? row?.rua ?? undefined],
-        ['Nº de porta', row?.morada?.numero_porta ?? row?.numero_porta ?? undefined],
-        ['Descritivo', row?.morada?.descritivo ?? row?.descritivo ?? undefined],
+        ['Rua', row?.morada?.rua ?? row?.rua],
+        ['Nº de porta', row?.morada?.numero_porta ?? row?.numero_porta],
+        ['Descritivo', row?.morada?.descritivo ?? row?.descritivo],
       ],
     },
     titulos: {
       kpis: [
-        ['Cobertura', fPercent(row?.percentagem_cobertura)],
         ['Valor cobertura', fCurrency(row?.valor_cobertura)],
         ['Valor do título', fCurrency(row?.valor_titulo)],
       ],
@@ -127,6 +124,10 @@ function renderColumns(item, row) {
   const current = isImovel ? specs.imoveis : specs[item];
 
   if (!current) return null;
+
+  const filtrarPreenchidos = (lista) => lista.filter(([, v]) => v != null && v !== '');
+  current.details = filtrarPreenchidos(current.details);
+  if (current.address) current.address = filtrarPreenchidos(current.address);
 
   return (
     <Grid container spacing={4}>
@@ -176,7 +177,7 @@ function renderColumns(item, row) {
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-function GarantiaLayout({ children, donos, seguros, donosTitle }) {
+function GarantiaLayout({ children, donos, seguros, donosTitle, bemFinanciado }) {
   return (
     <Paper
       variant="outlined"
@@ -188,6 +189,11 @@ function GarantiaLayout({ children, donos, seguros, donosTitle }) {
         '&:hover': { boxShadow: (theme) => theme.customShadows.z12 },
       }}
     >
+      {bemFinanciado && (
+        <Box sx={{ position: 'absolute', top: 8, right: 8 }}>
+          <Label color="info">Bem financiado</Label>
+        </Box>
+      )}
       <Stack spacing={3}>
         {children}
 
@@ -205,19 +211,13 @@ function GarantiaLayout({ children, donos, seguros, donosTitle }) {
 // ---------------------------------------------------------------------------------------------------------------------
 
 function Item({ title, value }) {
-  const hasValue = value !== null && value !== undefined && value !== '';
-  if (value === undefined) return null;
-
+  if (value == null || value === '') return null;
   return (
     <Stack direction="row" spacing={1} alignItems="flex-end">
       <Typography variant="body2" sx={{ color: 'text.secondary', whiteSpace: 'nowrap' }}>
         {title}:
       </Typography>
-      {hasValue ? (
-        <Typography variant="body2">{title === 'Balcão' ? <Balcao balcao={value} /> : value}</Typography>
-      ) : (
-        noDados('(Não defenido...)')
-      )}
+      <Typography variant="body2">{title === 'Balcão' ? <Balcao balcao={value} /> : value}</Typography>
     </Stack>
   );
 }
