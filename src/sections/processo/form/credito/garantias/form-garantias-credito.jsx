@@ -94,6 +94,7 @@ export default function FormGarantias({ dados, processoId, onClose }) {
             {
               ...grupos.veiculo,
               valor_avaliacao: grupos.veiculo?.valor_avaliacao ?? '',
+              localizacao_conservatoria: grupos.veiculo?.localizacao_conservatoria ?? '',
               bem_financiado: Boolean(grupos.veiculo?.bem_financiado),
             },
             tiposSeguros

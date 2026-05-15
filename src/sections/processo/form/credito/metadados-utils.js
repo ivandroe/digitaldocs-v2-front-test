@@ -430,7 +430,7 @@ const CAMPOS_POR_TIPO_BEM = {
     'rua',
     'numero_porta',
   ],
-  veiculo: ['matricula', 'marca', 'modelo', 'ano_fabrico', 'nura'],
+  veiculo: ['matricula', 'marca', 'modelo', 'ano_fabrico', 'nura', 'localizacao_conservatoria'],
   equipamento: ['descritivo'],
   outro: ['descritivo'],
 };

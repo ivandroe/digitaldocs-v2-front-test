@@ -51,6 +51,7 @@ export const veiculoSchema = {
   valor_avaliacao: '',
   matricula: '',
   ano_fabrico: '',
+  localizacao_conservatoria: '',
   bem_financiado: false,
   donos: [],
   seguros: [],

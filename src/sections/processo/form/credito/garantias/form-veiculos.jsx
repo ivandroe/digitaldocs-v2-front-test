@@ -6,11 +6,13 @@ import Card from '@mui/material/Card';
 import Stack from '@mui/material/Stack';
 import Divider from '@mui/material/Divider';
 import Typography from '@mui/material/Typography';
+// utils
+import { listaFreguesias } from '@/_mock';
 // components
 import FormSeguros from './form-seguros';
 import FormEntidades from './form-entidades';
 import GridItem from '@/components/GridItem';
-import { RHFTextField, RHFNumberField } from '@/components/hook-form';
+import { RHFTextField, RHFNumberField, RHFAutocompleteSmp } from '@/components/hook-form';
 
 // ---------------------------------------------------------------------------------------------------------------------
 
@@ -48,6 +50,13 @@ export default function FormVeiculos() {
               </GridItem>
               <GridItem sm={6} md={3}>
                 <RHFNumberField name="veiculo.valor_avaliacao" label="Valor avaliação" tipo="CVE" />
+              </GridItem>
+              <GridItem md={6}>
+                <RHFAutocompleteSmp
+                  label="Localização da conservatória"
+                  name="veiculo.localizacao_conservatoria"
+                  options={listaFreguesias?.map(({ freguesia }) => freguesia)?.sort()}
+                />
               </GridItem>
               <GridItem children={<FormEntidades label="Dono" name="veiculo.donos" />} />
             </>

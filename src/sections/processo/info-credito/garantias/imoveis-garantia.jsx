@@ -76,6 +76,7 @@ function renderColumns(item, row) {
         ['NURA', row?.nura],
         ['Ano fabricação', row?.ano_fabrico],
         ['Valor', row?.valor ? fCurrency(row.valor) : null],
+        ['Conservatória', row?.localizacao_conservatoria],
       ],
     },
     imoveis: {

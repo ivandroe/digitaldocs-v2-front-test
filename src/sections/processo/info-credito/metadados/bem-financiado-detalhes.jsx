@@ -107,13 +107,14 @@ function infoVeiculo(bem) {
     ['Matrícula', bem?.matricula],
     ['NURA', bem?.nura],
     ['Ano de fabrico', bem?.ano_fabrico],
+    ['Conservatória', bem?.localizacao_conservatoria, true],
   ];
 }
 
 // ---------------------------------------------------------------------------------------------------------------------
 
 function Section({ title, items }) {
-  const filtered = items.filter(([, v]) => v !== null && v !== undefined && v !== '');
+  const filtered = items.filter(([, v, keep]) => keep || (v !== null && v !== undefined && v !== ''));
   if (!filtered.length) return null;
   return (
     <>

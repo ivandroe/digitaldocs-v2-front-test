@@ -178,6 +178,7 @@ function mapVeiculo(row) {
     ano_fabrico: row?.ano_fabrico ? String(row.ano_fabrico) : '',
     valor: row?.valor ? String(row.valor) : '',
     valor_avaliacao: row?.valor_avaliacao ? String(row.valor_avaliacao) : '',
+    localizacao_conservatoria: row?.localizacao_conservatoria ?? '',
     seguros: (row?.seguros ?? []).map(mapSeguroDoBem),
   };
   if (bemFinanciado) return { ...base, bem_financiado: true };

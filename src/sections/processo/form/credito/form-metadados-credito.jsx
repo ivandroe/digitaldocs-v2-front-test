@@ -544,6 +544,12 @@ function BensFinanciadosField() {
                         <GridItem sm={6} md={4}>
                           <RHFTextField name={`bens_financiados[${index}].nura`} label="NURA" />
                         </GridItem>
+                        <GridItem md={6}>
+                          <RHFTextField
+                            name={`bens_financiados[${index}].localizacao_conservatoria`}
+                            label="Conservatória"
+                          />
+                        </GridItem>
                       </>
                     )}
                     {isOutroOuEquip && (
