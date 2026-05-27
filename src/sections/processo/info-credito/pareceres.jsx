@@ -18,6 +18,7 @@ import Label from '@/components/Label';
 import { DefaultAction } from '@/components/Actions';
 import { ColaboradorInfo, Criado } from '@/components/Panel';
 import { SearchNotFoundSmall } from '@/components/table/SearchNotFound';
+import ResumoCredito from './resumo-credito';
 import FormParecer, { CondicoesForm } from '../form/credito/form-parecer';
 
 // ---------------------------------------------------------------------------------------------------------------------
@@ -54,6 +55,8 @@ export default function PareceresCredito({ infoCredito }) {
 
   return (
     <Stack spacing={3}>
+      {!infoCredito && <ResumoCredito credito={processo?.credito} mutuarios={processo?.titular} />}
+
       {estado?.decisor && (
         <Stack direction="column" justifyContent="center" spacing={2}>
           {infoCredito && <ParecersLabel dados={{ estado, acessoParecer, pareceresAtuais, openModal }} />}
