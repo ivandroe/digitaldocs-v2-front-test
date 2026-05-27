@@ -8,7 +8,7 @@ import Stack from '@mui/material/Stack';
 import Divider from '@mui/material/Divider';
 import Typography from '@mui/material/Typography';
 // utils
-import { listaFreguesias } from '@/_mock';
+import { listaFreguesias, listaConservatorias } from '@/_mock';
 import { applySort, getComparator } from '@/hooks/useTable';
 // components
 import FormSeguros from './form-seguros';
@@ -49,7 +49,7 @@ function Bem({ name, isAp, isTerreno, bemFinanciado }) {
               <RHFAutocompleteSmp
                 label="Localização da conservatória"
                 name={`${name}.localizacao_conservatoria`}
-                options={listaFreguesias?.map(({ freguesia }) => freguesia)?.sort()}
+                options={listaConservatorias}
               />
             </GridItem>
             <GridItem sm={6} md={3}>

@@ -1,0 +1,41 @@
+[
+  {
+    "tipo_garantia_id": 12,
+    "subtipo_garantia_id": 17,
+    "percentagem_cobertura": "100",
+    "metadados": {
+      "garantidores": [],
+      "bem": {
+        "tipo": "predio",
+        "nip": "2589",
+        "tipo_matriz": "Urbana",
+        "numero_matriz": "",
+        "numero_descricao_predial": "",
+        "numero_inscricao_hipoteca": "36985",
+        "localizacao_conservatoria": "Praia",
+        "identificacao_fracao": "",
+        "numero_andar": "",
+        "area": "",
+        "valor_avaliacao": "30000000",
+        "rua": "xxxx",
+        "zona": "Palmarejo Grande",
+        "ilha": "Santiago",
+        "concelho": "Praia",
+        "freguesia": "Nossa Senhora da Graça",
+        "numero_porta": "",
+        "seguros": [
+          {
+            "apolice": "14785/4",
+            "valor": "400000",
+            "seguradora": "Impar Seguros",
+            "premio": "40000",
+            "tipo_seguro_id": 1,
+            "periodicidade": "Anual",
+            "percentagem_cobertura": "100"
+          }
+        ],
+        "donos": [{ "numero_entidade": 498877 }]
+      }
+    }
+  }
+]

@@ -12,6 +12,7 @@ import Divider from '@mui/material/Divider';
 import Typography from '@mui/material/Typography';
 import DialogContent from '@mui/material/DialogContent';
 // utils
+import { listaConservatorias } from '@/_mock';
 import {
   schemaTaxas,
   schemaObjeto,
@@ -508,9 +509,10 @@ function BensFinanciadosField() {
                           </GridItem>
                         )}
                         <GridItem md={6}>
-                          <RHFTextField
-                            name={`bens_financiados[${index}].localizacao_conservatoria`}
+                          <RHFAutocompleteSmp
                             label="Conservatória"
+                            name={`bens_financiados[${index}].localizacao_conservatoria`}
+                            options={listaConservatorias}
                           />
                         </GridItem>
                         <GridItem sm={4} md={3}>
@@ -545,9 +547,10 @@ function BensFinanciadosField() {
                           <RHFTextField name={`bens_financiados[${index}].nura`} label="NURA" />
                         </GridItem>
                         <GridItem md={6}>
-                          <RHFTextField
-                            name={`bens_financiados[${index}].localizacao_conservatoria`}
+                          <RHFAutocompleteSmp
                             label="Conservatória"
+                            name={`bens_financiados[${index}].localizacao_conservatoria`}
+                            options={listaConservatorias}
                           />
                         </GridItem>
                       </>

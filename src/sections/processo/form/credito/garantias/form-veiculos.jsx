@@ -7,7 +7,7 @@ import Stack from '@mui/material/Stack';
 import Divider from '@mui/material/Divider';
 import Typography from '@mui/material/Typography';
 // utils
-import { listaFreguesias } from '@/_mock';
+import { listaConservatorias } from '@/_mock';
 // components
 import FormSeguros from './form-seguros';
 import FormEntidades from './form-entidades';
@@ -55,7 +55,7 @@ export default function FormVeiculos() {
                 <RHFAutocompleteSmp
                   label="Localização da conservatória"
                   name="veiculo.localizacao_conservatoria"
-                  options={listaFreguesias?.map(({ freguesia }) => freguesia)?.sort()}
+                  options={listaConservatorias}
                 />
               </GridItem>
               <GridItem children={<FormEntidades label="Dono" name="veiculo.donos" />} />

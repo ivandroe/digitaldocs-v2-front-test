@@ -231,12 +231,14 @@ function mapSeguroComoBem(seguro) {
 
 function mapMorada(row) {
   const morada = row?.morada ?? row;
+  const freguesia = morada?.freguesia ?? row?.freguesia;
+  const freguesiaObj = freguesia && typeof freguesia === 'object' ? freguesia : null;
   return {
     rua: morada?.rua ?? '',
     zona: morada?.zona ?? '',
-    ilha: morada?.ilha ?? row?.freguesia?.ilha ?? '',
-    concelho: morada?.concelho ?? row?.freguesia?.concelho ?? '',
-    freguesia: morada?.freguesia ?? row?.freguesia?.freguesia ?? '',
+    ilha: morada?.ilha ?? freguesiaObj?.ilha ?? '',
+    concelho: morada?.concelho ?? freguesiaObj?.concelho ?? '',
+    freguesia: (freguesiaObj ? freguesiaObj.freguesia : freguesia) ?? '',
     numero_porta: morada?.numero_porta ?? '',
   };
 }
