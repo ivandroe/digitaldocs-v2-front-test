@@ -32,7 +32,7 @@ function DialogPareceres({ estado, onClose }) {
   const openModal = (modal) => dispatch(setModal({ modal: modal ?? '', dados: null }));
 
   return (
-    <Dialog open onClose={onClose} fullWidth maxWidth="md">
+    <Dialog open onClose={onClose} fullWidth maxWidth="lg">
       <DialogTitle>
         <Stack direction="row" justifyContent="space-between" alignItems="end">
           Pareceres: {estado?.estado}
