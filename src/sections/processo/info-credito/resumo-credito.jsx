@@ -93,9 +93,9 @@ export default function ResumoCredito({ credito, mutuarios }) {
                 <Typography variant="subtitle1" sx={{ color: `${item.color}.main` }}>
                   {item.value || '---'}
                 </Typography>
-                {item.sub && (
-                  <Typography variant="caption" sx={{ color: 'text.secondary', display: 'block' }} noWrap>
-                    s/ desconto: {item.sub}
+                {item.hint && (
+                  <Typography variant="caption" sx={{ color: item.hint.color, display: 'block' }} noWrap>
+                    {item.hint.text}
                   </Typography>
                 )}
               </Card>
@@ -272,18 +272,26 @@ function useResumoCredito(credito, mutuarios) {
     const total = ativas.reduce((acc, g) => acc + valorGarantia(g), 0);
     const racio = montante > 0 ? (total / montante) * 100 : null;
 
-    // prestação s/ desconto só releva quando difere da prestação efetiva
-    const semDesconto =
-      Number(meta?.valor_prestacao_sem_desconto) > 0 &&
-      Number(meta?.valor_prestacao_sem_desconto) !== Number(meta?.valor_prestacao)
-        ? fCurrency(meta?.valor_prestacao_sem_desconto)
-        : '';
+    // diferença entre prestação efetiva e prestação sem desconto — sinaliza se há (ou não) desconto aplicado
+    const prestacao = Number(meta?.valor_prestacao);
+    const prestacaoSemDesconto = Number(meta?.valor_prestacao_sem_desconto);
+    const hintSemDesconto =
+      prestacaoSemDesconto > 0 && prestacao > 0
+        ? prestacaoSemDesconto !== prestacao
+          ? { text: `−${fCurrency(Math.abs(prestacaoSemDesconto - prestacao))} c/ desconto`, color: 'success.dark' }
+          : { text: '= prestação', color: 'text.secondary' }
+        : null;
 
     const kpis = [
       { label: 'TAEG', color: 'info', value: fPercent(meta?.taxa_taeg, 3) },
-      { label: 'Prestação', color: 'primary', value: fCurrency(meta?.valor_prestacao), sub: semDesconto },
       { label: 'Custo total', color: 'warning', value: fCurrency(meta?.custo_total) },
-      { label: 'Taxa de mora', color: 'error', value: fPercent(Number(meta?.taxa_mora), 2) },
+      { label: 'Prestação', color: 'primary', value: fCurrency(meta?.valor_prestacao) },
+      {
+        label: 'Prestação s/ desconto',
+        color: 'secondary',
+        value: fCurrency(meta?.valor_prestacao_sem_desconto),
+        hint: hintSemDesconto,
+      },
     ];
 
     const taxas = [
