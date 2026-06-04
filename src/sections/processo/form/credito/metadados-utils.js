@@ -1,5 +1,6 @@
 import * as Yup from 'yup';
 // utils
+import { listaFreguesias } from '@/_mock';
 import { fillData, formatDate } from '@/utils/formatTime';
 // form
 import { shapeText } from '@/components/hook-form/yup-shape';
@@ -103,7 +104,7 @@ export function getDefaultsTaxas({ dadosStepper, dados, precario }) {
   };
 }
 
-export const PERIODICIDADES_COMISSAO = ['mensal', 'trimestral', 'semestral', 'anual'];
+export const PERIODICIDADES_COMISSAO = ['Único', 'Mensal', 'Trimestral', 'Semestral', 'Anual'];
 
 function normalizarComissao(comissao) {
   return {
@@ -141,7 +142,7 @@ export const bemFinanciadoSchema = {
   localizacao_conservatoria: '',
   ilha: '',
   concelho: '',
-  freguesia: '',
+  freguesia: null,
   zona: '',
   rua: '',
   numero_porta: '',
@@ -157,11 +158,22 @@ export const bemFinanciadoSchema = {
 
 function normalizarBensFinanciados(lista) {
   if (!Array.isArray(lista) || lista.length === 0) return [];
-  return lista.map((row) => ({
-    ...bemFinanciadoSchema,
-    ...row,
-    tipo: row?.tipo ? TIPOS_BEM_FINANCIADO.find((t) => t.id === row.tipo) || null : null,
-  }));
+  return lista.map((row) => {
+    const tipoId = row?.tipo?.id ?? row?.tipo;
+    // freguesia pode vir como string (servidor) ou como objeto (stepper)
+    const fregObj = row?.freguesia && typeof row.freguesia === 'object' ? row.freguesia : null;
+    const ilha = row?.ilha ?? fregObj?.ilha;
+    const fregNome = fregObj ? fregObj.freguesia : row?.freguesia;
+    const freg = listaFreguesias?.find((f) => f.ilha === ilha && f.freguesia === fregNome);
+    return {
+      ...bemFinanciadoSchema,
+      ...row,
+      tipo: tipoId ? TIPOS_BEM_FINANCIADO.find((t) => t.id === tipoId) || null : null,
+      ilha: ilha ?? freg?.ilha ?? '',
+      concelho: row?.concelho ?? fregObj?.concelho ?? freg?.concelho ?? '',
+      freguesia: freg ? { ...freg, label: freg.freguesia } : null,
+    };
+  });
 }
 
 export function getDefaultsEntidade({ dadosStepper, dados }) {
@@ -441,8 +453,17 @@ function mapBensFinanciados(lista) {
   return valid.map((bem) => {
     const tipo = bem?.tipo?.id ?? bem?.tipo;
     const out = { tipo };
+    // freguesia é um objeto no form; envia-se a designação e deriva-se ilha/concelho
+    const fregObj = bem?.freguesia && typeof bem.freguesia === 'object' ? bem.freguesia : null;
+    const resolved = {
+      ...bem,
+      ilha: bem?.ilha ?? fregObj?.ilha ?? '',
+      concelho: bem?.concelho ?? fregObj?.concelho ?? '',
+      freguesia: fregObj ? fregObj.freguesia : bem?.freguesia,
+    };
     (CAMPOS_POR_TIPO_BEM[tipo] ?? []).forEach((key) => {
-      if (bem?.[key] !== undefined && bem?.[key] !== '' && bem?.[key] !== null) out[key] = String(bem[key]);
+      if (resolved[key] !== undefined && resolved[key] !== '' && resolved[key] !== null)
+        out[key] = String(resolved[key]);
     });
     if (bem?.valor !== undefined && bem?.valor !== '' && bem?.valor !== null) out.valor = String(bem.valor);
     if (bem?.valor_avaliacao !== undefined && bem?.valor_avaliacao !== '' && bem?.valor_avaliacao !== null)

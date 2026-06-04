@@ -12,7 +12,8 @@ import Divider from '@mui/material/Divider';
 import Typography from '@mui/material/Typography';
 import DialogContent from '@mui/material/DialogContent';
 // utils
-import { listaConservatorias } from '@/_mock';
+import { listaFreguesias, listaConservatorias } from '@/_mock';
+import { applySort, getComparator } from '@/hooks/useTable';
 import {
   schemaTaxas,
   schemaObjeto,
@@ -431,8 +432,18 @@ function ComissaoAdicionalField({ ativaKey, valueKey, label, ativa }) {
 
 // ---------------------------------------------------------------------------------------------------------------------
 
+const ILHAS = Array.from(new Set(listaFreguesias.map((f) => f.ilha))).sort();
+
+const freguesiasDaIlha = (ilha) =>
+  ilha
+    ? applySort(
+        listaFreguesias.filter((f) => f.ilha === ilha).map((f) => ({ ...f, label: f.freguesia })),
+        getComparator('asc', 'label')
+      )
+    : [];
+
 function BensFinanciadosField() {
-  const { control, watch } = useFormContext();
+  const { control, watch, setValue } = useFormContext();
   const { fields, append, remove } = useFieldArray({ control, name: 'bens_financiados' });
   const bens = watch('bens_financiados') ?? [];
 
@@ -516,7 +527,36 @@ function BensFinanciadosField() {
                           />
                         </GridItem>
                         <GridItem sm={4} md={3}>
-                          <RHFTextField name={`bens_financiados[${index}].freguesia`} label="Freguesia" />
+                          <RHFAutocompleteSmp
+                            label="Ilha"
+                            name={`bens_financiados[${index}].ilha`}
+                            options={ILHAS}
+                            onChange={(_, newValue) => {
+                              setValue(`bens_financiados[${index}].ilha`, newValue ?? '');
+                              setValue(`bens_financiados[${index}].freguesia`, null);
+                              setValue(`bens_financiados[${index}].concelho`, '');
+                            }}
+                          />
+                        </GridItem>
+                        <GridItem sm={4} md={3}>
+                          <RHFAutocompleteObj
+                            label="Freguesia"
+                            name={`bens_financiados[${index}].freguesia`}
+                            options={freguesiasDaIlha(bens?.[index]?.ilha)}
+                            disabled={!bens?.[index]?.ilha}
+                            onChange={(_, newValue) => {
+                              setValue(`bens_financiados[${index}].freguesia`, newValue);
+                              setValue(`bens_financiados[${index}].concelho`, newValue?.concelho ?? '');
+                            }}
+                          />
+                        </GridItem>
+                        <GridItem sm={4} md={3}>
+                          <RHFTextField
+                            name={`bens_financiados[${index}].concelho`}
+                            label="Concelho"
+                            disabled
+                            InputLabelProps={{ shrink: true }}
+                          />
                         </GridItem>
                         <GridItem sm={4} md={3}>
                           <RHFTextField name={`bens_financiados[${index}].zona`} label="Zona" />
