@@ -154,6 +154,10 @@ export const bemFinanciadoSchema = {
   valor: '',
   valor_avaliacao: '',
   descritivo: '',
+  bem_sem_registo: false,
+  numero_fatura_proforma: '',
+  emissora_fatura_proforma: '',
+  data_emissao_fatura_proforma: null,
 };
 
 function normalizarBensFinanciados(lista) {
@@ -172,6 +176,8 @@ function normalizarBensFinanciados(lista) {
       ilha: ilha ?? freg?.ilha ?? '',
       concelho: row?.concelho ?? fregObj?.concelho ?? freg?.concelho ?? '',
       freguesia: freg ? { ...freg, label: freg.freguesia } : null,
+      bem_sem_registo: Boolean(row?.bem_sem_registo),
+      data_emissao_fatura_proforma: fillData(row?.data_emissao_fatura_proforma, null),
     };
   });
 }
@@ -275,13 +281,40 @@ export const getSchemaCondicoes = (dadosStepper) =>
 
 const tiposImovel = ['apartamento', 'predio', 'terreno'];
 
+const tipoDe = (parent) => parent?.tipo?.id ?? parent?.tipo;
+const semReg = (parent) => Boolean(parent?.bem_sem_registo);
+
 const bemFinanciadoShape = Yup.object({
   tipo: Yup.mixed().required().label('Tipo do bem'),
   matricula: Yup.string()
     .nullable()
     .test('matricula-veiculo', 'Matrícula é obrigatória para veículo', function (value) {
-      const tipoId = this.parent?.tipo?.id ?? this.parent?.tipo;
-      return tipoId === 'veiculo' ? Boolean(value) : true;
+      return tipoDe(this.parent) === 'veiculo' && !semReg(this.parent) ? Boolean(value) : true;
+    }),
+  nura: Yup.string()
+    .nullable()
+    .test('nura-veiculo', 'NURA é obrigatório para veículo', function (value) {
+      return tipoDe(this.parent) === 'veiculo' && !semReg(this.parent) ? Boolean(value) : true;
+    }),
+  numero_inscricao_hipoteca: Yup.string()
+    .nullable()
+    .test('hipoteca-imovel', 'Nº de inscrição de hipoteca é obrigatório', function (value) {
+      return tiposImovel.includes(tipoDe(this.parent)) && !semReg(this.parent) ? Boolean(value) : true;
+    }),
+  numero_fatura_proforma: Yup.string()
+    .nullable()
+    .test('proforma-numero', 'Nº da fatura proforma é obrigatório', function (value) {
+      return tipoDe(this.parent) === 'veiculo' && semReg(this.parent) ? Boolean(value) : true;
+    }),
+  emissora_fatura_proforma: Yup.string()
+    .nullable()
+    .test('proforma-emissora', 'Emissora da fatura proforma é obrigatória', function (value) {
+      return tipoDe(this.parent) === 'veiculo' && semReg(this.parent) ? Boolean(value) : true;
+    }),
+  data_emissao_fatura_proforma: Yup.mixed()
+    .nullable()
+    .test('proforma-data', 'Data de emissão da fatura proforma é obrigatória', function (value) {
+      return tipoDe(this.parent) === 'veiculo' && semReg(this.parent) ? Boolean(value) : true;
     }),
   nip: Yup.string()
     .nullable()
@@ -392,7 +425,7 @@ function mapComissao(comissao) {
   return {
     valor: String(comissao.valor),
     prazo: Number(comissao.prazo),
-    periodicidade: comissao.periodicidade,
+    periodicidade: comissao.periodicidade === 'Único' ? 'unica' : comissao.periodicidade,
   };
 }
 
@@ -447,12 +480,31 @@ const CAMPOS_POR_TIPO_BEM = {
   outro: ['descritivo'],
 };
 
+const CAMPOS_FATURA_PROFORMA = ['numero_fatura_proforma', 'emissora_fatura_proforma', 'data_emissao_fatura_proforma'];
+
+// Campos de registo dispensados quando o bem ainda não está registado (bem_sem_registo)
+const CAMPOS_REGISTO_DISPENSADOS = {
+  veiculo: ['matricula', 'localizacao_conservatoria', 'nura'],
+  apartamento: ['numero_inscricao_hipoteca'],
+  predio: ['numero_inscricao_hipoteca'],
+  terreno: ['numero_inscricao_hipoteca'],
+};
+
+function camposDoBem(tipo, semRegisto) {
+  const base = CAMPOS_POR_TIPO_BEM[tipo] ?? [];
+  if (!semRegisto) return base;
+  const dispensados = new Set(CAMPOS_REGISTO_DISPENSADOS[tipo] ?? []);
+  const campos = base.filter((key) => !dispensados.has(key));
+  return tipo === 'veiculo' ? [...campos, ...CAMPOS_FATURA_PROFORMA] : campos;
+}
+
 function mapBensFinanciados(lista) {
   const valid = (lista ?? []).filter((bem) => bem?.tipo?.id || bem?.tipo);
   if (valid.length === 0) return undefined;
   return valid.map((bem) => {
     const tipo = bem?.tipo?.id ?? bem?.tipo;
-    const out = { tipo };
+    const semRegisto = Boolean(bem?.bem_sem_registo);
+    const out = { tipo, bem_sem_registo: semRegisto };
     // freguesia é um objeto no form; envia-se a designação e deriva-se ilha/concelho
     const fregObj = bem?.freguesia && typeof bem.freguesia === 'object' ? bem.freguesia : null;
     const resolved = {
@@ -461,9 +513,10 @@ function mapBensFinanciados(lista) {
       concelho: bem?.concelho ?? fregObj?.concelho ?? '',
       freguesia: fregObj ? fregObj.freguesia : bem?.freguesia,
     };
-    (CAMPOS_POR_TIPO_BEM[tipo] ?? []).forEach((key) => {
-      if (resolved[key] !== undefined && resolved[key] !== '' && resolved[key] !== null)
-        out[key] = String(resolved[key]);
+    camposDoBem(tipo, semRegisto).forEach((key) => {
+      if (resolved[key] === undefined || resolved[key] === '' || resolved[key] === null) return;
+      out[key] =
+        key === 'data_emissao_fatura_proforma' ? formatDate(resolved[key], 'yyyy-MM-dd') : String(resolved[key]);
     });
     if (bem?.valor !== undefined && bem?.valor !== '' && bem?.valor !== null) out.valor = String(bem.valor);
     if (bem?.valor_avaliacao !== undefined && bem?.valor_avaliacao !== '' && bem?.valor_avaliacao !== null)

@@ -463,6 +463,7 @@ function BensFinanciadosField() {
             const isTerreno = tipoId === 'terreno';
             const isVeiculo = tipoId === 'veiculo';
             const isOutroOuEquip = tipoId === 'equipamento' || tipoId === 'outro';
+            const semRegisto = bens?.[index]?.bem_sem_registo;
             return (
               <Card key={item.id} sx={{ p: 1, boxShadow: (theme) => theme.customShadows.cardAlt }}>
                 <Stack direction="row" alignItems="flex-start" spacing={1}>
@@ -474,6 +475,15 @@ function BensFinanciadosField() {
                         options={TIPOS_BEM_FINANCIADO}
                       />
                     </GridItem>
+                    {(isImovel || isVeiculo) && (
+                      <GridItem sm={6} md={4}>
+                        <RHFSwitch
+                          name={`bens_financiados[${index}].bem_sem_registo`}
+                          label="Bem ainda não registado"
+                          mt
+                        />
+                      </GridItem>
+                    )}
                     {isImovel && (
                       <>
                         <GridItem sm={6} md={4}>
@@ -495,12 +505,14 @@ function BensFinanciadosField() {
                             name={`bens_financiados[${index}].tipo_matriz`}
                           />
                         </GridItem>
-                        <GridItem sm={6} md={4}>
-                          <RHFTextField
-                            name={`bens_financiados[${index}].numero_inscricao_hipoteca`}
-                            label="Nº inscrição hipoteca"
-                          />
-                        </GridItem>
+                        {!semRegisto && (
+                          <GridItem sm={6} md={4}>
+                            <RHFTextField
+                              name={`bens_financiados[${index}].numero_inscricao_hipoteca`}
+                              label="Nº inscrição hipoteca"
+                            />
+                          </GridItem>
+                        )}
                         {isAp && (
                           <>
                             <GridItem sm={6} md={4}>
@@ -571,9 +583,11 @@ function BensFinanciadosField() {
                     )}
                     {isVeiculo && (
                       <>
-                        <GridItem sm={6} md={4}>
-                          <RHFTextField name={`bens_financiados[${index}].matricula`} label="Matrícula" />
-                        </GridItem>
+                        {!semRegisto && (
+                          <GridItem sm={6} md={4}>
+                            <RHFTextField name={`bens_financiados[${index}].matricula`} label="Matrícula" />
+                          </GridItem>
+                        )}
                         <GridItem sm={6} md={4}>
                           <RHFTextField name={`bens_financiados[${index}].marca`} label="Marca" />
                         </GridItem>
@@ -583,16 +597,42 @@ function BensFinanciadosField() {
                         <GridItem sm={6} md={4}>
                           <RHFTextField name={`bens_financiados[${index}].ano_fabrico`} label="Ano fabrico" />
                         </GridItem>
-                        <GridItem sm={6} md={4}>
-                          <RHFTextField name={`bens_financiados[${index}].nura`} label="NURA" />
-                        </GridItem>
-                        <GridItem md={6}>
-                          <RHFAutocompleteSmp
-                            label="Conservatória"
-                            name={`bens_financiados[${index}].localizacao_conservatoria`}
-                            options={listaConservatorias}
-                          />
-                        </GridItem>
+                        {!semRegisto && (
+                          <>
+                            <GridItem sm={6} md={4}>
+                              <RHFTextField name={`bens_financiados[${index}].nura`} label="NURA" />
+                            </GridItem>
+                            <GridItem md={6}>
+                              <RHFAutocompleteSmp
+                                label="Conservatória"
+                                name={`bens_financiados[${index}].localizacao_conservatoria`}
+                                options={listaConservatorias}
+                              />
+                            </GridItem>
+                          </>
+                        )}
+                        {semRegisto && (
+                          <>
+                            <GridItem sm={6} md={4}>
+                              <RHFTextField
+                                name={`bens_financiados[${index}].numero_fatura_proforma`}
+                                label="Nº fatura proforma"
+                              />
+                            </GridItem>
+                            <GridItem sm={6} md={4}>
+                              <RHFTextField
+                                name={`bens_financiados[${index}].emissora_fatura_proforma`}
+                                label="Emissora fatura proforma"
+                              />
+                            </GridItem>
+                            <GridItem sm={6} md={4}>
+                              <RHFDatePicker
+                                name={`bens_financiados[${index}].data_emissao_fatura_proforma`}
+                                label="Data emissão fatura proforma"
+                              />
+                            </GridItem>
+                          </>
+                        )}
                       </>
                     )}
                     {isOutroOuEquip && (
