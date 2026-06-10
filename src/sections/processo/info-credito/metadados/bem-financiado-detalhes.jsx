@@ -7,8 +7,10 @@ import Divider from '@mui/material/Divider';
 import Typography from '@mui/material/Typography';
 import DialogContent from '@mui/material/DialogContent';
 // utils
+import { ptDate } from '@/utils/formatTime';
 import { fCurrency } from '@/utils/formatNumber';
 // components
+import Label from '@/components/Label';
 import { noDados } from '@/components/Panel';
 import { DialogTitleAlt } from '@/components/CustomDialog';
 
@@ -39,9 +41,10 @@ export default function BemFinanciadoDetalhes({ bem, onClose }) {
       <DialogContent sx={{ p: { xs: 1, sm: 3 } }}>
         <Grid container spacing={3}>
           <Grid item xs={12}>
-            <Stack direction="row" spacing={4}>
+            <Stack direction="row" spacing={4} alignItems="center">
               <Kpi label="Valor" value={bem?.valor ? fCurrency(bem.valor) : null} color="primary.main" />
               <Kpi label="Valor avaliação" value={bem?.valor_avaliacao ? fCurrency(bem.valor_avaliacao) : null} />
+              {(isImovel || isVeiculo) && bem?.bem_sem_registo && <Label color="warning">Bem sem registo</Label>}
             </Stack>
           </Grid>
 
@@ -107,7 +110,10 @@ function infoVeiculo(bem) {
     ['Matrícula', bem?.matricula],
     ['NURA', bem?.nura],
     ['Ano de fabrico', bem?.ano_fabrico],
-    ['Conservatória', bem?.localizacao_conservatoria, true],
+    ['Conservatória', bem?.localizacao_conservatoria, !bem?.bem_sem_registo],
+    ['Nº fatura proforma', bem?.numero_fatura_proforma],
+    ['Emissora fatura proforma', bem?.emissora_fatura_proforma],
+    ['Data emissão proforma', bem?.data_emissao_fatura_proforma ? ptDate(bem.data_emissao_fatura_proforma) : ''],
   ];
 }
 
