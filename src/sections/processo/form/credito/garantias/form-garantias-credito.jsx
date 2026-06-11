@@ -96,6 +96,10 @@ export default function FormGarantias({ dados, processoId, onClose }) {
               valor_avaliacao: grupos.veiculo?.valor_avaliacao ?? '',
               localizacao_conservatoria: grupos.veiculo?.localizacao_conservatoria ?? '',
               bem_financiado: Boolean(grupos.veiculo?.bem_financiado),
+              bem_sem_registo: Boolean(grupos.veiculo?.bem_sem_registo),
+              numero_fatura_proforma: grupos.veiculo?.numero_fatura_proforma ?? '',
+              emissora_fatura_proforma: grupos.veiculo?.emissora_fatura_proforma ?? '',
+              data_emissao_fatura_proforma: grupos.veiculo?.data_emissao_fatura_proforma ?? null,
             },
             tiposSeguros
           )
@@ -136,6 +140,8 @@ export default function FormGarantias({ dados, processoId, onClose }) {
     const bemActual = getValues(campoBem);
     if (!bemActual) return;
     setValue(`${campoBem}.bem_financiado`, Boolean(bemFinanciado), vdt);
+    // sem bem financiado não há "sem registo" — evita exigir fatura proforma indevidamente
+    if (!bemFinanciado) setValue(`${campoBem}.bem_sem_registo`, false, vdt);
   }, [bemFinanciado, campoBem, getValues, setValue]);
 
   // Preenche apenas o identificador do bem com base na selecção do dropdown
@@ -144,10 +150,16 @@ export default function FormGarantias({ dados, processoId, onClose }) {
   const preencherIdentificador = (bem) => {
     if (!bem || !campoBem) return;
     const atual = getValues(campoBem) || {};
-    const proximos = { ...atual, bem_financiado: true };
+    const semRegisto = Boolean(bem?.bem_sem_registo);
+    const proximos = { ...atual, bem_financiado: true, bem_sem_registo: semRegisto };
 
     if (campoBem === 'veiculo') {
-      if (bem?.matricula) {
+      if (semRegisto) {
+        // sem registo: identifica-se pela fatura proforma (não há matrícula/NURA)
+        proximos.numero_fatura_proforma = bem?.numero_fatura_proforma ?? '';
+        proximos.emissora_fatura_proforma = bem?.emissora_fatura_proforma ?? '';
+        proximos.data_emissao_fatura_proforma = bem?.data_emissao_fatura_proforma ?? null;
+      } else if (bem?.matricula) {
         proximos.matricula = bem.matricula;
       } else if (bem?.nura) {
         proximos.nura = bem.nura;
@@ -264,7 +276,10 @@ function matchBemFinanciado(bem, lista, tipoBem) {
     if (tipoBem === 'veiculo') {
       return (
         (bem.matricula && bf.matricula && bem.matricula === bf.matricula) ||
-        (bem.nura && bf.nura && bem.nura === bf.nura)
+        (bem.nura && bf.nura && bem.nura === bf.nura) ||
+        (bem.numero_fatura_proforma &&
+          bf.numero_fatura_proforma &&
+          bem.numero_fatura_proforma === bf.numero_fatura_proforma)
       );
     }
     return (
@@ -308,7 +323,10 @@ function hidratarSegurosNested(bem, tiposSeguros) {
 
 function descreverBemOption(bem) {
   if (bem?.tipo === 'veiculo') {
-    const id = bem?.matricula || [bem?.marca, bem?.modelo].filter(Boolean).join(' ');
+    const id =
+      bem?.matricula ||
+      [bem?.marca, bem?.modelo].filter(Boolean).join(' ') ||
+      (bem?.numero_fatura_proforma ? `Proforma ${bem.numero_fatura_proforma}` : '');
     return id || 'Veículo sem identificador';
   }
   const partes = [];

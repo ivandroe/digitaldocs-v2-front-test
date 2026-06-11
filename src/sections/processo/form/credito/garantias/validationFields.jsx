@@ -38,6 +38,7 @@ export const shapeGarantia = () =>
       .nullable()
       .shape({
         bem_financiado: Yup.boolean(),
+        bem_sem_registo: Yup.boolean(),
         donos: Yup.array().when('bem_financiado', {
           is: true,
           then: () => Yup.array().notRequired(),
@@ -64,15 +65,33 @@ export const shapeGarantia = () =>
           then: (s) => s.notRequired(),
           otherwise: (s) => s.required().label('Modelo'),
         }),
+        // Bem sem registo não tem matrícula/NURA — é identificado pela fatura proforma
         matricula: Yup.string()
           .nullable()
           .test('matricula-ou-nura', 'Indique a matrícula ou o NURA', function (value) {
+            if (this.parent?.bem_sem_registo) return true;
             return Boolean(value) || Boolean(this.parent?.nura);
           }),
         nura: Yup.string()
           .nullable()
           .test('nura-ou-matricula', 'Indique a matrícula ou o NURA', function (value) {
+            if (this.parent?.bem_sem_registo) return true;
             return Boolean(value) || Boolean(this.parent?.matricula);
+          }),
+        numero_fatura_proforma: Yup.string()
+          .nullable()
+          .test('proforma-numero', 'Nº da fatura proforma é obrigatório', function (value) {
+            return this.parent?.bem_sem_registo ? Boolean(value) : true;
+          }),
+        emissora_fatura_proforma: Yup.string()
+          .nullable()
+          .test('proforma-emissora', 'Emissora da fatura proforma é obrigatória', function (value) {
+            return this.parent?.bem_sem_registo ? Boolean(value) : true;
+          }),
+        data_emissao_fatura_proforma: Yup.mixed()
+          .nullable()
+          .test('proforma-data', 'Data de emissão da fatura proforma é obrigatória', function (value) {
+            return this.parent?.bem_sem_registo ? Boolean(value) : true;
           }),
       }),
   });
@@ -111,6 +130,7 @@ const shapeImovel = (tipo) =>
     .nullable()
     .shape({
       bem_financiado: Yup.boolean(),
+      bem_sem_registo: Yup.boolean(),
       donos: Yup.array().when('bem_financiado', {
         is: true,
         then: () => Yup.array().notRequired(),

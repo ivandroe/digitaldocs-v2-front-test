@@ -53,6 +53,10 @@ export const veiculoSchema = {
   ano_fabrico: '',
   localizacao_conservatoria: '',
   bem_financiado: false,
+  bem_sem_registo: false,
+  numero_fatura_proforma: '',
+  emissora_fatura_proforma: '',
+  data_emissao_fatura_proforma: null,
   donos: [],
   seguros: [],
 };

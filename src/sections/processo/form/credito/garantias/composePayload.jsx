@@ -1,5 +1,6 @@
 // Composição/unpacking de metadados de garantia (formato v2 — { bem, garantidores[], numero_livranca? })
 // Backend agora aceita no máximo 1 bem por garantia (campo singular `bem`).
+import { formatDate } from '@/utils/formatTime';
 
 const TIPO_IMOVEL = { predios: 'predio', terrenos: 'terreno', apartamentos: 'apartamento' };
 const CHAVE_TO_FIELD = {
@@ -170,6 +171,7 @@ function mapTitulo(row) {
 
 function mapVeiculo(row) {
   const bemFinanciado = Boolean(row?.bem_financiado);
+  const semRegisto = Boolean(row?.bem_sem_registo);
   const base = {
     nura: row?.nura ?? '',
     marca: row?.marca ?? '',
@@ -181,8 +183,17 @@ function mapVeiculo(row) {
     localizacao_conservatoria: row?.localizacao_conservatoria ?? '',
     seguros: (row?.seguros ?? []).map(mapSeguroDoBem),
   };
-  if (bemFinanciado) return { ...base, bem_financiado: true };
-  return { ...base, donos: (row?.donos ?? []).map(mapDono) };
+  if (!bemFinanciado) return { ...base, donos: (row?.donos ?? []).map(mapDono) };
+  const financiado = { ...base, bem_financiado: true, bem_sem_registo: semRegisto };
+  // Veículo sem registo é identificado pela fatura proforma (sem matrícula/NURA)
+  if (semRegisto) {
+    financiado.numero_fatura_proforma = row?.numero_fatura_proforma ?? '';
+    financiado.emissora_fatura_proforma = row?.emissora_fatura_proforma ?? '';
+    financiado.data_emissao_fatura_proforma = row?.data_emissao_fatura_proforma
+      ? formatDate(row.data_emissao_fatura_proforma, 'yyyy-MM-dd')
+      : '';
+  }
+  return financiado;
 }
 
 function mapImovel(row) {
@@ -202,7 +213,7 @@ function mapImovel(row) {
     ...morada,
     seguros: (row?.seguros ?? []).map(mapSeguroDoBem),
   };
-  if (bemFinanciado) return { ...base, bem_financiado: true };
+  if (bemFinanciado) return { ...base, bem_financiado: true, bem_sem_registo: Boolean(row?.bem_sem_registo) };
   return { ...base, donos: (row?.donos ?? []).map(mapDono) };
 }
 
