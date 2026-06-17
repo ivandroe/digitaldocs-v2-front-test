@@ -9,7 +9,7 @@ export const listaFreguesias = [
   { id: 7, ilha: 'Santo Antão', concelho: 'Porto Novo', freguesia: 'Santo André' },
 
   // São Vicente
-  { id: 8, ilha: 'São Vicente', concelho: 'São Vicente', freguesia: 'Nossa Senhora da Luz -São Vicente' },
+  { id: 8, ilha: 'São Vicente', concelho: 'São Vicente', freguesia: 'Nossa Senhora da Luz - São Vicente' },
 
   // São Nicolau
   { id: 9, ilha: 'São Nicolau', concelho: 'Ribeira Brava', freguesia: 'Nossa Senhora da Lapa' },

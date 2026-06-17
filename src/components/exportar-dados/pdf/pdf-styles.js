@@ -4,7 +4,12 @@ import { Font, StyleSheet } from '@react-pdf/renderer';
 
 Font.register({
   family: 'Neo Sans Std',
-  fonts: [{ src: '/fonts/neo-sans-std.otf' }, { src: '/fonts/neo-sans-std-bold.otf', fontWeight: 700 }],
+  fonts: [
+    { src: '/fonts/neo-sans-std.otf', fontWeight: 400, fontStyle: 'normal' },
+    { src: '/fonts/neo-sans-std-italic.otf', fontWeight: 400, fontStyle: 'italic' },
+    { src: '/fonts/neo-sans-std-bold.otf', fontWeight: 700, fontStyle: 'normal' },
+    { src: '/fonts/neo-sans-std-bold-italic.otf', fontWeight: 700, fontStyle: 'italic' },
+  ],
 });
 
 const styles = StyleSheet.create({

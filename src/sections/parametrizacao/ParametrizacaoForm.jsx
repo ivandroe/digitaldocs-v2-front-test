@@ -388,7 +388,7 @@ export function LinhaForm({ onClose }) {
             <RHFAutocompleteSmp
               name="descricao"
               label="Segmento"
-              options={['Empresa', 'Particular', 'Produtor Individual', 'Entidade Pública']}
+              options={['Empresa', 'Particular', 'Produtor Individual', 'Entidade Pública', 'TRABALHADOR']}
             />
             <RHFSwitch name="funcionario" label="Funcionário" />
           </Stack>

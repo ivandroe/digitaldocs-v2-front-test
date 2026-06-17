@@ -1,165 +1,101 @@
 import { useState } from 'react';
 // @mui
-import Box from '@mui/material/Box';
 import Card from '@mui/material/Card';
-import Stack from '@mui/material/Stack';
-import Collapse from '@mui/material/Collapse';
-import Typography from '@mui/material/Typography';
-import IconButton from '@mui/material/IconButton';
-import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import Table from '@mui/material/Table';
+import TableRow from '@mui/material/TableRow';
+import TableCell from '@mui/material/TableCell';
+import TableBody from '@mui/material/TableBody';
+import TableHead from '@mui/material/TableHead';
 // utils
 import { fCurrency, fPercent } from '@/utils/formatNumber';
-//
-import {
-  DonosBlock,
-  ContasBlock,
-  ImovelBlock,
-  TitulosBlock,
-  VeiculosBlock,
-  FiadoresBlock,
-  LivrancasBlock,
-  SegurosV2Block,
-  SegurosLegacyBlock,
-} from './garantia-sub-components';
-import { SearchNotFound } from '@/components/table';
+// components
 import { DefaultAction } from '@/components/Actions';
-import { InlineRow, SchemaBadge, StatusBadge, Atualizado } from './shared';
+import { TableSearchNotFound } from '@/components/table';
+import { noDados, CellChecked } from '@/components/Panel';
+import DetalhesGarantia from '@/sections/processo/info-credito/garantias/detalhes-garantia';
 
-// ─── TabGarantias ----------------------------------------------------------------------------------------------------
+// ---------------------------------------------------------------------------------------------------------------------
 
-export function TabGarantias({ garantias, participantes, canChange, openForm }) {
-  if (!garantias?.length) {
-    return <SearchNotFound card height={150} message="Sem garantias registadas..." />;
-  }
+export function TableGarantias({ dados, openForm }) {
+  const [item, setItem] = useState(null);
+  const notFound = dados?.length === 0;
 
   return (
-    <Stack spacing={3}>
-      {garantias.map((g) => (
-        <GarantiaCard key={g.id} garantia={g} participantes={participantes} canChange={canChange} openForm={openForm} />
-      ))}
-    </Stack>
+    <Card sx={{ p: 1 }}>
+      <Table>
+        <TableHead>
+          <TableRow>
+            <TableCell>Garantia</TableCell>
+            <TableCell align="center">Tipo</TableCell>
+            <TableCell align="right">Cobertura</TableCell>
+            <TableCell align="right">Valor</TableCell>
+            <TableCell align="center">Ativo</TableCell>
+            <TableCell width={10}></TableCell>
+          </TableRow>
+        </TableHead>
+        <TableBody>
+          {dados?.map((row, index) => (
+            <TableRow hover key={`${row?.id}_${index}`}>
+              <TableCell>
+                {row?.tipo_garantia}
+                {row?.subtipo_garantia ? ` - ${row?.subtipo_garantia}` : ''}
+                {!row?.tipo_garantia && !row?.subtipo_garantia ? noDados('(Não definido...)') : ''}
+              </TableCell>
+              <TableCell align="center">{row?.reais ? 'Real' : 'Pessoal'}</TableCell>
+              <TableCell align="right">
+                {fPercent(row?.percentagem_cobertura) || noDados('(Não definido...)')}
+              </TableCell>
+              <TableCell align="right">{fCurrency(row?.valor_garantia || row?.valor)}</TableCell>
+              <CellChecked check={row?.ativo} />
+              <TableCell>
+                <DefaultAction small label="DETALHES" onClick={() => setItem({ modal: 'detail', ...row })} />
+              </TableCell>
+            </TableRow>
+          ))}
+        </TableBody>
+        {notFound && <TableSearchNotFound message="Nenhuma registo encontrado..." height={130} />}
+      </Table>
+
+      {item?.modal === 'detail' && <DetalhesGarantia onClose={() => setItem(null)} dados={item} openForm={openForm} />}
+    </Card>
   );
 }
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-function MetadadosV2({ info_extra_v2 }) {
-  if (!info_extra_v2) return null;
-  const meta = info_extra_v2.metadados || {};
+export function normalizarGarantias(inputGarantias = []) {
+  if (!Array.isArray(inputGarantias)) return [];
 
-  return (
-    <Stack spacing={2}>
-      {meta?.fiadores?.length > 0 ? <FiadoresBlock fiadores={meta.fiadores} /> : null}
-      {meta?.imoveis?.predios?.length > 0 ? <ImovelBlock predios={meta.imoveis.predios} tipo="prédio" /> : null}
-      {meta?.imoveis?.apartamentos?.length > 0 ? (
-        <ImovelBlock apartamentos={meta.imoveis.apartamentos} tipo="apartamento" />
-      ) : null}
-      {meta?.imoveis?.terrenos?.length > 0 ? <ImovelBlock terrenos={meta.imoveis.terrenos} tipo="terreno" /> : null}
-      {meta?.imoveis?.veiculos?.length > 0 ? <VeiculosBlock veiculos={meta.imoveis.veiculos} /> : null}
-      {meta?.livrancas?.length > 0 ? <LivrancasBlock livrancas={meta.livrancas} /> : null}
-      {meta?.seguros?.length > 0 ? <SegurosV2Block seguros={meta.seguros} raiz /> : null}
-      {meta?.contas?.length > 0 ? <ContasBlock contas={meta.contas} /> : null}
-      {meta?.titulos?.length > 0 ? <TitulosBlock titulos={meta.titulos} /> : null}
-    </Stack>
-  );
-}
+  return inputGarantias.map((g) => {
+    const metadados = g?.info_extra_v2?.metadados || {};
+    const bem = metadados?.bem || {};
+    const garantidores = metadados?.garantidores || [];
 
-// ─── GarantiaCard ----------------------------------------------------------------------------------------------------
+    return {
+      // Mapeamento principal
+      valor_garantia: g.valor ?? null,
+      tipo_garantia_id: g.tipo_id ?? null,
+      subtipo_garantia_id: g.subtipo_id ?? null,
+      percentagem_cobertura: g.percentagem_cobertura ?? null,
 
-function GarantiaCard({ garantia, participantes, canChange, openForm }) {
-  const isV2 = garantia.versao_schema === 2;
-  const [expanded, setExpanded] = useState(false);
-  const donos = participantes?.filter(({ garantia_id }) => garantia_id === garantia?.id);
+      // Metadados normalizados
+      metadados: {
+        bem,
+        numero_livranca: metadados.numero_livranca ?? null,
+        garantidores: Array.isArray(garantidores) ? garantidores : [],
+      },
 
-  return (
-    <Card>
-      <Stack
-        spacing={2}
-        direction="row"
-        alignItems="center"
-        justifyContent="space-between"
-        onClick={() => setExpanded(!expanded)}
-        sx={{
-          px: 2,
-          py: 1.5,
-          cursor: 'pointer',
-          transition: 'background .15s',
-          borderBottom: expanded ? `1px solid` : 'none',
-          borderColor: 'divider',
-          '&:hover': { bgcolor: 'action.hover' },
-        }}
-      >
-        <Stack
-          useFlexGap
-          spacing={2}
-          flexWrap="wrap"
-          direction="row"
-          justifyContent="space-between"
-          sx={{ flexGrow: 1 }}
-        >
-          <Box>
-            <Stack direction="row" spacing={1} alignItems="center">
-              <Box sx={{ width: 10, height: 10, borderRadius: '50%', bgcolor: 'success.main' }} />
-              <Typography variant="subtitle2">
-                {garantia.tipo}
-                {garantia.subtipo ? ` — ${garantia.subtipo}` : ''}
-              </Typography>
-            </Stack>
-            <Stack useFlexGap flexWrap="wrap" direction="row" spacing={1.5} sx={{ pl: 2.4, mt: 0.5, rowGap: 0 }}>
-              <InlineRow
-                label="Valor"
-                value={fCurrency(garantia.valor)}
-                sxValue={{ fontWeight: 'bold', color: 'text.secondary' }}
-              />
-              <InlineRow
-                label="Cobertura"
-                sxValue={{ color: 'success.main', fontWeight: 'bold' }}
-                value={fPercent(garantia.percentagem_cobertura) || 'N/D'}
-              />
-              <InlineRow label="Conta DP" value={garantia.conta_dp} />
-            </Stack>
-          </Box>
+      // Campos adicionais do sistema atual
+      id: g.id ?? null,
+      reais: g.reais ?? null,
+      tipo_garantia: g.tipo ?? null,
+      subtipo_garantia: g.subtipo ?? null,
 
-          <Stack direction="row" spacing={0.75} alignItems="center" justifyContent="center">
-            <SchemaBadge version={garantia.versao_schema} />
-            <StatusBadge label={garantia.reais ? 'Real' : 'Pessoal'} variant={garantia.reais ? 'active' : 'info'} />
-            <StatusBadge label={garantia.ativo ? 'Ativo' : 'Inativo'} variant={garantia.ativo ? 'active' : ''} />
-          </Stack>
-        </Stack>
-
-        <IconButton
-          size="small"
-          sx={{ transform: expanded ? 'rotate(180deg)' : 'rotate(0deg)', transition: 'transform .2s' }}
-        >
-          <ExpandMoreIcon sx={{ fontSize: 18 }} />
-        </IconButton>
-      </Stack>
-
-      <Collapse in={expanded}>
-        <Box sx={{ p: 2 }}>
-          {isV2 ? (
-            <MetadadosV2 info_extra_v2={garantia.info_extra_v2} />
-          ) : (
-            <>
-              <Stack direction="row" spacing={2} justifyContent="space-between" alignItems="center" sx={{ mb: 2 }}>
-                {donos?.length > 0 && <DonosBlock donos={donos} />}
-                {canChange && (
-                  <DefaultAction
-                    button
-                    icon="adicionar"
-                    label="Entidade/Dono"
-                    onClick={() => openForm('form-interveniente', { garantiaId: garantia?.id })}
-                  />
-                )}
-              </Stack>
-              <SegurosLegacyBlock seguros={garantia.seguros} />
-            </>
-          )}
-          {garantia.ultima_modificacao || garantia.feito_por ? (
-            <Atualizado divider em={garantia.ultima_modificacao} por={garantia.feito_por} />
-          ) : null}
-        </Box>
-      </Collapse>
-    </Card>
-  );
+      ativo: g.ativo ?? true,
+      criador: g.feito_por ?? null,
+      criado_em: g.criado_em ?? null,
+      modificador: g.modificador ?? null,
+      modificado_em: g.ultima_modificacao ?? null,
+    };
+  });
 }

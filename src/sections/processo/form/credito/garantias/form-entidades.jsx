@@ -14,26 +14,17 @@ import { AddItem, DeleteBox } from '@/components/Actions';
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-export default function FormEntidades({ label, name, livranca = false }) {
+export default function FormEntidades({ label, name, pt = 1 }) {
   const { control } = useFormContext();
   const { fields, append, remove } = useFieldArray({ control, name });
 
-  return livranca ? (
-    <>
-      {fields.length > 0 && <Entidades fields={fields} remove={remove} prefixo={name} />}
-      <GridItem xs={2}>
-        <Stack direction="row" alignItems="center" sx={{ height: 1 }}>
-          <AddItem onClick={() => append({ numero_entidade: '' })} dados={{ label, small: true }} />
-        </Stack>
-      </GridItem>
-    </>
-  ) : (
-    <Stack sx={{ flexGrow: 1, pt: 1 }}>
+  return (
+    <Stack sx={{ flexGrow: 1, pt }}>
       <Stack direction="row" justifyContent="space-between" alignItems="flex-end">
         <Typography variant="overline">{label}(s)</Typography>
         <AddItem onClick={() => append({ numero_entidade: '' })} dados={{ label, small: true }} />
       </Stack>
-      <Divider sx={{ my: 1 }} />
+      <Divider sx={{ mt: 1, mb: 1.5 }} />
       <Grid container spacing={2} justifyContent="center">
         <Entidades fields={fields} remove={remove} prefixo={name} />
       </Grid>

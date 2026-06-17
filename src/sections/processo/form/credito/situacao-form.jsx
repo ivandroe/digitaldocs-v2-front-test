@@ -37,8 +37,8 @@ export function FormSituacao({ dados, onClose, setOpen }) {
   const formSchema = Yup.object().shape({
     situacao: Yup.mixed().required().label('Situação'),
     garantia: shapeText('situacao', ['Aprovado'], 'Garantias'),
+    escalao_decisao: shapeMixed('situacao', ['Aprovado'], 'Decisor'),
     data_referencia: Yup.date().typeError().required().label('Data'),
-    escalao_decisao: shapeMixed('Decisor', 'Aprovado', '', 'situacao'),
     taxa_juro: shapeNumber('Taxa de juros', 'Aprovado', '', 'situacao'),
     prazo_amortizacao: shapeNumber('Prazo', 'Aprovado', '', 'situacao'),
     montante: shapeNumber('Montante', 'Aprovado', 'Contratado', 'situacao'),

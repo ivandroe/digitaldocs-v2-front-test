@@ -56,7 +56,7 @@ export default function FormInfoInterno({ dados }) {
     // agendamento
     diadomes: shapeNumber('Dia do mês', true, '', 'agendado'),
     data_inicio: shapeDate('agendado', [true], 'Data de início'),
-    periodicidade: shapeMixed('Periodicidade', true, '', 'agendado'),
+    periodicidade: shapeMixed('agendado', [true], 'Periodicidade'),
     data_arquivamento: shapeDate('agendado', [true], 'Data de término'),
   });
 

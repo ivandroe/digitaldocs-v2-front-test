@@ -43,13 +43,13 @@ export default function FormDepositante({ dados }) {
     pai: shapeText('is_cliente', [false], 'Nome do Pai'),
     profissao: shapeText('is_cliente', [false], 'Profissão'),
     telemovel: shapeText('is_cliente', [false], 'Nº de telemóvel'),
+    estado_civil: shapeMixed('is_cliente', [false], 'Estado civil'),
     docid: shapeText('is_cliente', [false], 'Doc. de identificação'),
     nacionalidade: shapeText('is_cliente', [false], 'Nacionalidade'),
     ordenador: shapeText('is_cliente', [false], 'Nome do ordenador'),
-    estado_civil: shapeMixed('Estado civil', false, '', 'is_cliente'),
     entidade_con: shapeNumber('Nº da entidade', true, '', 'is_cliente'),
     data_nascimento: shapeDate('is_cliente', [false], 'Data de nascimento'),
-    tipo_docid: shapeMixed('Tipo doc. identificação', false, '', 'is_cliente'),
+    tipo_docid: shapeMixed('is_cliente', [false], 'Tipo doc. identificação'),
     local_pais_nascimento: shapeText('is_cliente', [false], 'Local/País de nascimento'),
   });
 

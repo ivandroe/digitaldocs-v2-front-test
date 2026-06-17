@@ -9,7 +9,7 @@ export const extrairDescricaoGarantias = (garantias = []) => {
 
   garantias.forEach((g) => {
     const meta = g.metadados || {};
-    const { fiadores, seguros, livrancas, contas, imoveis } = meta || {};
+    const { garantidores, seguros, livrancas, contas, imoveis } = meta || {};
 
     const adicionarQuebraSeNecessario = () => {
       if (runs.length > 0) return { break: 1 };
@@ -17,10 +17,10 @@ export const extrairDescricaoGarantias = (garantias = []) => {
     };
 
     // 1. FIANÇA
-    if (fiadores?.length > 0) {
+    if (garantidores?.length > 0) {
       runs.push(new TextRun({ text: '• Fiança solidária prestada por: ', ...adicionarQuebraSeNecessario() }));
-      fiadores.forEach((f, i) => {
-        runs.push(new TextRun({ text: `${f.nome_entidade}${i < fiadores.length - 1 ? ', ' : ';'}`, bold: true }));
+      garantidores.forEach((f, i) => {
+        runs.push(new TextRun({ text: `${f.nome_entidade}${i < garantidores.length - 1 ? ', ' : ';'}`, bold: true }));
       });
     }
 

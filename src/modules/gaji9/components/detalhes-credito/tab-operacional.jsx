@@ -1,6 +1,7 @@
 // @mui
 import Grid from '@mui/material/Grid';
 // utils
+import { useSelector } from '@/redux/store';
 import { ptDateTime } from '@/utils/formatTime';
 //
 import GridItem from '@/components/GridItem';
@@ -9,6 +10,9 @@ import { CardBox, FieldRow, StatusBadge, SchemaBadge } from './shared';
 // ---------------------------------------------------------------------------------------------------------------------
 
 export function TabOperacional({ credito }) {
+  const uos = useSelector((state) => state.intranet.uos);
+  const uo = uos?.find(({ balcao }) => balcao === credito.balcao_domicilio)?.label;
+
   return (
     <Grid container spacing={2}>
       <GridItem md={6}>
@@ -21,7 +25,10 @@ export function TabOperacional({ credito }) {
 
       <GridItem md={6}>
         <CardBox title="Conta e balcão">
-          <FieldRow label="Balcão domicílio" value={credito.balcao_domicilio} />
+          <FieldRow
+            label="Balcão domicílio"
+            value={uo ? `${credito.balcao_domicilio} - ${uo}` : credito.balcao_domicilio}
+          />
           <FieldRow label="Conta DO" value={credito.conta_do} />
           <FieldRow label="Conta DO renda" value={credito.conta_do_renda} />
         </CardBox>

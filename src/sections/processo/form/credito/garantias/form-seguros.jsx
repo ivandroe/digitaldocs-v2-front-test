@@ -9,6 +9,7 @@ import Divider from '@mui/material/Divider';
 import Typography from '@mui/material/Typography';
 // utils
 import { useSelector } from '@/redux/store';
+import { periodicidadesList } from '@/_mock';
 import { seguroSchema } from './schemaFileds';
 // components
 import GridItem from '@/components/GridItem';
@@ -18,12 +19,12 @@ import { RHFTextField, RHFNumberField, RHFAutocompleteSmp, RHFAutocompleteObj } 
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-export default function FormSeguros({ prefixo, tipo = false }) {
+export default function FormSeguros({ prefixo, tipo = false, pt = 1 }) {
   const { control } = useFormContext();
   const { fields, append, remove } = useFieldArray({ control, name: prefixo });
 
   return (
-    <Stack sx={{ flexGrow: 1, pt: 1 }}>
+    <Stack sx={{ flexGrow: 1, pt }}>
       <Stack direction="row" justifyContent="space-between" alignItems="flex-end">
         <Typography variant="overline">Seguro(s)</Typography>
         <AddItem onClick={() => append(seguroSchema)} dados={{ label: 'Seguro', small: true }} />
@@ -45,11 +46,11 @@ function Seguros({ fields = [], remove, prefixo, tipo = false }) {
   return fields?.length ? (
     fields.map((item, index) => (
       <Card key={item.id} sx={{ p: 1, boxShadow: (theme) => theme.customShadows.cardAlt }}>
-        <Stack direction="row" alignItems="center" spacing={2}>
+        <Stack direction="row" alignItems="center" spacing={1}>
           <Grid container spacing={2} justifyContent="center">
             {tipo && (
               <GridItem sm={12} md={4}>
-                <RHFAutocompleteObj label="Tipo" name={`${prefixo}[${index}].tipo`} options={segurosList} />
+                <RHFAutocompleteObj label="Tipo" name={`${prefixo}[${index}].tipo_seguro`} options={segurosList} />
               </GridItem>
             )}
             <GridItem sm={6} md={tipo ? 4 : 6}>
@@ -69,10 +70,10 @@ function Seguros({ fields = [], remove, prefixo, tipo = false }) {
               <RHFNumberField name={`${prefixo}[${index}].premio`} label="Prémio" tipo="CVE" />
             </GridItem>
             <GridItem sm={6} md={3}>
-              <RHFAutocompleteSmp
+              <RHFAutocompleteObj
                 label="Periodicidade"
+                options={periodicidadesList}
                 name={`${prefixo}[${index}].periodicidade`}
-                options={['Único', 'Mensal', 'Trimestral', 'Semestral', 'Anual']}
               />
             </GridItem>
             <GridItem sm={6} md={3}>
@@ -85,5 +86,33 @@ function Seguros({ fields = [], remove, prefixo, tipo = false }) {
     ))
   ) : (
     <SemDados message="Nenhum seguro adicionado..." sx={{ p: 1.5 }} />
+  );
+}
+
+// ---------------------------------------------------------------------------------------------------------------------
+
+export function SeguroForm() {
+  const { tiposSeguros } = useSelector((state) => state.gaji9);
+  const segurosList = useMemo(() => tiposSeguros.map((s) => ({ id: s?.id, label: s?.designacao })), [tiposSeguros]);
+
+  return (
+    <Grid container spacing={2} justifyContent="center">
+      <GridItem sm={12} md={4}>
+        <RHFAutocompleteObj label="Tipo" name="tipo_seguro" options={segurosList} />
+      </GridItem>
+      <GridItem sm={6} md={4}>
+        <RHFAutocompleteSmp
+          name="seguradora"
+          label="Seguradora"
+          options={['Aliança Seguros', 'Garantia Seguros', 'Impar Seguros']}
+        />
+      </GridItem>
+      <GridItem sm={6} md={4} children={<RHFTextField name="apolice" label="Apólice" />} />
+      <GridItem sm={6} md={4} children={<RHFNumberField name="valor" label="Valor" tipo="CVE" />} />
+      <GridItem sm={6} md={4} children={<RHFNumberField name="premio" label="Prémio" tipo="CVE" />} />
+      <GridItem sm={6} md={4}>
+        <RHFAutocompleteObj name="periodicidade" label="Periodicidade" options={periodicidadesList} />
+      </GridItem>
+    </Grid>
   );
 }

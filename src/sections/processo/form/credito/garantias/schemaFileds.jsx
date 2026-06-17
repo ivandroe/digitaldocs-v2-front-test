@@ -1,9 +1,10 @@
-import { listaFreguesias } from '@/_mock';
+// utils
+import { periodicidadesList } from '@/_mock';
 
 // ---------------------------------------------------------------------------------------------------------------------
 
 export const seguroSchema = {
-  tipo: null,
+  tipo_seguro: null,
   seguradora: null,
   valor: '',
   premio: '',
@@ -14,71 +15,52 @@ export const seguroSchema = {
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-export const tituloSchema = { codigo: '', numero_cliente: '', percentagem_cobertura: '', seguros: [] };
+export const extrairCamposBem = (bem, listaFreguesias = []) => ({
+  donos: transformarDonos(bem?.donos),
+  seguros: transformarSeguros(bem?.seguros),
+  freguesia: getFreguesia({ freguesia: bem?.freguesia, ilha: bem?.ilha }, listaFreguesias),
+});
 
-// ---------------------------------------------------------------------------------------------------------------------
+export const transformarSeguros = (seguros = []) =>
+  Array.isArray(seguros)
+    ? seguros.map((row) => ({
+        ...row,
+        tipo_seguro: { id: row?.tipo_seguro_id, label: row?.tipo_seguro },
+        periodicidade: periodicidadesList?.find(({ id }) => id === row?.periodicidade) || null,
+      }))
+    : [];
 
-export const imovelSchema = {
-  zona: '',
-  rua: '',
-  descritivo: '',
-  numero_porta: '',
-  nip: '',
-  area: '',
-  valor_pvt: '',
-  numero_andar: '',
-  numero_matriz: '',
-  identificacao_fracao: '',
-  percentagem_cobertura: '',
-  numero_descricao_predial: '',
-  localizacao_conservatoria: '',
-  freguesia: null,
-  tipo_matriz: null,
-  donos: [],
-  seguros: [],
+const transformarDonos = (donos = []) =>
+  Array.isArray(donos) ? donos.map((d) => ({ numero_entidade: d.numero ?? d.numero_entidade ?? '' })) : [];
+
+export const getFreguesia = (morada, listaFreguesias = []) => {
+  const freg = listaFreguesias.find(({ ilha, freguesia }) => ilha === morada?.ilha && freguesia === morada?.freguesia);
+  return freg ? { ...freg, label: freg.freguesia } : null;
 };
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-export const veiculoSchema = {
-  nura: '',
-  marca: '',
-  valor: '',
-  modelo: '',
-  valor_pvt: '',
-  matricula: '',
-  ano_fabrico: '',
-  percentagem_cobertura: '',
-  donos: [],
-  seguros: [],
-};
-
-// ---------------------------------------------------------------------------------------------------------------------
-
-export function construirSchemaImoveis(dados = []) {
-  const seguros = (rows) =>
-    rows?.map((row) => ({ ...row, tipo: { id: row?.tipo_seguro_id, label: row?.tipo_seguro } }));
-
-  return dados?.map((row) => {
-    const freg = listaFreguesias?.find(
-      ({ ilha, freguesia }) => ilha === row?.morada?.ilha && freguesia === row?.morada?.freguesia
+export const descreverBem = (bem) => {
+  if (bem?.tipo === 'veiculo') {
+    return (
+      bem?.matricula || bem?.nura || [bem?.marca, bem?.modelo].filter(Boolean).join(' ') || 'Veículo sem identificador'
     );
+  }
 
-    return {
-      ...row,
-      ...(row?.morada
-        ? {
-            rua: row?.morada?.rua ?? '',
-            zona: row?.morada?.zona ?? '',
-            descritivo: row?.morada?.descritivo ?? '',
-            numero_porta: row?.morada?.numero_porta ?? '',
-            freguesia: freg ? { ...freg, label: freg.freguesia } : null,
-          }
-        : null),
-      seguros: Array.isArray(row?.seguros) ? seguros(row.seguros) : [],
-      donos: Array.isArray(row?.donos)
-        ? row.donos.map((d) => ({ numero_entidade: d.numero ?? d.numero_entidade ?? '' }))
-        : [],
-    };
-  });
-}
+  const partes = [];
+  if (bem?.nip) partes.push(`NIP ${bem.nip}`);
+  else {
+    if (bem?.numero_matriz && bem?.numero_descricao_predial)
+      partes.push(`${bem.numero_matriz} / ${bem.numero_descricao_predial}`);
+    else if (bem?.numero_matriz) partes.push(`Mtz ${bem.numero_matriz}`);
+  }
+
+  return partes.length ? partes.join(' · ') : 'Bem sem identificador';
+};
+
+export const extrairBens = (bens = [], chave) =>
+  Array.isArray(bens)
+    ? bens
+        .filter(({ tipo }) => tipo === chave)
+        .map((bem) => ({ ...bem, id: descreverBem(bem), label: descreverBem(bem) }))
+    : [];

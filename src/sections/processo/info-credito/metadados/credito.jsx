@@ -12,11 +12,11 @@ import { useMetadadosCreditoData } from './useMetadadosCreditoData';
 import { getFromParametrizacao } from '@/redux/slices/parametrizacao';
 // Components
 import GridItem from '@/components/GridItem';
-import { noDados } from '@/components/Panel';
 import { DefaultAction } from '@/components/Actions';
 import { SearchNotFoundSmall } from '@/components/table/SearchNotFound';
-import { CardBox } from '@/modules/gaji9/components/detalhes-credito/shared';
-import MetadadosCreditoForm from '../../form/credito/form-metadados-credito';
+//
+import MetadadosCreditoForm from '../../form/credito/metadados';
+import CardsGrid from '@/modules/gaji9/components/detalhes-credito/cards-grid';
 
 // ---------------------------------------------------------------------------------------------------------------------
 
@@ -56,44 +56,7 @@ export default function MetadadosCredito({ dados, outros, modificar = false, ids
             ))}
           </Grid>
 
-          <Box
-            gap={2}
-            display="grid"
-            alignItems="center"
-            gridTemplateColumns={{ xs: '1fr', sm: 'repeat(2, 1fr)', lg: 'repeat(3, 1fr)', xl: 'repeat(3, 1fr)' }}
-          >
-            {cards.map((card, index) => (
-              <CardBox key={card.id ?? index} title={card.titulo}>
-                {card.dados.map(
-                  (item, idx) =>
-                    (item?.empty && noDados(item?.label)) ||
-                    (item.isHeader && (
-                      <Typography key={idx} variant="caption" sx={{ color: 'primary.main', fontWeight: 700 }}>
-                        {item.title}
-                      </Typography>
-                    )) || (
-                      <Box
-                        key={idx}
-                        sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 1 }}
-                      >
-                        <Typography variant="caption" sx={{ color: 'text.secondary' }}>
-                          {item.title}:
-                        </Typography>
-                        <Box sx={{ textAlign: 'right' }}>
-                          <Typography
-                            variant="body2"
-                            noWrap={!item.noWrap}
-                            sx={{ fontWeight: item.bold ? 700 : 400, color: item.color || 'text.primary', pr: 0.25 }}
-                          >
-                            {item.value || noDados('(N/D)')}
-                          </Typography>
-                        </Box>
-                      </Box>
-                    )
-                )}
-              </CardBox>
-            ))}
-          </Box>
+          <CardsGrid cards={cards} />
         </>
       ) : (
         <SearchNotFoundSmall

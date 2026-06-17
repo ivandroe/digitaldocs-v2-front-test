@@ -40,9 +40,9 @@ export const shapeText = (item, opcoes, label) =>
     otherwise: () => Yup.mixed().notRequired(),
   });
 
-export const shapeMixed = (label, sit1, sit2, item) =>
+export const shapeMixed = (item, opcoes, label) =>
   Yup.mixed().when(item, {
-    is: (val) => val === sit1 || (sit2 && val === sit2),
+    is: (val) => opcoes?.includes(val),
     then: () => Yup.mixed().required().label(label),
     otherwise: () => Yup.mixed().notRequired(),
   });

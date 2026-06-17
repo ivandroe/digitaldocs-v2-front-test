@@ -9,6 +9,7 @@ import DialogContent from '@mui/material/DialogContent';
 // utils
 import { fCurrency, fPercent } from '@/utils/formatNumber';
 import { useTabsSync } from '@/hooks/minimal-hooks/use-tabs-sync';
+import { chaveMetaGarantia } from '../../form/credito/garantias/form-garantias-credito';
 // components
 import { noDados } from '@/components/Panel';
 import Label, { LabelSN } from '@/components/Label';
@@ -16,59 +17,35 @@ import { SearchNotFoundSmall } from '@/components/table';
 import { DialogTitleAlt } from '@/components/CustomDialog';
 import { TabsWrapperSimple } from '@/components/TabsWrapper';
 //
+import TableSeguros from './table-seguros';
 import ImoveisGarantia from './imoveis-garantia';
-import TableInfoGarantias from './table-info-garantias';
+import { Livranca, Donos } from './imoveis-garantia';
 import { Resgisto, TableRowItem } from '../../../parametrizacao/details';
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-export default function DetalhesGarantia({ dados, onClose }) {
-  const {
-    contas = [],
-    seguros = [],
-    titulos = [],
-    imoveis = [],
-    fiadores = [],
-    livrancas = [],
-  } = dados?.metadados || {};
+export default function DetalhesGarantia({ dados, onClose, openForm = null }) {
+  const id = dados?.id;
+  const { garantidores = [], bem = null, numero_livranca: livranca = '' } = dados?.metadados || {};
 
   const tabsList = [
-    { value: 'Info', component: <InfoGarantia dados={dados} info /> },
-    ...(fiadores?.length > 0
-      ? [{ value: 'Fiadores', component: <TableInfoGarantias item="fiadores" dados={fiadores ?? []} /> }]
+    { value: 'Garantia', component: <InfoGarantia dados={dados} info /> },
+    ...(livranca ? [{ value: 'Livrança', component: <Livranca livranca={livranca} donos={garantidores} /> }] : []),
+    ...(garantidores?.length > 0 && !livranca
+      ? [{ value: 'Fiador(es)', component: <Donos dados={garantidores} /> }]
       : []),
-    ...(livrancas?.length > 0
-      ? [{ value: 'Livranças', component: <ImoveisGarantia item="livrancas" dados={livrancas ?? []} /> }]
-      : []),
-    ...(seguros?.length > 0
-      ? [{ value: 'Seguros', component: <TableInfoGarantias item="seguros" dados={seguros ?? []} garantia /> }]
-      : []),
-    ...(contas?.length > 0
-      ? [{ value: 'Contas DP', component: <ImoveisGarantia item="contas" dados={contas ?? []} /> }]
-      : []),
-    ...(titulos?.length > 0
-      ? [{ value: 'Títulos', component: <ImoveisGarantia item="titulos" dados={titulos ?? []} /> }]
-      : []),
-    ...(imoveis?.veiculos?.length > 0
-      ? [{ value: 'Veículos', component: <ImoveisGarantia item="veiculos" dados={imoveis?.veiculos ?? []} /> }]
-      : []),
-    ...(imoveis?.terrenos?.length > 0
-      ? [{ value: 'Terrenos', component: <ImoveisGarantia item="terrenos" dados={imoveis?.terrenos ?? []} /> }]
-      : []),
-    ...(imoveis?.apartamentos?.length > 0
+    ...(bem?.tipo
       ? [
           {
-            value: 'Apartamentos',
-            component: <ImoveisGarantia item="apartamentos" dados={imoveis?.apartamentos ?? []} />,
+            value: chaveMetaGarantia?.find(({ chave }) => chave === bem?.tipo)?.label || 'Bem',
+            component: <ImoveisGarantia item={bem?.tipo} dados={bem} openForm={openForm} id={id} />,
           },
         ]
       : []),
-    ...(imoveis?.predios?.length > 0
-      ? [{ value: 'Prédios', component: <ImoveisGarantia item="predios" dados={imoveis?.predios ?? []} /> }]
-      : []),
+    ...(bem?.seguros?.length > 0 ? [{ value: 'Seguros', component: <TableSeguros dados={bem?.seguros ?? []} /> }] : []),
   ];
 
-  const [tab, setTab] = useTabsSync(tabsList, 'Info', '');
+  const [tab, setTab] = useTabsSync(tabsList, 'Garantia', '');
 
   return (
     <Dialog open onClose={onClose} fullWidth maxWidth="md">
@@ -116,5 +93,18 @@ function InfoGarantia({ dados, info = false }) {
         <SearchNotFoundSmall message="Nenhuma informação disponível..." />
       )}
     </List>
+  );
+}
+
+// ---------------------------------------------------------------------------------------------------------------------
+
+export function DetalhesBemFinanciado({ dados, onClose }) {
+  return (
+    <Dialog open onClose={onClose} fullWidth maxWidth="md">
+      <DialogTitleAlt onClose={onClose} title={`Detalhes do ${dados?.label} financiado`} />
+      <DialogContent sx={{ mt: 3 }}>
+        <ImoveisGarantia item={dados?.tipo} dados={dados} />
+      </DialogContent>
+    </Dialog>
   );
 }

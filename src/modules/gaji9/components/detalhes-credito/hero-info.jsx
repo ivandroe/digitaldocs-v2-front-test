@@ -7,6 +7,7 @@ import Typography from '@mui/material/Typography';
 // utils
 import { fNumber } from '@/utils/formatNumber';
 // components
+import { noDados } from '@/components/Panel';
 import GridItem from '@/components/GridItem';
 import { StatusBadge, SchemaBadge } from './shared';
 
@@ -17,7 +18,6 @@ export default function HeroCreditoDetail({ credito = {} }) {
     <Card sx={{ p: 2 }}>
       <Stack
         gap={1.5}
-        sx={{ mb: 2 }}
         justifyContent="space-between"
         direction={{ xs: 'column', sm: 'row' }}
         alignItems={{ xs: 'flex-start', sm: 'flex-start' }}
@@ -38,13 +38,19 @@ export default function HeroCreditoDetail({ credito = {} }) {
           />
         </Stack>
       </Stack>
+      <Typography variant="body2" sx={{ my: 1 }}>
+        <Typography variant="subtitle2" component="span" sx={{ color: 'text.secondary' }}>
+          Finalidade:{' '}
+        </Typography>
+        {credito.finalidade || noDados('(Não definido...)')}
+      </Typography>
       <Grid container spacing={1}>
         <KpiCell label="Montante" value={credito.montante} sub={credito.moeda} colorStyle="success.main" />
-        <KpiCell label="Custo total" value={credito.custo_total} sub={credito.moeda} />
-        <KpiCell label="Prestação / mês" value={credito.valor_prestacao} sub={credito.moeda} />
-        <KpiCell label="Prazo contratual" value={credito.prazo_contratual} sub="meses" />
+        <KpiCell label="Taxa negociada" value={credito.taxa_juro_negociado} sub="%" colorStyle="info.main" />
+        <KpiCell label="Prestação" value={credito.valor_prestacao} sub={credito.moeda} colorStyle="info.main" />
         <KpiCell label="TAEG" value={credito.taxa_taeg} colorStyle="warning.main" sub="%" />
-        <KpiCell label="Taxa negociada" value={credito.taxa_juro_negociado} sub="%" colorStyle="success.main" />
+        <KpiCell label="Custo total" value={credito.custo_total} sub={credito.moeda} colorStyle="warning.main" />
+        <KpiCell label="Prazo contratual" value={credito.prazo_contratual} sub="meses" />
       </Grid>
     </Card>
   );

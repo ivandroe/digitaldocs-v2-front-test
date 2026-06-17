@@ -40,7 +40,7 @@ import {
 import ProcessoForm from '@/sections/processo/form/form-processo';
 import Intervencao from '@/sections/processo/intervencao-em-serie';
 import { DesarquivarForm } from '@/sections/processo/form/form-arquivo';
-import PareceresComites from '@/sections/processo/info-credito/dialog-pareceres';
+import PareceresComites from '@/sections/processo/info-credito/pareceres/dialog-pareceres';
 
 // ---------------------------------------------------------------------------------------------------------------------
 

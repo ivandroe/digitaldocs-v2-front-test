@@ -174,7 +174,7 @@ export function IntervenienteForm({ id, versao, onClose }) {
 
   const formSchema = Yup.object().shape({
     entidade: Yup.number().min(0).required().label('Nº de entidade'),
-    entidade_representada: shapeMixed('Entidade representada', 'Procurador', '', 'responsabilidade'),
+    entidade_representada: shapeMixed('responsabilidade', ['Procurador'], 'Entidade representada'),
     responsabilidade: garantiaId ? Yup.mixed().nullable() : Yup.mixed().required().label('Responsabilidade'),
   });
 

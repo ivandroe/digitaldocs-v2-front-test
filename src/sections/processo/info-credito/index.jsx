@@ -12,9 +12,9 @@ import { TabsWrapperSimple } from '@/components/TabsWrapper';
 //
 import Kpis from './kpis';
 import VisaoGeral from './visao-geral';
-import PareceresCredito from './pareceres';
 import FichaAnalise from './ficha-parecer';
 import MetadadosCredito from './metadados/credito';
+import PareceresCredito from './pareceres/pareceres';
 import TableGarantias from './garantias/table-garantias';
 
 // ---------------------------------------------------------------------------------------------------------------------

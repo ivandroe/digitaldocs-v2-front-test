@@ -19,17 +19,12 @@ import { SkeletonEntidade } from '@/components/skeleton';
 import { TabsWrapperSimple } from '@/components/TabsWrapper';
 import HeaderBreadcrumbs from '@/components/HeaderBreadcrumbs';
 //
-import {
-  TabGarantias,
-  TabDadosExtra,
-  TabFinanceiro,
-  TabOperacional,
-  TabParticipantes,
-} from '../components/detalhes-credito';
 import AcessoGaji9 from './acesso-gaji9';
 import ModaisCredito from '../components/detalhes-credito/modais';
 import TableContratos from '../components/detalhes-credito/contratos';
 import HeroCreditoDetail from '../components/detalhes-credito/hero-info';
+import { TabFinanceiro, TabOperacional, TabParticipantes } from '../components/detalhes-credito';
+import { TableGarantias, normalizarGarantias } from '../components/detalhes-credito/tab-garantias';
 
 // ---------------------------------------------------------------------------------------------------------------------
 
@@ -42,7 +37,7 @@ export default function PageCreditoDetalhes() {
 
   const { credito, isLoading } = useSelector((state) => state.gaji9);
   const { ativo = false, contratado = false, numero_proposta = '' } = credito || {};
-  const { participantes = [], garantias = [], versao_schema = 1, info_extra_v2 = null } = credito || {};
+  const { participantes = [], garantias = [], versao_schema = 1 } = credito || {};
   const canChange = ativo && !contratado && (isGerente || temPermissao(['CREATE_CREDITO']));
 
   useEffect(() => {
@@ -57,7 +52,7 @@ export default function PageCreditoDetalhes() {
   const openForm = (item, dados) => dispatch(setModal({ item: item || '', dados: dados || null }));
 
   const tabsList = [
-    { value: 'Financeiro', component: <TabFinanceiro credito={credito || {}} /> },
+    { value: 'Condições Financeiras', component: <TabFinanceiro credito={credito || {}} /> },
     {
       value: 'Participantes',
       count: participantes?.length,
@@ -74,22 +69,17 @@ export default function PageCreditoDetalhes() {
       value: 'Garantias',
       count: garantias?.length,
       component: (
-        <TabGarantias
-          openForm={openForm}
-          garantias={garantias}
-          participantes={participantes}
-          canChange={canChange && versao_schema === 1}
+        <TableGarantias
+          dados={normalizarGarantias(garantias)}
+          openForm={canChange && versao_schema === 1 ? openForm : null}
         />
       ),
     },
-    ...(versao_schema === 2 && info_extra_v2
-      ? [{ value: 'Dados extra', component: <TabDadosExtra info={info_extra_v2} /> }]
-      : []),
-    { value: 'Operacional', component: <TabOperacional credito={credito || {}} /> },
     { value: 'Contratos', component: <TableContratos id={id} /> },
+    { value: 'Operacional', component: <TabOperacional credito={credito || {}} /> },
   ];
 
-  const [tab, setTab] = useTabsSync(tabsList, 'Financeiro', '');
+  const [tab, setTab] = useTabsSync(tabsList, 'Condições Financeiras', '');
 
   return (
     <Page title="Crédito | DigitalDocs">
@@ -137,7 +127,6 @@ export default function PageCreditoDetalhes() {
                     <TabsWrapperSimple tabsList={tabsList} tab={tab} setTab={setTab} />
                     {tabsList?.find(({ value }) => value === tab)?.component}
                   </Stack>
-
                   <ModaisCredito id={id} dispatch={dispatch} onClose={openForm} versao={versao_schema} />
                 </>
               )}

@@ -10,7 +10,6 @@ import Typography from '@mui/material/Typography';
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
 // utils
 import { ptDateTime } from '@/utils/formatTime';
-//
 import { noDados, Criado } from '@/components/Panel';
 
 // ─── FieldRow --------------------------------------------------------------------------------------------------------
@@ -73,12 +72,6 @@ export function CardBox({ title = '', solid = false, children, sx }) {
       </Stack>
     </Card>
   );
-}
-
-// ─── InnerCard -------------------------------------------------------------------------------------------------------
-
-export function InnerCard({ children, sx }) {
-  return <Box sx={{ bgcolor: 'background.neutral', borderRadius: 1, p: 1.5, ...sx }}>{children}</Box>;
 }
 
 // ─── SchemaBadge -----------------------------------------------------------------------------------------------------

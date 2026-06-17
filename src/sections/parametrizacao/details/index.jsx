@@ -235,14 +235,14 @@ export function Resgisto({ label, por = '', em = '' }) {
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-export function TableRowItem({ title, id = 0, text = '', item = null }) {
+export function TableRowItem({ title, id = 0, text = '', item = null, sx = null }) {
   return text || item ? (
     <TableRow hover>
       <TableCell align="right" sx={{ color: 'text.secondary', pr: 0, maxWidth: '25% !important' }}>
         {title}
       </TableCell>
       <TableCell sx={{ minWidth: '75% !important' }}>
-        <Typography variant="body2" sx={{ whiteSpace: 'pre-line' }}>
+        <Typography variant="body2" sx={{ whiteSpace: 'pre-line', ...sx }}>
           {(!!text && !!id && `${text} (ID: ${id})`) || (text && text) || (item && item)}
         </Typography>
       </TableCell>

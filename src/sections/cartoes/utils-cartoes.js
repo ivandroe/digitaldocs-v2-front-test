@@ -38,11 +38,11 @@ export function applySortFilter({ dados, comparator, filter, tipoCartao, balcao 
   if (filter) {
     const normalizedFilter = normalizeText(filter);
     dados = dados.filter(
-      ({ nome, numero, cliente, data_emissao: dataEmissao }) =>
+      ({ nome, numero, cliente, data_emissao }) =>
         (nome && normalizeText(nome).indexOf(normalizedFilter) !== -1) ||
         (numero && normalizeText(numero).indexOf(normalizedFilter) !== -1) ||
         (cliente && normalizeText(cliente).indexOf(normalizedFilter) !== -1) ||
-        (dataEmissao && normalizeText(dataEmissao).indexOf(normalizedFilter) !== -1)
+        (data_emissao && normalizeText(data_emissao).indexOf(normalizedFilter) !== -1)
     );
   }
 

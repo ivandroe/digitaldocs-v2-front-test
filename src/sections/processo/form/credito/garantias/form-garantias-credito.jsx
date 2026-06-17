@@ -1,6 +1,6 @@
-import { useEffect, useMemo } from 'react';
+import { useMemo } from 'react';
 // form
-import { useForm } from 'react-hook-form';
+import { useForm, useWatch } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 // @mui
 import Grid from '@mui/material/Grid';
@@ -9,44 +9,29 @@ import DialogContent from '@mui/material/DialogContent';
 // utils
 import { vdt } from '@/utils/formatObject';
 import { useSelector, useDispatch } from '@/redux/store';
-import { createItem, updateItem } from '@/redux/slices/digitaldocs';
+import { updateDados, resetDados } from '@/redux/slices/stepper';
 //
+import { extrairBens } from './schemaFileds';
 import { shapeGarantia } from './validationFields';
-import composeGarantiaPayload from './composePayload';
-import { construirSchemaImoveis } from './schemaFileds';
 import { listaGarantias } from '@/modules/gaji9/utils/applySortFilter';
 // components
+import Steps from '@/components/Steps';
 import GridItem from '@/components/GridItem';
-import { DialogButons } from '@/components/Actions';
+import { ButtonsStepper } from '@/components/Actions';
 import { DialogTitleAlt } from '@/components/CustomDialog';
-import { FormProvider, RHFNumberField, RHFAutocompleteObj } from '@/components/hook-form';
+import { FormProvider, RHFNumberField, RHFAutocompleteObj, RHFSwitch } from '@/components/hook-form';
 //
-import FormContas from './form-contas';
-import FormImoveis from './form-imoveis';
-import FormTitulos from './form-titulos';
-import FormSeguros from './form-seguros';
-import FormVeiculos from './form-veiculos';
-import FormEntidades from './form-entidades';
-import FormLivrancas from './form-livrancas';
-
-const META_DEFAULTS = {
-  contas: [],
-  titulos: [],
-  seguros: [],
-  fiadores: [],
-  livrancas: [],
-  predios: [],
-  terrenos: [],
-  veiculos: [],
-  apartamentos: [],
-};
+import FormBemFinanciado from './form-bem-financiado';
+import FormMetadadosGarantias from './form-metadados-garantia';
 
 // ---------------------------------------------------------------------------------------------------------------------
 
 export default function FormGarantias({ dados, processoId, onClose }) {
   const dispatch = useDispatch();
+  const { activeStep } = useSelector((state) => state.stepper);
   const { tiposGarantias } = useSelector((state) => state.gaji9);
-  const { isSaving } = useSelector((state) => state.digitaldocs);
+  const bensFinanciados =
+    useSelector((state) => state.digitaldocs.processo?.credito?.gaji9_metadados?.bens_financiados) || [];
 
   const isEdit = dados?.modal === 'update';
   const garantiasList = useMemo(() => listaGarantias(tiposGarantias), [tiposGarantias]);
@@ -58,101 +43,93 @@ export default function FormGarantias({ dados, processoId, onClose }) {
   const formSchema = shapeGarantia();
   const defaultValues = useMemo(
     () => ({
-      contas: dados?.metadados?.contas || [],
-      titulos: dados?.metadados?.titulos || [],
-      seguros: dados?.metadados?.seguros || [],
-      fiadores: dados?.metadados?.fiadores || [],
-      livrancas: dados?.metadados?.livrancas || [],
-      percentagem_cobertura: dados?.percentagem_cobertura || '',
-      predios: construirSchemaImoveis(dados?.metadados?.imoveis?.predios || []),
-      terrenos: construirSchemaImoveis(dados?.metadados?.imoveis?.terrenos || []),
-      veiculos: construirSchemaImoveis(dados?.metadados?.imoveis?.veiculos || []),
-      apartamentos: construirSchemaImoveis(dados?.metadados?.imoveis?.apartamentos || []),
-      subtipo_garantia: tipoGarantia?.subtipos?.find(({ id }) => id === dados?.subtipo_garantia_id) || null,
       tipo_garantia: tipoGarantia,
+      bem_financiado: !!dados?.metadados?.bem?.bem_financiado,
+      bem_sem_registo: !!dados?.metadados?.bem?.bem_sem_registo,
+      percentagem_cobertura: dados?.percentagem_cobertura || '',
+      subtipo_garantia: tipoGarantia?.subtipos?.find(({ id }) => id === dados?.subtipo_garantia_id) || null,
     }),
     [dados, tipoGarantia]
   );
 
   const methods = useForm({ resolver: yupResolver(formSchema), defaultValues });
-  const { handleSubmit, watch, reset, setValue } = methods;
+  const { handleSubmit, control, setValue } = methods;
 
-  useEffect(() => {
-    reset(defaultValues);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [dados]);
-
-  const tipo = watch('tipo_garantia');
-  const subtipo = watch('subtipo_garantia');
+  const tipo = useWatch({ control, name: 'tipo_garantia' });
+  const subtipo = useWatch({ control, name: 'subtipo_garantia' });
+  const bem_financiado = useWatch({ control, name: 'bem_financiado' });
   const subtipos = useMemo(() => tipo?.subtipos ?? [], [tipo?.subtipos]);
-  const chaveMeta = useMemo(() => extrairChaveMeta(tipo, subtipo) ?? null, [tipo, subtipo]);
+
+  const chaveMeta = extrairChaveMeta(tipo, subtipo);
+  const bensFinanciadosMeta = extrairBens(bensFinanciados, chaveMeta?.chave);
+  const bensAplicado = bens?.includes(chaveMeta?.chave) && bensFinanciadosMeta?.length > 0;
 
   const onSubmit = async (values) => {
-    const msg = isEdit ? 'Garantia atualizada' : 'Garantia adicionada';
-    const params = { id: dados?.id || '', fillCredito: true, processoId, msg, put: true };
-    const formData = isEdit ? composeGarantiaPayload(values, chaveMeta) : [composeGarantiaPayload(values, chaveMeta)];
-    dispatch((isEdit ? updateItem : createItem)('garantias', JSON.stringify(formData), { ...params, onClose }));
+    dispatch(updateDados({ forward: true, dados: values }));
   };
 
-  const resetMetaFields = () => {
-    Object.entries(META_DEFAULTS).forEach(([key, val]) => {
-      setValue(key, val, vdt);
-    });
+  const closeModal = () => {
+    dispatch(resetDados());
+    onClose();
   };
 
   return (
-    <Dialog open fullWidth maxWidth="lg">
-      <DialogTitleAlt title={isEdit ? 'Editar garantia' : 'Adicionar garantia'} onClose={onClose} sx={{ pb: 2 }} />
+    <Dialog open fullWidth maxWidth="md">
+      <DialogTitleAlt
+        sx={{ pb: 2 }}
+        onClose={closeModal}
+        title={isEdit ? 'Editar garantia' : 'Adicionar garantia'}
+        content={<Steps sx={{ mt: 2, mb: 0 }} activeStep={activeStep} steps={['Garantia', 'Métadados']} />}
+      />
       <DialogContent>
-        <FormProvider methods={methods} onSubmit={handleSubmit(onSubmit)}>
-          <Grid container spacing={2} sx={{ flexGrow: 1, pt: 1 }}>
-            <GridItem md={subtipos.length > 0 ? 5 : 9}>
-              <RHFAutocompleteObj
-                dc
-                label="Garantia"
-                disabled={isEdit}
-                options={garantiasList}
-                name="tipo_garantia"
-                onChange={(_, newValue) => {
-                  setValue('tipo_garantia', newValue, vdt);
-                  setValue('subtipo_garantia', null, vdt);
-                  resetMetaFields();
-                }}
-              />
-            </GridItem>
-
-            {subtipos.length > 0 ? (
-              <GridItem sm={8} md={4}>
+        {activeStep === 0 && (
+          <FormProvider methods={methods} onSubmit={handleSubmit(onSubmit)}>
+            <Grid container spacing={2} sx={{ pt: 0.5 }}>
+              <GridItem md={subtipos.length > 0 ? 12 : 9}>
                 <RHFAutocompleteObj
                   dc
-                  label="Subtipo"
+                  label="Garantia"
                   disabled={isEdit}
-                  options={subtipos}
-                  name="subtipo_garantia"
+                  options={garantiasList}
+                  name="tipo_garantia"
                   onChange={(_, newValue) => {
-                    setValue('subtipo_garantia', newValue, vdt);
-                    resetMetaFields();
+                    setValue('tipo_garantia', newValue, vdt);
+                    setValue('subtipo_garantia', null, vdt);
                   }}
                 />
               </GridItem>
-            ) : null}
-            <GridItem sm={4} md={3}>
-              <RHFNumberField label="Cobertura" name="percentagem_cobertura" tipo="%" />
-            </GridItem>
-            {chaveMeta === 'fiadores' && <GridItem children={<FormEntidades label="Fiador" name="fiadores" />} />}
-            {chaveMeta === 'livrancas' && <GridItem children={<FormLivrancas />} />}
-            {chaveMeta === 'contas' && <GridItem children={<FormContas />} />}
-            {chaveMeta === 'seguros' && <GridItem children={<FormSeguros prefixo="seguros" />} />}
-            {chaveMeta === 'titulos' && <GridItem children={<FormTitulos />} />}
-            {chaveMeta === 'terrenos' && <GridItem children={<FormImoveis tipo="Terreno" name="terrenos" />} />}
-            {chaveMeta === 'predios' && <GridItem children={<FormImoveis tipo="Prédio" name="predios" />} />}
-            {chaveMeta === 'apartamentos' && (
-              <GridItem children={<FormImoveis tipo="Apartamento" name="apartamentos" />} />
-            )}
-            {chaveMeta === 'veiculos' && <GridItem children={<FormVeiculos />} />}
-          </Grid>
-          <DialogButons onClose={onClose} isSaving={isSaving} edit={isEdit} />
-        </FormProvider>
+
+              {subtipos.length > 0 ? (
+                <GridItem sm={9}>
+                  <RHFAutocompleteObj
+                    dc
+                    label="Subtipo"
+                    disabled={isEdit}
+                    options={subtipos}
+                    name="subtipo_garantia"
+                    onChange={(_, newValue) => setValue('subtipo_garantia', newValue, vdt)}
+                  />
+                </GridItem>
+              ) : null}
+              <GridItem sm={3}>
+                <RHFNumberField label="Cobertura" name="percentagem_cobertura" tipo="%" />
+              </GridItem>
+              {bensAplicado && (
+                <GridItem children={<RHFSwitch name="bem_financiado" label="Bem financiado pelo crédito" />} />
+              )}
+              {/* {bens?.includes(chaveMeta?.chave) && (
+                <GridItem children={<RHFSwitch name="bem_sem_registo" label="Bem ainda não registado" />} />
+              )} */}
+            </Grid>
+            <ButtonsStepper onClose={closeModal} labelCancel="Cancelar" />
+          </FormProvider>
+        )}
+        {activeStep === 1 && !bem_financiado && (
+          <FormMetadadosGarantias onClose={closeModal} dados={dados} chaveMeta={chaveMeta} processoId={processoId} />
+        )}
+        {activeStep === 1 && bem_financiado && (
+          <FormBemFinanciado onClose={closeModal} dados={dados} processoId={processoId} bens={bensFinanciadosMeta} />
+        )}
       </DialogContent>
     </Dialog>
   );
@@ -160,11 +137,38 @@ export default function FormGarantias({ dados, processoId, onClose }) {
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-function extrairChaveMeta(tipoSelecionado, subtipoSelecionado) {
+export const chaveMetaGarantia = [
+  { value: 'contas', label: 'DP', chave: 'dp', meta: 'bem' },
+  { value: 'acoes', label: 'Ações', chave: 'acoes', meta: 'bem' },
+  { value: 'predios', label: 'Prédio', chave: 'predio', meta: 'bem' },
+  { value: 'titulos', label: 'Título', chave: 'titulo', meta: 'bem' },
+  { value: 'seguros', label: 'Seguro', chave: 'seguro', meta: 'bem' },
+  { value: 'terrenos', label: 'Terreno', chave: 'terreno', meta: 'bem' },
+  { value: 'veiculos', label: 'Veículo', chave: 'veiculo', meta: 'bem' },
+  { value: 'aval', label: 'Avalista', chave: 'aval', meta: 'garantidores' },
+  { value: 'fiadores', label: 'Fiador', chave: 'fianca', meta: 'garantidores' },
+  { value: 'apartamentos', label: 'Apartamento', chave: 'apartamento', meta: 'bem' },
+  { value: 'livrancas', label: 'Livrança', chave: 'livranca', meta: 'numero_livranca' },
+];
+
+const bens = ['predio', 'terreno', 'apartamento', 'veiculo'];
+
+function resolverChaveMeta(tipoSelecionado, subtipoSelecionado) {
   if (!tipoSelecionado) return null;
-  if (!Array.isArray(tipoSelecionado?.subtipos) || tipoSelecionado?.subtipos?.length === 0) {
-    return tipoSelecionado?.chave_meta ?? null;
-  }
+
+  const temSubtipos = tipoSelecionado.subtipos?.length > 0;
+  if (!temSubtipos) return tipoSelecionado.chave_meta ?? null;
   if (!subtipoSelecionado) return null;
-  return subtipoSelecionado?.chave_meta ?? tipoSelecionado?.chave_meta ?? null;
+
+  return subtipoSelecionado.chave_meta ?? tipoSelecionado.chave_meta ?? null;
+}
+
+function buscarConfigGarantia(chave_meta) {
+  if (!chave_meta) return null;
+  return chaveMetaGarantia.find((item) => item.value === chave_meta) ?? null;
+}
+
+function extrairChaveMeta(tipoSelecionado, subtipoSelecionado) {
+  const chave_meta = resolverChaveMeta(tipoSelecionado, subtipoSelecionado);
+  return buscarConfigGarantia(chave_meta);
 }

@@ -45,3 +45,11 @@ export const meses = [
   { id: 11, label: 'Novembro', abrev: 'Nov' },
   { id: 12, label: 'Dezembro', abrev: 'Dez' },
 ];
+
+export const periodicidadesList = [
+  { id: 'unica', label: 'Única' },
+  { id: 'mensal', label: 'Mensal' },
+  { id: 'trimestral', label: 'Trimestral' },
+  { id: 'semestral', label: 'Semestral' },
+  { id: 'anual', label: 'Anual' },
+];
