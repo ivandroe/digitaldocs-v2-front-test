@@ -70,6 +70,7 @@ export default function VisaoGeral({ dados, modificar = false }) {
             extra={<DividaAtiva valor={dados?.valor_divida} periodo={dados.periodo} />}
           />
           <Identificacao
+            label="Produto"
             dados={[
               { key: 'Nº proposta', val: dados?.numero_proposta },
               { key: 'Linha de crédito', val: dados?.linha },
@@ -182,10 +183,10 @@ function SectionCard({ title, children, sx = {} }) {
   );
 }
 
-function Identificacao({ dados, extra = null }) {
+function Identificacao({ label = 'Proponente', dados, extra = null }) {
   return (
     <GridItem sm={6}>
-      <SectionCard title="Proponente" sx={{ height: '100%' }}>
+      <SectionCard title={label} sx={{ height: '100%' }}>
         <Stack spacing={0.75} divider={<Divider sx={{ borderStyle: 'dotted' }} />}>
           {dados.map(({ key, val }) => (
             <Typography key={key} variant="body2">
