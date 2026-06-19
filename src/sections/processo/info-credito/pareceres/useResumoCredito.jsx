@@ -1,28 +1,9 @@
 import { useMemo } from 'react';
 // utils
-import { ptDate } from '@/utils/formatTime';
 import { fCurrency, fPercent } from '@/utils/formatNumber';
 // components
 import { sn } from '@/modules/gaji9/components/detalhes-credito/credito-rows';
 import { StatusBadge } from '@/modules/gaji9/components/detalhes-credito/shared';
-
-// ---------------------------------------------------------------------------------------------------------------------
-
-function racioToColor(pct) {
-  if (pct === null) return 'default';
-  if (pct >= 100) return 'success';
-  if (pct >= 75) return 'info';
-  if (pct >= 50) return 'warning';
-  return 'error';
-}
-
-function racioToLabel(pct) {
-  if (pct === null) return 'Sem referência';
-  if (pct >= 100) return 'Totalmente coberto';
-  if (pct >= 75) return 'Cobertura elevada';
-  if (pct >= 50) return 'Cobertura parcial';
-  return 'Cobertura baixa';
-}
 
 // ---------------------------------------------------------------------------------------------------------------------
 
@@ -37,30 +18,12 @@ export function useResumoCredito(credito, mutuarios) {
       { title: 'Componente', value: credito?.componente, bold: true },
     ];
 
-    // dívida do mutuário/entidade (quando exista) — sinal relevante para a decisão
-    const divida = credito?.valor_divida
-      ? { valor: fCurrency(credito?.valor_divida), data: credito?.periodo ? ptDate(credito?.periodo) : '' }
-      : null;
-
-    // montante usado apenas para o rácio de cobertura (não é exibido — pertence às condições de aprovação)
-    const montante = Number(
-      credito?.montante_aprovado || credito?.montante_contratado || credito?.montante_solicitado || 0
-    );
-
-    // valor da garantia vem expresso em negativo — normalizar para positivo
-    const valorGarantia = (g) => Math.abs(Number(g?.valor_garantia || g?.valor || 0));
-    const ativas = (Array.isArray(credito?.garantias) ? credito.garantias : []).filter((g) => g?.ativo);
-    const total = ativas.reduce((acc, g) => acc + valorGarantia(g), 0);
-    const racio = montante > 0 ? (total / montante) * 100 : null;
-
     // diferença entre prestação efetiva e prestação sem desconto — sinaliza se há (ou não) desconto aplicado
-    const prestacao = Number(meta?.valor_prestacao);
-    const prestacaoSemDesconto = Number(meta?.valor_prestacao_sem_desconto);
+    const prestacao = Number(meta?.valor_prestacao || 0);
+    const prestacaoSemDesconto = Number(meta?.valor_prestacao_sem_desconto || 0);
     const hintSemDesconto =
-      prestacaoSemDesconto > 0 && prestacao > 0
-        ? prestacaoSemDesconto !== prestacao
-          ? { text: `− ${fCurrency(Math.abs(prestacaoSemDesconto - prestacao))}`, color: 'success.dark' }
-          : { text: '= prestação', color: 'text.secondary' }
+      prestacaoSemDesconto !== prestacao
+        ? { text: `− ${fCurrency(Math.abs(prestacaoSemDesconto - prestacao))}`, color: 'success.dark' }
         : null;
 
     const kpis = [
@@ -68,14 +31,13 @@ export function useResumoCredito(credito, mutuarios) {
       { label: 'Custo total', color: 'warning', value: fCurrency(meta?.custo_total) },
       { label: 'Prestação', color: 'primary', value: fCurrency(meta?.valor_prestacao) },
       {
-        label: 'Prestação s/ desconto',
         color: 'secondary',
-        value: fCurrency(meta?.valor_prestacao_sem_desconto),
         hint: hintSemDesconto,
+        label: 'Prestação s/ desconto',
+        value: fCurrency(meta?.valor_prestacao_sem_desconto),
       },
     ];
 
-    // ── card no formato CardsGrid: { titulo, dados: [{ title, value, ... }] } ──
     const capitalMaxIsentoRow =
       meta?.tem_isencao_imposto_selo && Number(meta?.capital_max_isento_imposto_selo) > 0
         ? [{ title: 'Capital máx. isento', value: fCurrency(meta?.capital_max_isento_imposto_selo), bold: true }]
@@ -117,19 +79,6 @@ export function useResumoCredito(credito, mutuarios) {
       ],
     };
 
-    const lista = ativas.map((g) => ({
-      id: g?.id,
-      reais: g?.reais,
-      valor: valorGarantia(g),
-      nome: [g?.tipo_garantia, g?.subtipo_garantia].filter(Boolean).join(' - ') || 'Garantia',
-    }));
-
-    return {
-      kpis,
-      divida,
-      identificacao,
-      cards: [cardTaxas, cardRegime],
-      garantias: { lista, total, racio, racioColor: racioToColor(racio), racioLabel: racioToLabel(racio) },
-    };
+    return { kpis, identificacao, cards: [cardTaxas, cardRegime] };
   }, [credito, mutuarios]);
 }

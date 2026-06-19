@@ -78,7 +78,7 @@ export default function Fincc() {
   };
 
   return (
-    <Stack sx={{ mt: 2 }}>
+    <Stack sx={{ mt: 3 }}>
       <DownloadModeloDoc modelo="FINCC - Simulação.docx" onClick={exportToWord} />
     </Stack>
   );

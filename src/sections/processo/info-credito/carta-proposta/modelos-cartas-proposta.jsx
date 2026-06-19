@@ -86,7 +86,7 @@ export default function ModeloCartaProposta() {
   };
 
   return (
-    <Stack sx={{ mt: 2 }}>
+    <Stack sx={{ mt: 3 }}>
       <DownloadModeloDoc modelo="Modelo de Carta Proposta - CrediCaixa.docx" onClick={exportToWord} />
     </Stack>
   );

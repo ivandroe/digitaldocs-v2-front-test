@@ -70,6 +70,7 @@ function Bens({ bem }) {
             {(bem.nip && ` - NIP: ${bem.nip}`) ||
               (bem.matricula && `: ${bem.matricula}`) ||
               (bem.nura && `: ${bem.nura}`) ||
+              (bem.numero_fatura_proforma && ` - Proforma: ${bem.numero_fatura_proforma}`) ||
               (bem.numero_matriz && ` - Matriz: ${bem.numero_matriz || bem.numero_descricao_predial}`) ||
               ''}
           </Typography>

@@ -19,7 +19,7 @@ export default function useMenuProcesso({ id, processo, handleAceitar }) {
   const { isAdmin, isAuditoria } = useSelector((state) => state.parametrizacao);
 
   const { estado = null, credito = null, con = null, estado_pode_enquadrar = false } = processo || {};
-  const { valor = '', fluxo = '', titular = '', entidade, numero_operacao: numero } = processo || {};
+  const { valor = '', fluxo = '', titular = '', cliente, entidade, numero_operacao: numero } = processo || {};
   const { estados = [], htransicoes = [], pareceres_estado: pareceres = [], criado_em, data_entrada } = processo || {};
 
   const assunto = useMemo(() => `${fluxo ?? ''} - ${titular ?? ''}`, [fluxo, titular]);
@@ -31,7 +31,11 @@ export default function useMenuProcesso({ id, processo, handleAceitar }) {
     if (credito)
       tabs.push({
         value: 'Info. crédito',
-        component: <InfoCredito dados={{ ...credito, processoId: id, criado_em, data_entrada, estado, entidade }} />,
+        component: (
+          <InfoCredito
+            dados={{ ...credito, processoId: id, titular, cliente, criado_em, data_entrada, estado, entidade }}
+          />
+        ),
       });
 
     if (con) tabs.push({ value: 'Info. CON', component: <InfoCon dados={{ ...con, valor, numero }} /> });
@@ -85,8 +89,9 @@ export default function useMenuProcesso({ id, processo, handleAceitar }) {
     valor,
     estado,
     numero,
-    assunto,
     titular,
+    cliente,
+    assunto,
     credito,
     isAdmin,
     processo,
