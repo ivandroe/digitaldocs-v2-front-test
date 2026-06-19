@@ -28,7 +28,7 @@ import FormParecer, { CondicoesForm } from '../../form/credito/form-parecer';
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-export default function PareceresCredito({ infoCredito }) {
+export default function PareceresCredito({ infoCredito = false }) {
   const dispatch = useDispatch();
   const { meusAmbientes } = useSelector((state) => state.parametrizacao);
   const { processo, isOpenModal } = useSelector((state) => state.digitaldocs);

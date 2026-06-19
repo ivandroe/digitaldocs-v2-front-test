@@ -1,5 +1,4 @@
 // @mui
-import Box from '@mui/material/Box';
 import Grid from '@mui/material/Grid';
 import Card from '@mui/material/Card';
 import Stack from '@mui/material/Stack';
@@ -30,22 +29,20 @@ export default function ResumoCredito({ credito, mutuarios }) {
     <Card sx={{ boxShadow: theme.customShadows.cardAlt, borderRadius: 1, overflow: 'hidden' }}>
       <CardHeader
         title="Resumo do crédito"
-        titleTypographyProps={{ variant: 'subtitle2', sx: { color: 'primary.main', textTransform: 'uppercase' } }}
         sx={{ py: 1.25, px: 2, bgcolor: 'background.neutral' }}
+        titleTypographyProps={{ variant: 'subtitle2', sx: { color: 'primary.main', textTransform: 'uppercase' } }}
       />
       <CardContent sx={{ p: 2, paddingBottom: '16px !important' }}>
-        <Box gap={1.5} display="grid" gridTemplateColumns={{ xs: '1fr', sm: 'repeat(2, 1fr)' }} sx={{ mb: 2 }}>
+        <Stack spacing={0.5} sx={{ mb: 2 }}>
           {identificacao.map((item) => (
-            <Stack key={item.title} spacing={0.25}>
-              <Typography variant="caption" sx={{ color: 'text.secondary', fontWeight: 'bold' }}>
-                {item.title}
+            <Stack direction="row" key={item.title} spacing={0.25}>
+              <Typography variant="body2" sx={{ color: 'text.secondary' }}>
+                {item.title}:&nbsp;
               </Typography>
-              <Typography variant="body2" sx={{ fontWeight: item.bold ? 700 : 400 }}>
-                {item.value || noDados('(N/D)')}
-              </Typography>
+              <Typography variant="subtitle2">{item.value || noDados('(N/D)')}</Typography>
             </Stack>
           ))}
-        </Box>
+        </Stack>
 
         <DividaAtiva valor={credito?.valor_divida} periodo={credito?.periodo} />
 
@@ -85,11 +82,7 @@ export default function ResumoCredito({ credito, mutuarios }) {
         <CardsGrid
           cards={[
             ...cards,
-            {
-              id: 'garantias',
-              titulo: 'Garantias & Cobertura',
-              dados: [{ custom: <GarantiasResumo1 dados={credito} /> }],
-            },
+            { id: 'garantias', titulo: 'Garantias & Cobertura', dados: [{ custom: <Resumo dados={credito} /> }] },
           ]}
         />
       </CardContent>
@@ -99,7 +92,7 @@ export default function ResumoCredito({ credito, mutuarios }) {
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-function GarantiasResumo1({ dados }) {
+function Resumo({ dados }) {
   const garantiasAtivas = (dados?.garantias ?? []).filter(({ ativo }) => ativo);
 
   if (garantiasAtivas.length === 0) {

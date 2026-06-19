@@ -12,10 +12,10 @@ export function useResumoCredito(credito, mutuarios) {
     const meta = credito?.gaji9_metadados || {};
 
     const identificacao = [
-      { title: 'Mutuário(s)', value: mutuarios, bold: true },
-      { title: 'Linha de crédito', value: credito?.linha, bold: true },
+      { title: 'Mutuário(s)', value: mutuarios },
+      { title: 'Linha de crédito', value: credito?.linha },
+      { title: 'Componente', value: credito?.componente },
       { title: 'Finalidade', value: credito?.finalidade },
-      { title: 'Componente', value: credito?.componente, bold: true },
     ];
 
     // diferença entre prestação efetiva e prestação sem desconto — sinaliza se há (ou não) desconto aplicado
