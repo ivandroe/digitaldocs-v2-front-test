@@ -19,7 +19,12 @@ export function useMetadadosCreditoData(dados) {
     if (!dados) return { financeiroPrincipal: [], cards: [] };
 
     const financeiroPrincipal = [
-      { label: 'Valor da prestação', value: fCurrency(dados?.valor_prestacao), color: 'primary' },
+      {
+        color: 'primary',
+        label: 'Valor da prestação',
+        value: fCurrency(dados?.valor_prestacao),
+        sem_desconto: fCurrency(dados?.valor_prestacao_sem_desconto),
+      },
       { label: 'TAEG', value: fPercent(dados?.taxa_taeg, 3), color: 'info' },
       { label: 'Custo total', value: fCurrency(dados?.custo_total), color: 'warning' },
       { label: 'Taxa de Mora', value: fPercent(Number(dados?.taxa_mora), 2), color: 'error' },
@@ -43,7 +48,11 @@ export function useMetadadosCreditoData(dados) {
             tooltip: 'Taxa base constante no precário',
           },
           { title: 'Desconto', value: fPercent(dados?.taxa_juro_desconto) },
-          { title: 'Taxa negociada', value: fPercent(dados?.taxa_juro_negociado), color: 'success.main' },
+          {
+            color: 'success.main',
+            title: 'Taxa negociada',
+            value: fPercent(dados?.taxa_juro_negociado || dados?.taxa_juro),
+          },
           {
             title: 'TAEG',
             value: fPercent(dados?.taxa_taeg),

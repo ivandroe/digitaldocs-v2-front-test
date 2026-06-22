@@ -19,7 +19,11 @@ export default function composeGarantiaPayload(form, meta, chaveMeta) {
   };
 
   const derivados = isImovel
-    ? { ilha: meta?.freguesia?.ilha, concelho: meta?.freguesia?.concelho, freguesia: meta?.freguesia?.freguesia }
+    ? {
+        ilha: meta?.freguesia?.ilha || meta?.ilha,
+        concelho: meta?.freguesia?.concelho || meta?.concelho,
+        freguesia: meta?.freguesia?.freguesia || meta?.freguesia,
+      }
     : {};
 
   return {

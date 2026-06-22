@@ -11,6 +11,7 @@ import { setModal } from '@/redux/slices/digitaldocs';
 import { useMetadadosCreditoData } from './useMetadadosCreditoData';
 import { getFromParametrizacao } from '@/redux/slices/parametrizacao';
 // Components
+import { noDados } from '@/components/Panel';
 import GridItem from '@/components/GridItem';
 import { DefaultAction } from '@/components/Actions';
 import { SearchNotFoundSmall } from '@/components/table/SearchNotFound';
@@ -23,7 +24,7 @@ import CardsGrid from '@/modules/gaji9/components/detalhes-credito/cards-grid';
 export default function MetadadosCredito({ dados, outros, modificar = false, ids = null }) {
   const theme = useTheme();
   const isOpenModal = useSelector((state) => state.digitaldocs.isOpenModal);
-  const { financeiroPrincipal, cards } = useMetadadosCreditoData(dados);
+  const { financeiroPrincipal, cards } = useMetadadosCreditoData({ ...dados, ...outros });
 
   const openModal = () => {
     dispatch(setModal({ modal: 'form-metadados' }));
@@ -40,17 +41,25 @@ export default function MetadadosCredito({ dados, outros, modificar = false, ids
                 <Card
                   sx={{
                     p: 1,
+                    height: 1,
+                    display: 'flex',
                     textAlign: 'center',
+                    color: 'text.secondary',
+                    flexDirection: 'column',
+                    justifyContent: 'center',
                     boxShadow: theme.customShadows.cardAlt,
                     bgcolor: alpha(theme.palette[item.color].main, 0.025),
                   }}
                 >
-                  <Typography variant="overline" sx={{ color: 'text.secondary' }}>
-                    {item.label}
-                  </Typography>
+                  <Typography variant="overline">{item.label}</Typography>
                   <Typography variant="h6" sx={{ color: `${item.color}.main` }}>
-                    {item.value || '---'}
+                    {item.value || noDados()}
                   </Typography>
+                  {item.sem_desconto ? (
+                    <Typography variant="caption" sx={{ color: 'text.disabled' }}>
+                      Sem desconto: {item.sem_desconto}
+                    </Typography>
+                  ) : null}
                 </Card>
               </GridItem>
             ))}

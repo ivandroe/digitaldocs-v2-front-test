@@ -16,13 +16,6 @@ export function useTabFinanceiroData(credito) {
     const extra = credito?.info_extra_v2 || {};
     const d = { ...extra, ...credito };
 
-    const financeiroPrincipal = [
-      { label: 'Valor da prestação', value: fCurrency(d?.valor_prestacao), color: 'primary' },
-      { label: 'TAEG', value: fPercent(d?.taxa_taeg, 3), color: 'info' },
-      { label: 'Custo total', value: fCurrency(d?.custo_total), color: 'warning' },
-      { label: 'Taxa de Mora', value: fPercent(Number(extra?.taxa_mora), 2), color: 'error' },
-    ];
-
     const rowsComissoes = [
       ...comissaoRows('Comissão de avaliação', extra?.comissao_avaliacao),
       ...comissaoRows('Comissão de vistoria', extra?.comissao_vistoria),
@@ -41,7 +34,7 @@ export function useTabFinanceiroData(credito) {
             tooltip: 'Taxa base constante no precário',
           },
           { title: 'Desconto', value: fPercent(d?.taxa_juro_desconto) },
-          { title: 'Taxa negociada', value: fPercent(d?.taxa_juro_negociado), color: 'success.main' },
+          { title: 'Taxa negociada', value: fPercent(d?.taxa_juro_negociado || d?.taxa_juro), color: 'success.main' },
           { title: 'TAEG', value: fPercent(d?.taxa_taeg), color: 'warning.main', tooltip: 'Taxa Anual Efetiva Global' },
           { title: 'Imposto de selo', value: fPercent(d?.taxa_imposto_selo) },
           { title: 'Comissão abertura', value: fPercent(d?.taxa_comissao_abertura) },
@@ -166,6 +159,6 @@ export function useTabFinanceiroData(credito) {
         : []),
     ];
 
-    return { financeiroPrincipal, cards };
+    return cards;
   }, [credito]);
 }

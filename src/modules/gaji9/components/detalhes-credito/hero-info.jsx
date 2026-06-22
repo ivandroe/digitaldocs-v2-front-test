@@ -46,7 +46,12 @@ export default function HeroCreditoDetail({ credito = {} }) {
       </Typography>
       <Grid container spacing={1}>
         <KpiCell label="Montante" value={credito.montante} sub={credito.moeda} colorStyle="success.main" />
-        <KpiCell label="Taxa negociada" value={credito.taxa_juro_negociado} sub="%" colorStyle="info.main" />
+        <KpiCell
+          sub="%"
+          label="Taxa negociada"
+          colorStyle="info.main"
+          value={credito.taxa_juro_negociado || credito?.taxa_juro}
+        />
         <KpiCell label="Prestação" value={credito.valor_prestacao} sub={credito.moeda} colorStyle="info.main" />
         <KpiCell label="TAEG" value={credito.taxa_taeg} colorStyle="warning.main" sub="%" />
         <KpiCell label="Custo total" value={credito.custo_total} sub={credito.moeda} colorStyle="warning.main" />
