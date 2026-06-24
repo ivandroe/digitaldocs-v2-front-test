@@ -483,8 +483,9 @@ export function deleteItem(item, params) {
         '';
 
       if (apiUrl) {
-        const options = headerOptions({ accessToken, mail: '', cc: true, ct: false, mfd: false });
-        const response = await axios.delete(`${API_GAJI9_URL}${apiUrl}`, options);
+        const options = headerOptions({ accessToken, mail: '', cc: true, ct: item === 'contratos', mfd: false });
+        const config = item === 'contratos' ? { ...options, data: { motivo: params?.motivo } } : options;
+        const response = await axios.delete(`${API_GAJI9_URL}${apiUrl}`, config);
         if (item === 'contratos') dispatch(slice.actions.setContratado(false));
         else if (params?.getItem)
           dispatch(getSuccess({ item: params?.getItem, dados: response.data?.objeto || response.data?.clausula }));

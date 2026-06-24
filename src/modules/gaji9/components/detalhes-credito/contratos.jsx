@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 // @mui
 import Card from '@mui/material/Card';
 import Stack from '@mui/material/Stack';
@@ -6,6 +6,7 @@ import Table from '@mui/material/Table';
 import TableRow from '@mui/material/TableRow';
 import TableBody from '@mui/material/TableBody';
 import TableCell from '@mui/material/TableCell';
+import TextField from '@mui/material/TextField';
 import TableContainer from '@mui/material/TableContainer';
 // utils
 import { usePermissao } from '@/hooks/useAcesso';
@@ -40,13 +41,18 @@ export default function TableContratos({ id }) {
 
   const isNotFound = !contratos.length;
 
-  const openModal = (item, dados) => dispatch(setModal({ item, dados }));
+  const [motivo, setMotivo] = useState('');
+
+  const openModal = (item, dados) => {
+    setMotivo('');
+    dispatch(setModal({ item, dados }));
+  };
 
   const downloadContrato = (codigo) =>
     dispatch(getDocumentoGaji9('contrato', { codigo, titulo: `CONTRATO: ${codigo}` }));
 
   const eliminarContrato = () => {
-    const params = { creditoId: id, id: selectedItem?.id, onClose: () => openModal() };
+    const params = { creditoId: id, id: selectedItem?.id, motivo, onClose: () => openModal() };
     dispatch(deleteItem('contratos', { ...params, msg: 'Contrato eliminado' }));
   };
 
@@ -106,6 +112,18 @@ export default function TableContratos({ id }) {
           handleOk={eliminarContrato}
           onClose={() => openModal()}
           desc="eliminar este contrato"
+          desabilitar={!motivo?.trim()}
+          content={
+            <TextField
+              fullWidth
+              multiline
+              minRows={2}
+              value={motivo}
+              label="Motivo"
+              sx={{ mb: 3 }}
+              onChange={(event) => setMotivo(event.target.value)}
+            />
+          }
         />
       )}
       {modalGaji9 === 'view-contrato' && <DetalhesContrato onClose={openModal} />}

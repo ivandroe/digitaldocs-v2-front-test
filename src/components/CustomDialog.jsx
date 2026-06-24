@@ -17,21 +17,28 @@ import { Loading } from './LoadingScreen';
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-export function DialogConfirmar({ isSaving, title = 'Eliminar', desc = '', color, onClose, handleOk, content = null }) {
+export function DialogConfirmar({
+  isSaving,
+  title = 'Eliminar',
+  desc = '',
+  color,
+  onClose,
+  handleOk,
+  content = null,
+  desabilitar = false,
+}) {
   return (
     <Dialog open onClose={onClose} fullWidth maxWidth="xs">
       <DialogTitle>{title}</DialogTitle>
       <DialogContent sx={{ mt: 3 }}>
-        <DialogContentText>
-          {content}
-          {desc && <>Tens a certeza de que pretendes {desc}?</>}
-        </DialogContentText>
+        {content}
+        {desc && <DialogContentText>Tens a certeza de que pretendes {desc}?</DialogContentText>}
       </DialogContent>
       <DialogActions>
         <Button color="inherit" variant="outlined" onClick={onClose}>
           Cancelar
         </Button>
-        <Button variant="soft" onClick={handleOk} loading={isSaving} color={color || 'error'}>
+        <Button variant="soft" onClick={handleOk} loading={isSaving} disabled={desabilitar} color={color || 'error'}>
           OK
         </Button>
       </DialogActions>
