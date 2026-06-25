@@ -29,7 +29,7 @@ import { DataContratoForm } from '../forms/form-credito';
 
 export default function TableContratos({ id }) {
   const dispatch = useDispatch();
-  const { temPermissao, isGerente } = usePermissao();
+  const { temPermissao, podeAnularContrato, isGerente } = usePermissao();
   const permissao = isGerente || temPermissao(['READ_CONTRATO']);
 
   const { order, dense, orderBy, onSort } = useTable({});
@@ -87,10 +87,10 @@ export default function TableContratos({ id }) {
                       <TableCell align="center" width={10}>
                         <Stack direction="row" spacing={0.75}>
                           <DefaultAction small label="CONTRATO" onClick={() => downloadContrato(row?.codigo)} />
-                          {temPermissao(['DELETE_CONTRATO']) && (
+                          {podeAnularContrato(row) && (
                             <DefaultAction small label="ELIMINAR" onClick={() => openModal('eliminar-contrato', row)} />
                           )}
-                          {(isGerente || temPermissao(['CREATE_CONTRATO'])) && (
+                          {(isGerente || temPermissao(['UPDATE_CONTRATO'])) && (
                             <DefaultAction small label="EDITAR" onClick={() => openModal('data-contrato', row)} />
                           )}
                           <DefaultAction small label="DETALHES" onClick={() => openModal('view-contrato', row)} />
