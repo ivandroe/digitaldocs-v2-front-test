@@ -21,32 +21,35 @@ import { newLineText } from '@/components/Panel';
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-export default function Mensagens({ messages }) {
+export default function Mensagens({ messages = [] }) {
+  const total = messages.length;
   return (
-    <Timeline sx={{ pr: 0, pl: { xs: 0, md: 2 }, mt: 1 }}>
-      {messages.length === 0 ? (
+    <Timeline sx={{ pr: 0, pl: { xs: 0, md: total > 1 ? 2 : 0 }, mt: 1 }}>
+      {total === 0 ? (
         <SemRegisto message="Nenhuma mensagem encontrada..." />
       ) : (
         messages.map((msg, idx) => {
-          const isLast = idx === messages.length - 1;
-          return <TimelineMessageItem key={`${msg.sent_at}-${idx}`} message={msg} isLast={isLast} />;
+          const isLast = idx === total - 1;
+          return <TimelineMessageItem key={`${msg.sent_at}-${idx}`} message={msg} isLast={isLast} total={total} />;
         })
       )}
     </Timeline>
   );
 }
 
-function TimelineMessageItem({ message, isLast }) {
+function TimelineMessageItem({ message, isLast, total }) {
   const { content, sent_at: at, from, attachments = [] } = message;
   const criadoPor = useColaborador({ userId: from, nome: true });
 
   return (
     <TimelineItem sx={{ '&:before': { display: 'none' } }}>
-      <TimelineSeparator>
-        <TimelineDot color={from === 'Cliente' ? 'grey' : 'success'} />
-        {!isLast && <TimelineConnector />}
-      </TimelineSeparator>
-      <TimelineContent sx={{ width: 1 }}>
+      {total > 1 && (
+        <TimelineSeparator>
+          <TimelineDot color={from === 'Cliente' ? 'grey' : 'success'} />
+          {!isLast && <TimelineConnector />}
+        </TimelineSeparator>
+      )}
+      <TimelineContent sx={{ width: 1, ...(total === 1 && { p: 0 }) }}>
         <Paper elevation={1} sx={{ p: 2 }}>
           <Stack direction="row" alignItems="flex-end" spacing={1} sx={{ mb: 1 }}>
             <Typography variant="subtitle2" sx={{ color: 'success.main' }}>

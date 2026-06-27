@@ -6,7 +6,7 @@ import Container from '@mui/material/Container';
 //
 import { useSelector } from '@/redux/store';
 import useSettings from '@/hooks/useSettings';
-import { usePermissao } from '@/hooks/useAcesso';
+import { usePermissao } from '../utils/useAcesso';
 import { PATH_DIGITALDOCS } from '@/routes/paths';
 import { useTabsSync } from '@/hooks/minimal-hooks/use-tabs-sync';
 // components

@@ -8,8 +8,8 @@ import { statusList } from '../../utils';
 // ---------------------------------------------------------------------------------------------------------------------
 
 export default function SearchToolbar({ values, setValues, lists }) {
-  const { colaborador, status, subject, department, isAdmin } = values;
-  const { usersList = [], subjectsList = [], departamentoList = [] } = lists;
+  const { colaborador, status, subject, department } = values;
+  const { usersList = [], subjectsList = [], departmentList = [] } = lists;
   const { setStatus, setColaborador, setSubject, setDepartment } = setValues;
 
   return (
@@ -17,10 +17,10 @@ export default function SearchToolbar({ values, setValues, lists }) {
       <Stack direction="row" spacing={1} sx={{ flexGrow: 1, maxWidth: { md: '40%' } }}>
         <SearchFilter
           value={department}
-          disabled={!isAdmin}
           label="Departamento"
-          dados={departamentoList}
+          dados={departmentList}
           setValue={setDepartment}
+          disabled={departmentList.length < 2}
         />
         <SearchFilter value={status} dados={statusList} setValue={setStatus} label="Estado" />
       </Stack>

@@ -8,7 +8,7 @@ import TableBody from '@mui/material/TableBody';
 import TableCell from '@mui/material/TableCell';
 import TableContainer from '@mui/material/TableContainer';
 // hooks
-import { usePermissao } from '@/hooks/useAcesso';
+import { usePermissao } from '../../utils/useAcesso';
 import useTable, { getComparator } from '@/hooks/useTable';
 // redux
 import { useDispatch, useSelector } from '@/redux/store';

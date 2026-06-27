@@ -7,7 +7,7 @@ import Stack from '@mui/material/Stack';
 import Container from '@mui/material/Container';
 //
 import useSettings from '@/hooks/useSettings';
-import { usePermissao } from '@/hooks/useAcesso';
+import { usePermissao } from '../utils/useAcesso';
 import { PATH_DIGITALDOCS } from '@/routes/paths';
 import { useTabsSync } from '@/hooks/minimal-hooks/use-tabs-sync';
 // redux

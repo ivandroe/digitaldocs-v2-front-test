@@ -8,7 +8,7 @@ import Autocomplete from '@mui/material/Autocomplete';
 import FormControlLabel from '@mui/material/FormControlLabel';
 // utils
 import useToggle from '@/hooks/useToggle';
-import { usePermissao } from '@/hooks/useAcesso';
+import { usePermissao } from '../../utils/useAcesso';
 import { useTabsSync } from '@/hooks/minimal-hooks/use-tabs-sync';
 // redux
 import { useSelector, useDispatch } from '@/redux/store';

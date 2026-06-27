@@ -1,4 +1,4 @@
-import { useMemo, useState, useEffect, useRef } from 'react';
+import { useMemo } from 'react';
 // @mui
 import Box from '@mui/material/Box';
 import Container from '@mui/material/Container';
@@ -7,6 +7,7 @@ import SearchIcon from '@mui/icons-material/Search';
 import { useSelector } from '@/redux/store';
 import useSettings from '@/hooks/useSettings';
 import { useTabsSync } from '@/hooks/minimal-hooks/use-tabs-sync';
+import { useDepartmentSelection } from '../useDepartmentSelection';
 // components
 import Page from '@/components/Page';
 import TabsWrapper from '@/components/TabsWrapper';
@@ -14,6 +15,7 @@ import TabsWrapper from '@/components/TabsWrapper';
 import AcessoSuporte from '../acesso-suporte';
 import Dashboard from '../components/dashboard';
 import Tickets from '../components/lista-pedidos';
+import FilaEspera from '../components/fila-espera';
 import Configuracoes from '../components/configuracoes';
 import Avaliacoes from '../components/lista-pedidos/avaliacoes';
 import ProcurarPedidos from '../components/lista-pedidos/procurar-pedidos';
@@ -23,50 +25,40 @@ import ProcurarPedidos from '../components/lista-pedidos/procurar-pedidos';
 export default function PageGestaoSuporteCliente() {
   const { themeStretch } = useSettings();
   const { departamentos, utilizador } = useSelector((state) => state.suporte);
-  const hasInitialized = useRef(false);
+  const isAdmin = utilizador?.role === 'ADMINISTRATOR';
 
-  const [selectedDepartmentId, setSelectedDepartmentId] = useState(() => {
-    const isAdmin = utilizador?.role === 'ADMINISTRATOR';
-    const storedId = isAdmin ? localStorage.getItem('departmentTicket') : null;
-    return storedId || utilizador?.department_id || null;
+  const { selectedDepartment, departmentList, setDepartment } = useDepartmentSelection({
+    utilizador,
+    departamentos,
+    isAdmin,
   });
-
-  useEffect(() => {
-    if (hasInitialized.current || !utilizador?.department_id) return;
-    hasInitialized.current = true;
-
-    const isAdmin = utilizador.role === 'ADMINISTRATOR';
-    const storedId = isAdmin ? localStorage.getItem('departmentTicket') : null;
-    setSelectedDepartmentId(storedId || utilizador.department_id);
-  }, [utilizador]);
-
-  const department = useMemo(
-    () => departamentos?.find(({ id }) => Number(id) === Number(selectedDepartmentId)) ?? null,
-    [departamentos, selectedDepartmentId]
-  );
-
-  const setDepartment = (dep) => {
-    if (utilizador?.role === 'ADMINISTRATOR') localStorage.setItem('departmentTicket', dep?.id);
-    setSelectedDepartmentId(dep?.id ?? null);
-  };
 
   const tabsList = useMemo(
     () => [
       {
         value: 'Tickets',
-        component: <Tickets department={department} setDepartment={setDepartment} utilizador={utilizador} />,
+        component: (
+          <Tickets setDepartment={setDepartment} departmentList={departmentList} department={selectedDepartment} />
+        ),
       },
-      ...(utilizador?.role === 'ADMINISTRATOR' || utilizador?.role === 'COORDINATOR'
-        ? [{ value: 'Dashboard', component: <Dashboard params={{ department, setDepartment, departamentos }} /> }]
+      ...(isAdmin || utilizador?.role === 'COORDINATOR'
+        ? [
+            {
+              value: 'Dashboard',
+              component: <Dashboard params={{ department: selectedDepartment, setDepartment, departamentos }} />,
+            },
+          ]
         : []),
       { value: 'Avaliações', component: <Avaliacoes /> },
-      ...(utilizador?.role === 'ADMINISTRATOR'
-        ? [{ value: 'Configurações', component: <Configuracoes role={utilizador?.role} /> }]
+      ...(isAdmin
+        ? [
+            { value: 'Configurações', component: <Configuracoes /> },
+            { value: 'Fila de Espera', component: <FilaEspera /> },
+          ]
         : []),
       { value: 'Procurar', icon: <SearchIcon sx={{ width: 20, height: 20 }} />, component: <ProcurarPedidos /> },
     ],
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [department, utilizador, departamentos]
+    [utilizador, selectedDepartment, setDepartment, departmentList, isAdmin, departamentos]
   );
 
   const [tab, setTab] = useTabsSync(tabsList, 'Tickets', 'tab-suporte-cliente');

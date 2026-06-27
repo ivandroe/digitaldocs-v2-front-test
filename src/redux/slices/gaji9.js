@@ -1,9 +1,6 @@
 import axios from 'axios';
 import { createSlice } from '@reduxjs/toolkit';
 // utils
-import { API_GAJI9_URL } from '../../utils/apisUrl';
-import { meusAcessosGaji9 } from '../../utils/formatObject';
-//
 import {
   hasError,
   actionGet,
@@ -15,7 +12,9 @@ import {
   actionOpenModal,
   actionCloseModal,
 } from './sliceActions';
-import { getAccessToken } from './intranet';
+import { API_GAJI9_URL } from '@/utils/apisUrl';
+import { getAccessToken } from '@/utils/getAccessToken';
+import { meusAcessosGaji9 } from '@/utils/formatObject';
 
 // ---------------------------------------------------------------------------------------------------------------------
 
@@ -451,7 +450,7 @@ export function updateItem(item, dados, params) {
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-export function deleteItem(item, params) {
+export function deleteItem(item, params, dados) {
   return async (dispatch) => {
     dispatch(slice.actions.getSuccess({ item: 'isSaving', dados: true }));
 
@@ -484,7 +483,7 @@ export function deleteItem(item, params) {
 
       if (apiUrl) {
         const options = headerOptions({ accessToken, mail: '', cc: true, ct: false, mfd: false });
-        const response = await axios.delete(`${API_GAJI9_URL}${apiUrl}`, options);
+        const response = await axios.delete(`${API_GAJI9_URL}${apiUrl}`, { ...options, data: dados || null });
         if (item === 'contratos') dispatch(slice.actions.setContratado(false));
         else if (params?.getItem)
           dispatch(getSuccess({ item: params?.getItem, dados: response.data?.objeto || response.data?.clausula }));

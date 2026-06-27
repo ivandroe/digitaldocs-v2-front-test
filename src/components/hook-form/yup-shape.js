@@ -42,7 +42,7 @@ export const shapeText = (item, opcoes, label) =>
 
 export const shapeMixed = (item, opcoes, label) =>
   Yup.mixed().when(item, {
-    is: (val) => opcoes?.includes(val),
+    is: (val) => opcoes?.includes(val) || opcoes?.includes(val?.id),
     then: () => Yup.mixed().required().label(label),
     otherwise: () => Yup.mixed().notRequired(),
   });

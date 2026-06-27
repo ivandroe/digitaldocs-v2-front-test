@@ -2,17 +2,10 @@ import { useState, useEffect, useMemo, useCallback } from 'react';
 // @mui
 import Card from '@mui/material/Card';
 // utils
-import {
-  storageGet,
-  storageSet,
-  statusList,
-  getAccessibleUsers,
-  injectCollaboratorName,
-  getAccessibleDepartments,
-} from '../../utils';
 import useTable from '@/hooks/useTable';
 import { useDispatch, useSelector } from '@/redux/store';
 import { getInSuporte } from '@/redux/slices/suporte-cliente';
+import { storageGet, storageSet, statusList, getAccessibleUsers, injectCollaboratorName } from '../../utils';
 // Components
 import TablePedidos from './table-pedidos';
 import SearchToolbar from './search-toolbar';
@@ -20,7 +13,7 @@ import HeaderBreadcrumbs from '@/components/HeaderBreadcrumbs';
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-export default function Tickets({ utilizador, department, setDepartment }) {
+export default function Tickets({ setDepartment, departmentList, department }) {
   const dispatch = useDispatch();
   const { order, page, rowsPerPage, setPage, ...rest } = useTable({
     defaultOrder: 'asc',
@@ -28,9 +21,9 @@ export default function Tickets({ utilizador, department, setDepartment }) {
     defaultOrderBy: 'created_at',
   });
 
-  const isAdmin = utilizador?.role === 'ADMINISTRATOR';
   const colaboradores = useSelector((state) => state.intranet.colaboradores);
-  const { tickets, departamentos, utilizadores, assuntos } = useSelector((state) => state.suporte);
+  const { tickets, utilizador, utilizadores, assuntos } = useSelector((state) => state.suporte);
+  const isAdmin = utilizador?.role === 'ADMINISTRATOR';
 
   const [subject, setSubject] = useState(() => storageGet('subjectTicket'));
   const [colaborador, setColaborador] = useState(() => storageGet('colaboradorTickets'));
@@ -38,7 +31,6 @@ export default function Tickets({ utilizador, department, setDepartment }) {
     () => statusList?.find(({ id }) => id === storageGet('statusTicket')?.id) || null
   );
 
-  const departamentoList = getAccessibleDepartments(departamentos, utilizador);
   const usersList = getAccessibleUsers(utilizadores, colaboradores, utilizador, department);
 
   const fetchTickets = useCallback(() => {
@@ -81,8 +73,8 @@ export default function Tickets({ utilizador, department, setDepartment }) {
       <HeaderBreadcrumbs sx={{ px: 1 }} heading="Tickets" />
       <Card sx={{ p: 1 }}>
         <SearchToolbar
-          values={{ colaborador, status, subject, department, isAdmin }}
-          lists={{ usersList, subjectsList: assuntos, departamentoList }}
+          values={{ colaborador, status, subject, department }}
+          lists={{ usersList, subjectsList: assuntos, departmentList }}
           setValues={{
             setDepartment,
             setStatus: handleFilter(setStatus, 'statusTicket'),

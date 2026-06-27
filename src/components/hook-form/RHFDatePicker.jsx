@@ -1,50 +1,83 @@
+import { parse, format, isValid } from 'date-fns';
 // form
 import { useFormContext, Controller } from 'react-hook-form';
 // @mui
 import Stack from '@mui/material/Stack';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
+import { TimePicker } from '@mui/x-date-pickers/TimePicker';
 import { DateTimePicker } from '@mui/x-date-pickers/DateTimePicker';
 // utils
 import { setDataUtil } from '@/utils/formatTime';
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-export function RHFDatePicker({ name, label = '', small = false, required = false, dateTime = false, ...other }) {
+export function RHFDatePicker({
+  name,
+  label = '',
+  small = false,
+  required = false,
+  dateTime = false,
+  timePicker = false,
+  ...other
+}) {
   const { control } = useFormContext();
 
   return (
     <Controller
       name={name}
       control={control}
-      render={({ field, fieldState: { error } }) =>
-        dateTime ? (
-          <DateTimePicker
-            label={label}
-            value={field.value}
-            onChange={(newValue) => field.onChange(newValue)}
-            slotProps={{
-              textField: { error, helperText: error?.message, fullWidth: true, size: small ? 'small' : 'medium' },
-            }}
-            {...other}
-          />
-        ) : (
+      render={({ field, fieldState: { error } }) => {
+        const slotProps = {
+          textField: {
+            required,
+            error: !!error,
+            fullWidth: true,
+            helperText: error?.message,
+            size: small ? 'small' : 'medium',
+          },
+        };
+
+        if (timePicker) {
+          const parsed =
+            field.value && typeof field.value === 'string'
+              ? parse(field.value, 'HH:mm', new Date())
+              : field.value instanceof Date && isValid(field.value)
+                ? field.value
+                : null;
+
+          return (
+            <TimePicker
+              label={label}
+              value={parsed}
+              onChange={(newValue) => field.onChange(newValue && isValid(newValue) ? format(newValue, 'HH:mm') : null)}
+              slotProps={slotProps}
+              {...other}
+            />
+          );
+        }
+
+        if (dateTime) {
+          return (
+            <DateTimePicker
+              label={label}
+              value={field.value}
+              onChange={(newValue) => field.onChange(newValue)}
+              slotProps={slotProps}
+              {...other}
+            />
+          );
+        }
+
+        return (
           <DatePicker
             label={label}
             value={field.value}
             onChange={(newValue) => field.onChange(newValue)}
-            slotProps={{
-              textField: {
-                error,
-                required,
-                fullWidth: true,
-                helperText: error?.message,
-                size: small ? 'small' : 'medium',
-              },
-            }}
+            slotProps={slotProps}
             {...other}
           />
-        )
-      }
+        );
+      }}
     />
   );
 }

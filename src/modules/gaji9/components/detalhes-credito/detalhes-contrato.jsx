@@ -37,6 +37,8 @@ export function DetalhesContent({ dados = null }) {
         <TableBody>
           <TableRowItem title="Versão:" text={dados?.versao} />
           <TableRowItem title="Código:" text={dados?.codigo} />
+          <TableRowItem title="Minuta:" text={dados?.minuta} />
+          <TableRowItem title="Subtitulo:" text={dados?.subtitulo} />
           <TableRowItem title="Representante:" text={dados?.representante} />
           <TableRowItem title="Data entrega:" text={ptDateTime(dados?.data_entrega)} />
           <TableRowItem title="Data recebimento:" text={ptDateTime(dados?.data_recebido)} />

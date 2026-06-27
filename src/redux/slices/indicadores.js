@@ -1,9 +1,8 @@
 import axios from 'axios';
 import { createSlice } from '@reduxjs/toolkit';
 // utils
-import { API_FORMINGA_URL } from '../../utils/apisUrl';
-//
-import { getAccessToken } from './intranet';
+import { API_FORMINGA_URL } from '@/utils/apisUrl';
+import { getAccessToken } from '@/utils/getAccessToken';
 import { selectUtilizador, headerOptions, actionGet, hasError } from './sliceActions';
 
 // Estado inicial

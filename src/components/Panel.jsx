@@ -259,3 +259,17 @@ export function newLineText(text = '') {
   if (!text) return '';
   return text.split('\n').map((str, index) => <p key={index}>{str.trim() === '' ? '\u00A0' : str}</p>);
 }
+
+export function TextItem({ variant = 'body2', title = '', text = '', label = null }) {
+  return text || label ? (
+    <Typography variant={variant}>
+      {title && (
+        <Typography component="span" sx={{ color: 'text.secondary' }}>
+          {title}:{' '}
+        </Typography>
+      )}
+      {text}
+      {label}
+    </Typography>
+  ) : null;
+}

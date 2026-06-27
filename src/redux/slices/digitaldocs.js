@@ -1,12 +1,10 @@
 import axios from 'axios';
 import { createSlice } from '@reduxjs/toolkit';
 // utils
-import { API_FORMINGA_URL } from '../../utils/apisUrl';
-import { downloadDoc, canPreview } from '../../utils/formatFile';
-// hooks
-import { getComparator, applySort } from '../../hooks/useTable';
-//
-import { getAccessToken } from './intranet';
+import { API_FORMINGA_URL } from '@/utils/apisUrl';
+import { getAccessToken } from '@/utils/getAccessToken';
+import { getComparator, applySort } from '@/hooks/useTable';
+import { downloadDoc, canPreview } from '@/utils/formatFile';
 import { selectUtilizador, headerOptions, actionGet, doneSucess, hasError } from './sliceActions';
 
 // ---------------------------------------------------------------------------------------------------------------------

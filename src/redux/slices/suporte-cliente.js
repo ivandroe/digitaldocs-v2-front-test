@@ -1,9 +1,6 @@
 import axios from 'axios';
 import { createSlice } from '@reduxjs/toolkit';
 // utils
-import { queryString } from '@/utils/formatText';
-import { API_SUPORTE_CLIENTE_URL } from '@/utils/apisUrl';
-//
 import {
   hasError,
   actionGet,
@@ -13,7 +10,9 @@ import {
   actionDelete,
   headerOptions,
 } from './sliceActions';
-import { getAccessToken } from './intranet';
+import { queryString } from '@/utils/formatText';
+import { getAccessToken } from '@/utils/getAccessToken';
+import { API_SUPORTE_CLIENTE_URL } from '@/utils/apisUrl';
 
 // ---------------------------------------------------------------------------------------------------------------------
 
@@ -37,6 +36,8 @@ const initialState = {
   slas: [],
   slasUo: [],
   prompts: [],
+  horario: [],
+  excecoes: [],
   assuntos: [],
   respostas: [],
   conteudos: [],
@@ -108,12 +109,14 @@ export function getInSuporte(item, params) {
         (item === 'departamentos' && `/api/v1/departments/all`) ||
         (item === 'categorias' && `/api/v1/faq-categories/all`) ||
         (item === 'prompts' && `/api/v1/mail-scan-presets/all`) ||
+        (item === 'horario' && `/api/v1/availability/schedule`) ||
         (item === 'conteudos' && `/api/v1/page-information/all`) ||
         (item === 'ticket' && `/api/v1/tickets/get/${params?.id}`) ||
         (item === 'respostas' && `/api/v1/standardized-response/all`) ||
         (item === 'presets' && `/api/v1/mail-scan-presets/${params?.id}`) ||
         (item === 'utilizador' && `/api/v1/users/employee/${params?.id}`) ||
         (item === 'prompt' && `/api/v1/mail-scan-presets/generate-prompt`) ||
+        (item === 'excecoes' && `/api/v1/availability/exception/upcoming`) ||
         //
         (item === 'tickets' && `/api/v1/tickets/all${queryString(params)}`) ||
         (item === 'pesquisa' && `/api/v1/tickets/search${queryString(params)}`) ||
@@ -126,7 +129,7 @@ export function getInSuporte(item, params) {
         const headers = headerOptions({ accessToken, mail: '', cc: true, ct: false, mfd: false });
         const response = await axios.get(`${API_SUPORTE_CLIENTE_URL}${apiUrl}`, headers);
 
-        const dados = response.data?.payload;
+        const dados = response.data?.payload || response.data;
         dispatch(slice.actions.getSuccess({ item: params?.item || item, dados }));
         if (params?.msg) doneSucess(params, dispatch, slice.actions.getSuccess);
       }
@@ -156,18 +159,23 @@ export function createInSuporte(item, body, params) {
         (item === 'utilizadores' && `/api/v1/users/register`) ||
         (item === 'slasUo' && `/api/v1/department-sla/create`) ||
         (item === 'departamentos' && `/api/v1/departments/new`) ||
+        (item === 'horario' && `/api/v1/availability/schedule`) ||
+        (item === 'excecoes' && `/api/v1/availability/exception`) ||
         (item === 'categorias' && `/api/v1/faq-categories/create`) ||
         (item === 'prompts' && `/api/v1/mail-scan-presets/create`) ||
         (item === 'conteudos' && `/api/v1/page-information/create`) ||
         (item === 'respostas' && `/api/v1/standardized-response/create`) ||
         (item === 'add-message' && `/api/v1/ticket-messages/create/${params?.id}`) ||
         (item === 'lembrete' && `/api/v1/tickets/send-draft-reminder/${params?.id}`) ||
+        (item === 'departamento-ut' && `/api/v1/users/${params?.userId}/department/${params?.id}`) ||
         '';
 
       if (apiUrl) {
         const response = await axios.post(`${API_SUPORTE_CLIENTE_URL}${apiUrl}`, body, options);
-        const dados = response.data?.payload;
-        if (item !== 'lembrete')
+        const dados = response.data?.payload || response.data;
+        if (params?.getItem) dispatch(slice.actions.getSuccess({ item: params?.getItem, dados }));
+        if (item === 'departamento-ut') dispatch(slice.actions.updateSuccess({ item: 'utilizadores', dados }));
+        else if (item !== 'lembrete')
           dispatch(slice.actions.createSuccess({ item: params?.item || item, item1: params?.item1 || '', dados }));
       }
 
@@ -207,6 +215,8 @@ export function updateInSuporte(item, body, params) {
         (item === 'assuntos' && `/api/subjects/update/${params?.id}`) ||
         (item === 'utilizadores' && `/api/v1/users/update/${params?.id}`) ||
         (item === 'slasUo' && `/api/v1/department-sla/update/${params?.id}`) ||
+        (item === 'horario' && `/api/v1/availability/schedule/${params?.id}`) ||
+        (item === 'excecoes' && `/api/v1/availability/exception/${params?.id}`) ||
         (item === 'departamentos' && `/api/v1/departments/update/${params?.id}`) ||
         (item === 'prompts' && `/api/v1/mail-scan-presets/update/${params?.id}`) ||
         (item === 'categorias' && `/api/v1/faq-categories/update/${params?.id}`) ||
@@ -230,7 +240,7 @@ export function updateInSuporte(item, body, params) {
         const method = params?.patch ? 'patch' : 'put';
         const response = await axios[method](`${API_SUPORTE_CLIENTE_URL}${apiUrl}`, body, options);
 
-        const dados = response.data?.payload;
+        const dados = response.data?.payload || response.data;
         if (item?.includes('toggle-')) dispatch(slice.actions.toogleItem(params));
         if (item === 'core-validation') dispatch(slice.actions.changeCustomer(dados));
         else if (params?.getItem) dispatch(slice.actions.getSuccess({ item: params?.getItem, dados }));
@@ -263,17 +273,23 @@ export function deleteInSuporte(item, params) {
         (item === 'assuntos' && `/api/v1/subjects/delete/${params?.id}`) ||
         (item === 'utilizadores' && `/api/v1/users/delete/${params?.id}`) ||
         (item === 'slasUo' && `/api/v1/department-sla/delete/${params?.id}`) ||
+        (item === 'horario' && `/api/v1/availability/schedule/${params?.id}`) ||
+        (item === 'excecoes' && `/api/v1/availability/exception/${params?.id}`) ||
         (item === 'departamentos' && `/api/v1/departments/delete/${params?.id}`) ||
         (item === 'categorias' && `/api/v1/faq-categories/delete/${params?.id}`) ||
         (item === 'prompts' && `/api/v1/mail-scan-presets/delete/${params?.id}`) ||
         (item === 'conteudos' && `/api/v1/page-information/delete/${params?.id}`) ||
         (item === 'respostas' && `/api/v1/standardized-response/delete/${params?.id}`) ||
+        (item === 'departamento-ut' && `/api/v1/users/${params?.userId}/department/${params?.id}`) ||
         '';
 
       if (apiUrl) {
         const options = headerOptions({ accessToken, mail: '', cc: true, ct: false, mfd: false });
-        await axios.delete(`${API_SUPORTE_CLIENTE_URL}${apiUrl}`, options);
-        dispatch(slice.actions.deleteSuccess({ item, item1: params?.item1 || '', id: params?.id }));
+        const response = await axios.delete(`${API_SUPORTE_CLIENTE_URL}${apiUrl}`, options);
+        const dados = response.data?.payload || response.data;
+        if (params?.getItem) dispatch(slice.actions.getSuccess({ item: params.getItem, dados }));
+        if (item === 'departamento-ut') dispatch(slice.actions.updateSuccess({ item: 'utilizadores', dados }));
+        else dispatch(slice.actions.deleteSuccess({ item, item1: params.item1 ?? '', id: params?.id }));
       }
       doneSucess(params, dispatch, slice.actions.getSuccess);
     } catch (error) {

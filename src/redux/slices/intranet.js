@@ -1,12 +1,11 @@
 import axios from 'axios';
 import { format } from 'date-fns';
 import { createSlice } from '@reduxjs/toolkit';
-import { InteractionRequiredAuthError } from '@azure/msal-browser';
 //
 import { callMsGraph } from '@/graph';
+import { getAccessToken } from '@/utils/getAccessToken';
 import { addRole, getFromParametrizacao } from './parametrizacao';
 import { API_INTRANET_URL, API_SLIM_URL, API_CORENET_URL } from '@/utils/apisUrl';
-import { loginRequest, msalInstance, redirectUri, msalReadyPromise } from '@/auth-config';
 import { hasError, actionGet, doneSucess, headerOptions, selectUtilizador } from './sliceActions';
 
 // ---------------------------------------------------------------------------------------------------------------------
@@ -86,37 +85,6 @@ export function authenticateColaborador() {
       hasError(error, dispatch, slice.actions.getSuccess);
     }
   };
-}
-
-export async function getAccessToken() {
-  await msalReadyPromise;
-
-  const activeAccount = msalInstance.getActiveAccount() ?? msalInstance.getAllAccounts()[0] ?? null;
-
-  if (!activeAccount) {
-    await msalInstance.loginRedirect({ ...loginRequest, redirectUri });
-    return null;
-  }
-
-  const tokenRequest = { ...loginRequest, account: activeAccount, redirectUri, forceRefresh: false };
-
-  try {
-    const response = await msalInstance.acquireTokenSilent(tokenRequest);
-    return response.accessToken;
-  } catch (error) {
-    const deveRedirecionar =
-      error instanceof InteractionRequiredAuthError ||
-      error?.errorCode === 'timed_out' ||
-      error?.errorCode === 'monitor_window_timeout' ||
-      error?.errorCode === 'no_token_request_cache_error';
-
-    if (deveRedirecionar) {
-      await msalInstance.acquireTokenRedirect({ ...tokenRequest, redirectUri });
-      return null;
-    }
-
-    throw error;
-  }
 }
 
 // ---------------------------------------------------------------------------------------------------------------------

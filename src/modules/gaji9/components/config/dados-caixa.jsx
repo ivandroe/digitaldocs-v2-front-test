@@ -10,7 +10,7 @@ import Dialog from '@mui/material/Dialog';
 import DialogContent from '@mui/material/DialogContent';
 // utils
 import useToggle from '@/hooks/useToggle';
-import { usePermissao } from '@/hooks/useAcesso';
+import { usePermissao } from '../../utils/useAcesso';
 import { useSelector, useDispatch } from '@/redux/store';
 import { createItem, updateItem } from '@/redux/slices/gaji9';
 // components

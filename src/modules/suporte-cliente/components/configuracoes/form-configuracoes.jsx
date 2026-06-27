@@ -1,7 +1,7 @@
 import * as Yup from 'yup';
 import { useEffect, useMemo } from 'react';
 // form
-import { useForm } from 'react-hook-form';
+import { useForm, useWatch } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 // @mui
 import Stack from '@mui/material/Stack';
@@ -9,10 +9,10 @@ import Dialog from '@mui/material/Dialog';
 import DialogTitle from '@mui/material/DialogTitle';
 import DialogContent from '@mui/material/DialogContent';
 // utils
-import { mapConcelhoToBackend } from './utils';
 import { useSelector, useDispatch } from '@/redux/store';
 import { applyList, rolesList, phasesList } from '../../utils';
 import { createInSuporte, updateInSuporte } from '@/redux/slices/suporte-cliente';
+import { mapConcelhoToBackend, mapTipoUoToBackend, mapIlhaToBackend } from './utils';
 // components
 import {
   RHFSwitch,
@@ -359,14 +359,22 @@ export function DepartamentoForm({ onClose }) {
   const { uos } = useSelector((state) => state.intranet);
   const { isEdit, isSaving, selectedItem } = useSelector((state) => state.suporte);
 
-  const formSchema = Yup.object().shape({ uo: Yup.mixed().required().label('Unidade orgânica') });
+  const formSchema = Yup.object().shape({
+    uo: Yup.mixed().required().label('Unidade orgânica'),
+    code: Yup.mixed().when('uo', {
+      is: (val) => val?.tipo === 'Agências',
+      then: () => Yup.string().required().label('Código fila de espera'),
+      otherwise: () => Yup.mixed().notRequired(),
+    }),
+  });
   const defaultValues = useMemo(
-    () => ({ uo: uos?.find(({ balcao }) => balcao === selectedItem?.counter) ?? null }),
+    () => ({ uo: uos?.find(({ balcao }) => balcao === selectedItem?.counter) ?? null, code: selectedItem?.code ?? '' }),
     [selectedItem, uos]
   );
 
   const methods = useForm({ resolver: yupResolver(formSchema), defaultValues });
-  const { reset, handleSubmit } = methods;
+  const { reset, control, handleSubmit } = methods;
+  const uoSel = useWatch({ control, name: 'uo' });
 
   useEffect(() => {
     reset(defaultValues);
@@ -374,24 +382,19 @@ export function DepartamentoForm({ onClose }) {
   }, [selectedItem]);
 
   const onSubmit = async (values) => {
-    const { uo } = values;
+    const { uo, code } = values;
     const formData = {
+      code,
       active: true,
       name: uo?.nome ?? '',
       counter: uo?.balcao ?? null,
       abreviation: uo?.label ?? '',
       latitude: uo?.latitude ?? null,
       longitude: uo?.longitude ?? null,
-      island:
-        uo?.ilha
-          .toUpperCase()
-          .normalize('NFD')
-          .replace(/[\u0300-\u036f]/g, '')
-          .replace(/\s+/g, '_') ?? '',
+      island: mapIlhaToBackend(uo?.ilha),
+      type: mapTipoUoToBackend(uo?.tipo),
       council: mapConcelhoToBackend(uo?.concelho),
       region: uo?.regiao === 'Sul' ? 'SOUTH' : 'NORTH',
-      type:
-        (uo?.tipo === 'Agências' && 'AGENCY') || (uo?.tipo === 'Serviços Centrais' && 'CENTRAL_SERVICES') || 'OTHER',
     };
     const params = { id: selectedItem?.id, msg: `Departamento ${isEdit ? 'atualizado' : 'adicionado'}`, onClose };
     dispatch((isEdit ? updateInSuporte : createInSuporte)('departamentos', JSON.stringify(formData), params));
@@ -405,9 +408,44 @@ export function DepartamentoForm({ onClose }) {
           <ItemComponent item={selectedItem} rows={1}>
             <Stack spacing={3} sx={{ pt: 3 }}>
               <RHFAutocompleteObj name="uo" label="Unidade orgânica" options={uos} />
+              {uoSel?.tipo === 'Agências' && <RHFTextField name="code" label="Código fila de espera" />}
             </Stack>
             <DialogButons edit={isEdit} isSaving={isSaving} onClose={onClose} />
           </ItemComponent>
+        </FormProvider>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+// ---------------------------------------------------------------------------------------------------------------------
+
+export function UserDepartamentForm({ onClose, dados }) {
+  const dispatch = useDispatch();
+  const { isEdit, isSaving, departamentos } = useSelector((state) => state.suporte);
+  const departsList = useMemo(() => {
+    const idsAssociados = new Set([dados?.department_id, ...(dados?.departments?.map((d) => d.id) ?? [])]);
+    return departamentos?.filter(({ id }) => !idsAssociados.has(id))?.map(({ id, name }) => ({ id, label: name }));
+  }, [dados?.department_id, dados?.departments, departamentos]);
+
+  const formSchema = Yup.object().shape({ departamento: Yup.mixed().required().label('Departamento') });
+  const methods = useForm({ resolver: yupResolver(formSchema), defaultValues: { departamento: null } });
+  const { handleSubmit } = methods;
+
+  const onSubmit = async (values) => {
+    const params = { userId: dados?.id, id: values?.departamento?.id, getItem: 'selectedItem' };
+    dispatch(createInSuporte('departamento-ut', null, { ...params, msg: 'Departamento adicionado', onClose }));
+  };
+
+  return (
+    <Dialog open onClose={onClose} fullWidth maxWidth="xs">
+      <DialogTitle>Adicionar departamneto</DialogTitle>
+      <DialogContent>
+        <FormProvider methods={methods} onSubmit={handleSubmit(onSubmit)}>
+          <Stack spacing={3} sx={{ pt: 3 }}>
+            <RHFAutocompleteObj name="departamento" label="Departamento" options={departsList} />
+          </Stack>
+          <DialogButons edit={isEdit} isSaving={isSaving} onClose={onClose} />
         </FormProvider>
       </DialogContent>
     </Dialog>

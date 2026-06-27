@@ -11,6 +11,7 @@ import Typography from '@mui/material/Typography';
 import TableContainer from '@mui/material/TableContainer';
 import FormControlLabel from '@mui/material/FormControlLabel';
 // utils
+import { headerTable } from './utils';
 import { normalizeText } from '@/utils/formatText';
 import useTable, { getComparator, applySort } from '@/hooks/useTable';
 // redux
@@ -35,7 +36,7 @@ import {
   DepartamentoForm,
 } from './form-configuracoes';
 import Categorias from './categorias';
-import DetalhesPrompt from './detalhes';
+import DetalhesConfig from './detalhes';
 import FormPrompt, { Eliminar } from './form-prompt';
 import { getDepartTypeLabel, LabelApply, LabelPhase, LabelRole } from '../../utils';
 
@@ -91,7 +92,11 @@ export default function TableConfiguracoes({ item }) {
       (item === 'conteudos' && conteudos) ||
       (item === 'departamentos' && departamentos) ||
       (item === 'utilizadores' &&
-        utilizadores?.map((row) => ({ ...colaboradores?.find(({ id }) => id === row?.employee_id), ...row }))) ||
+        utilizadores?.map((row) => ({
+          ...colaboradores?.find(({ id }) => id === row?.employee_id),
+          department_name: row?.departmentName,
+          ...row,
+        }))) ||
       [],
   });
   const isNotFound = !dataFiltered.length;
@@ -158,10 +163,11 @@ export default function TableConfiguracoes({ item }) {
 
                       {/* DEPARTAMENTOS */}
                       {item === 'departamentos' && (
-                        <TableCell>{row?.abreviation || noDados('(Não definido)')}</TableCell>
-                      )}
-                      {item === 'departamentos' && (
-                        <TableCell align="center">{getDepartTypeLabel(row?.type)}</TableCell>
+                        <>
+                          <TableCell>{row?.abreviation || noDados('(Não definido)')}</TableCell>
+                          <TableCell align="center">{row?.code || noDados('(Não definido)')}</TableCell>
+                          <TableCell align="center">{getDepartTypeLabel(row?.type)}</TableCell>
+                        </>
                       )}
 
                       {/* SLA */}
@@ -184,7 +190,7 @@ export default function TableConfiguracoes({ item }) {
 
                       {item === 'faq' && <CellChecked check={row?.highlighted} />}
 
-                      {(item === 'prompts' || item === 'utilizadores' || item === 'respostas' || item === 'faq') && (
+                      {(item === 'prompts' || item === 'respostas' || item === 'utilizadores') && (
                         <TableCell align="center">
                           <FormControlLabel
                             label={row?.active ? 'Ativo' : 'Inativo'}
@@ -199,7 +205,10 @@ export default function TableConfiguracoes({ item }) {
                           {((item === 'prompts' && !row?.active) || item === 'conteudos') && (
                             <DefaultAction small label="ELIMINAR" onClick={() => viewItem('eliminar', row)} />
                           )}
-                          {((item === 'prompts' && row?.active) || item === 'respostas' || item === 'faq') && (
+                          {(item === 'faq' ||
+                            item === 'respostas' ||
+                            item === 'utilizadores' ||
+                            (item === 'prompts' && row?.active)) && (
                             <DefaultAction small label="DETALHES" onClick={() => viewItem('detalhes', row)} />
                           )}
                         </Stack>
@@ -231,7 +240,7 @@ export default function TableConfiguracoes({ item }) {
 
       {modalSuporte === 'categories' && <Categorias onClose={onClose} />}
       {modalSuporte === 'eliminar' && <Eliminar onClose={onClose} item={item} />}
-      {modalSuporte === 'detalhes' && <DetalhesPrompt onClose={onClose} item={item} editarItem={viewItem} />}
+      {modalSuporte === 'detalhes' && <DetalhesConfig onClose={onClose} item={item} editarItem={viewItem} />}
       {(modalSuporte === 'add' || modalSuporte === 'update') && (
         <>
           {item === 'faq' && <FaqForm onClose={onClose} />}
@@ -271,59 +280,4 @@ export function applySortFilter({ dados, filter, comparator }) {
   }
 
   return dados?.map((row) => ({ ...row, active: row?.active || row?.enabled }));
-}
-
-// ---------------------------------------------------------------------------------------------------------------------
-
-function headerTable(item) {
-  return [
-    ...((item === 'assuntos' && [
-      { id: 'name', label: 'Assunto' },
-      { id: 'department_name', label: 'Departamento' },
-      { id: 'sla_name', label: 'SLA' },
-      { id: 'applicability', label: 'Aplicabilidade', align: 'center' },
-    ]) ||
-      (item === 'utilizadores' && [
-        { id: 'nome', label: 'Colaborador' },
-        { id: 'department', label: 'Departamento' },
-        { id: 'role', label: 'Função', align: 'center' },
-      ]) ||
-      (item === 'departamentos' && [
-        { id: 'name', label: 'Nome' },
-        { id: 'abreviation', label: 'Abreviação' },
-        { id: 'type', label: 'Tipo', align: 'center' },
-      ]) ||
-      (item === 'slas' && [
-        { id: 'nome', label: 'Nome' },
-        { id: 'descricao', label: 'Descrição' },
-        { id: 'tempo_resposta', label: 'Resposta' },
-        { id: 'tempo_resolucao', label: 'Resolução' },
-      ]) ||
-      (item === 'slasUo' && [
-        { id: 'nome', label: 'Nome' },
-        { id: 'department_name', label: 'Departamento' },
-        { id: 'subject_name', label: 'Assunto' },
-        { id: 'tempo_resolucao', label: 'Resolução' },
-      ]) ||
-      (item === 'respostas' && [
-        { id: 'subject', label: 'Assunto' },
-        { id: 'phase', label: 'Fase', align: 'center' },
-      ]) ||
-      (item === 'faq' && [
-        { id: 'sequence', label: 'Ordem', align: 'center', width: 10 },
-        { id: 'category', label: 'Categoria' },
-        { id: 'question', label: 'Questão' },
-        { id: 'highlighted', label: 'Destaque', align: 'center' },
-      ]) ||
-      (item === 'conteudos' && [
-        { id: 'reference', label: 'Referência' },
-        { id: 'content', label: 'Conteúdo' },
-      ]) ||
-      (item === 'prompts' && [{ id: 'preset_name', label: 'Nome' }]) ||
-      []),
-    ...(item === 'prompts' || item === 'utilizadores' || item === 'respostas' || item === 'faq'
-      ? [{ id: 'active', label: 'Estado', align: 'center' }]
-      : []),
-    { id: '', width: 10 },
-  ];
 }

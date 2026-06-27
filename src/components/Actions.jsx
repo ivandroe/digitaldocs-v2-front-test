@@ -100,7 +100,11 @@ export function DefaultAction({
       label === 'Gerar contrato') &&
       'inherit') ||
     (label === 'ATRIBUIR' && 'info') ||
-    ((label === 'ELIMINAR' || label === 'Eliminar' || label === 'ARQUIVAR' || label === 'DESARQUIVAR') && 'error') ||
+    ((label === 'ANULAR' ||
+      label === 'ARQUIVAR' ||
+      label === 'DESARQUIVAR' ||
+      label?.toLocaleLowerCase() === 'eliminar') &&
+      'error') ||
     color;
 
   const iconAlt =
@@ -108,6 +112,7 @@ export function DefaultAction({
     (label === 'ANULAR CONFIRMAÇÂO' && <ClearIcon />) ||
     (label === 'DESARQUIVAR' && <UnarchiveOutlinedIcon />) ||
     (label === 'DOMICILIAR' && <AddHomeWorkOutlinedIcon />) ||
+    (label === 'ANULAR' && <ClearIcon sx={{ width: 22, height: 22 }} />) ||
     (label === 'ARQUIVAR' && <Arquivo sx={{ width: 22, height: 22 }} />) ||
     (label === 'LIBERTAR' && <Libertar sx={{ width: 24, height: 24 }} />) ||
     (label === 'FINALIZAR' && <SvgIconStyle src="/assets/icons/stop.svg" />) ||

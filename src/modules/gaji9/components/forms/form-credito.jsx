@@ -14,7 +14,7 @@ import DialogContent from '@mui/material/DialogContent';
 import { useSelector, useDispatch } from '@/redux/store';
 import { formatDate, fillData } from '@/utils/formatTime';
 import { listaTitrulares } from '../../utils/applySortFilter';
-import { getFromGaji9, getDocumentoGaji9, createItem, updateItem } from '@/redux/slices/gaji9';
+import { getFromGaji9, getDocumentoGaji9, createItem, updateItem, deleteItem } from '@/redux/slices/gaji9';
 // components
 import {
   RHFSwitch,
@@ -288,6 +288,37 @@ export function DataContratoForm({ creditoId, onClose }) {
               minDateTime={values?.data_entrega}
               label="Data de receção do cliente"
             />
+          </Stack>
+          <DialogButons edit isSaving={isSaving} onClose={onClose} />
+        </FormProvider>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+// ---------------------------------------------------------------------------------------------------------------------
+
+export function AnularContratoForm({ creditoId, onClose }) {
+  const dispatch = useDispatch();
+  const { selectedItem, isSaving } = useSelector((state) => state.gaji9);
+
+  const formSchema = Yup.object().shape({ motivo: Yup.string().required().label('Motivo') });
+  const methods = useForm({ resolver: yupResolver(formSchema), defaultValues: { motivo: '' } });
+  const { control, handleSubmit } = methods;
+  const values = useWatch({ control });
+
+  const onSubmit = async () => {
+    const params = { msg: 'Contrato anulado', onClose };
+    dispatch(deleteItem('contratos', { creditoId, id: selectedItem?.id, ...params }, values));
+  };
+
+  return (
+    <Dialog open onClose={onClose} fullWidth maxWidth="xs">
+      <DialogTitleAlt sx={{ mb: 2 }} title="Anular contrato" />
+      <DialogContent>
+        <FormProvider methods={methods} onSubmit={handleSubmit(onSubmit)}>
+          <Stack spacing={3} sx={{ pt: 1 }}>
+            <RHFTextField label="Motivo" name="motivo" multiline minRows={2} />
           </Stack>
           <DialogButons edit isSaving={isSaving} onClose={onClose} />
         </FormProvider>

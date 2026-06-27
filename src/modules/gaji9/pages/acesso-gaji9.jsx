@@ -2,7 +2,7 @@ import { useEffect, useMemo } from 'react';
 // @mui
 import Card from '@mui/material/Card';
 // utils
-import { usePermissao } from '@/hooks/useAcesso';
+import { usePermissao } from '../utils/useAcesso';
 import { useDispatch, useSelector } from '@/redux/store';
 import { getFromGaji9, getInfoGaji } from '@/redux/slices/gaji9';
 // guards
