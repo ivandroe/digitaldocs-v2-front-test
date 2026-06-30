@@ -28,13 +28,21 @@ import { FormLoading } from '@/components/skeleton';
 import { SearchNotFoundSmall } from '@/components/table/SearchNotFound';
 
 const DEFAULT_CONTEUDOS = [
-  'Confirmação de email',
-  'Descrição do módulo de suporte',
-  'Cabeçalho Portal',
-  'Cabeçalho Suporte',
+  'Homepage / Título hero',
+  'Homepage / Subtítulo hero',
+  'Homepage / Serviço Suporte',
+  'Homepage / Serviço EMI',
+  'Homepage / Serviço Investidor',
+  'Homepage / Serviço Extrato',
+  'Homepage / Como funciona - título',
+  'Homepage / Como funciona - intro',
+  'Homepage / Como funciona - passos',
   'Cabeçalho EMI',
   'Cabeçalho FAQ',
+  'Cabeçalho Suporte',
+  'Descrição do módulo de suporte',
   'Informação de cartão',
+  'Confirmação de email',
 ];
 
 // ---------------------------------------------------------------------------------------------------------------------
@@ -213,12 +221,7 @@ export function ConteudoForm({ onClose }) {
         <FormProvider methods={methods} onSubmit={handleSubmit(onSubmit)}>
           <ItemComponent item={selectedItem} rows={1}>
             <Stack spacing={3} sx={{ pt: 3 }}>
-              <RHFAutocompleteSmp
-                name="reference"
-                disabled={isEdit}
-                label="Referência"
-                options={conteudosList?.sort()}
-              />
+              <RHFAutocompleteSmp name="reference" disabled={isEdit} label="Referência" options={conteudosList} />
               <RHFTextField name="content" label="Conteúdo" multiline minRows={8} />
             </Stack>
             <DialogButons edit={isEdit} isSaving={isSaving} onClose={onClose} />

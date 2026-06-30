@@ -81,8 +81,9 @@ export function EstadoForm({ onClose }) {
 
   const onSubmit = async () => {
     try {
+      const data = { ...values, balcao: values?.uo_id?.balcao, uo_id: values?.uo_id?.id };
+      const formData = JSON.stringify({ ...data, nivel_decisao: values?.is_decisao ? values?.nivel_decisao : '' });
       const params = { getItem: isEdit ? '' : 'selectedItem', msg: `Estado ${isEdit ? 'atualizado' : 'adicionado'}` };
-      const formData = JSON.stringify({ ...values, balcao: values?.uo_id?.balcao, uo_id: values?.uo_id?.id });
       dispatch((isEdit ? updateItem : createItem)('estado', formData, { id: selectedItem?.id, ...params, onClose }));
     } catch {
       enqueueSnackbar('Erro ao submeter os dados', { variant: 'error' });

@@ -111,12 +111,12 @@ export function getInSuporte(item, params) {
         (item === 'prompts' && `/api/v1/mail-scan-presets/all`) ||
         (item === 'horario' && `/api/v1/availability/schedule`) ||
         (item === 'conteudos' && `/api/v1/page-information/all`) ||
+        (item === 'excecoes' && `/api/v1/availability/exception`) ||
         (item === 'ticket' && `/api/v1/tickets/get/${params?.id}`) ||
         (item === 'respostas' && `/api/v1/standardized-response/all`) ||
         (item === 'presets' && `/api/v1/mail-scan-presets/${params?.id}`) ||
         (item === 'utilizador' && `/api/v1/users/employee/${params?.id}`) ||
         (item === 'prompt' && `/api/v1/mail-scan-presets/generate-prompt`) ||
-        (item === 'excecoes' && `/api/v1/availability/exception/upcoming`) ||
         //
         (item === 'tickets' && `/api/v1/tickets/all${queryString(params)}`) ||
         (item === 'pesquisa' && `/api/v1/tickets/search${queryString(params)}`) ||

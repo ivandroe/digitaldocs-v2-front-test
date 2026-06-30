@@ -266,13 +266,14 @@ export function applySortFilter({ dados, filter, comparator }) {
   if (filter) {
     const normalizedFilter = normalizeText(filter);
     dados = dados.filter(
-      ({ name, nome, subject, subject_name, department_name, uo_label, question, response, description }) =>
+      ({ name, nome, subject, reference, subject_name, department_name, uo_label, question, response, description }) =>
         (name && normalizeText(name).indexOf(normalizedFilter) !== -1) ||
         (nome && normalizeText(nome).indexOf(normalizedFilter) !== -1) ||
         (subject && normalizeText(subject).indexOf(normalizedFilter) !== -1) ||
         (question && normalizeText(question).indexOf(normalizedFilter) !== -1) ||
         (response && normalizeText(response).indexOf(normalizedFilter) !== -1) ||
         (uo_label && normalizeText(uo_label).indexOf(normalizedFilter) !== -1) ||
+        (reference && normalizeText(reference).indexOf(normalizedFilter) !== -1) ||
         (description && normalizeText(description).indexOf(normalizedFilter) !== -1) ||
         (subject_name && normalizeText(subject_name).indexOf(normalizedFilter) !== -1) ||
         (department_name && normalizeText(department_name).indexOf(normalizedFilter) !== -1)
