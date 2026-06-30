@@ -54,7 +54,7 @@ export default function FormInfoInterno({ dados }) {
       fluxo?.assunto !== 'Abertura de Conta' &&
       Yup.number().positive().integer().required().label('Nº de conta'),
     // agendamento
-    diadomes: shapeNumber('Dia do mês', true, '', 'agendado'),
+    diadomes: shapeNumber('Dia do mês', [true], 'agendado'),
     data_inicio: shapeDate('agendado', [true], 'Data de início'),
     periodicidade: shapeMixed('agendado', [true], 'Periodicidade'),
     data_arquivamento: shapeDate('agendado', [true], 'Data de término'),

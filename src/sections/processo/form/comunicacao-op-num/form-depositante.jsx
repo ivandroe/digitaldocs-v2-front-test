@@ -37,7 +37,7 @@ export default function FormDepositante({ dados }) {
   const { isSaving } = useSelector((state) => state.digitaldocs);
 
   const formSchema = Yup.object().shape({
-    nif: shapeNumber('NIF', false, '', 'is_cliente'),
+    nif: shapeNumber('NIF', [false], 'is_cliente'),
     morada: shapeText('is_cliente', [false], 'Morada'),
     mae: shapeText('is_cliente', [false], 'Nome da Mãe'),
     pai: shapeText('is_cliente', [false], 'Nome do Pai'),
@@ -47,7 +47,7 @@ export default function FormDepositante({ dados }) {
     docid: shapeText('is_cliente', [false], 'Doc. de identificação'),
     nacionalidade: shapeText('is_cliente', [false], 'Nacionalidade'),
     ordenador: shapeText('is_cliente', [false], 'Nome do ordenador'),
-    entidade_con: shapeNumber('Nº da entidade', true, '', 'is_cliente'),
+    entidade_con: shapeNumber('Nº da entidade', [true], 'is_cliente'),
     data_nascimento: shapeDate('is_cliente', [false], 'Data de nascimento'),
     tipo_docid: shapeMixed('is_cliente', [false], 'Tipo doc. identificação'),
     local_pais_nascimento: shapeText('is_cliente', [false], 'Local/País de nascimento'),

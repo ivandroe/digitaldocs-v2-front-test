@@ -50,7 +50,7 @@ export function EstadoForm({ onClose }) {
   const formSchema = Yup.object().shape({
     nome: Yup.string().required().label('Nome'),
     uo_id: Yup.mixed().required().label('Unidade orgânica'),
-    nivel_decisao: shapeNumber('Escalão de decisão', true, '', 'is_decisao'),
+    nivel_decisao: shapeNumber('Escalão de decisão', [true], 'is_decisao'),
   });
 
   const defaultValues = useMemo(

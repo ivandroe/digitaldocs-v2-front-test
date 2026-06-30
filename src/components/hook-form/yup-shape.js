@@ -19,9 +19,9 @@ export const shapePercentagem = (label) =>
     .required()
     .label(label);
 
-export const shapeNumber = (label, sit1, sit2, item) =>
+export const shapeNumber = (label, opcoes, item) =>
   Yup.mixed().when(item, {
-    is: (val) => val === sit1 || (sit2 && val === sit2),
+    is: (val) => opcoes?.includes(val),
     then: () => Yup.number().positive().required().label(label),
     otherwise: () => Yup.mixed().notRequired(),
   });

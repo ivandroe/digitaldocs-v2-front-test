@@ -39,9 +39,9 @@ export function FormSituacao({ dados, onClose, setOpen }) {
     garantia: shapeText('situacao', ['Aprovado'], 'Garantias'),
     escalao_decisao: shapeMixed('situacao', ['Aprovado'], 'Decisor'),
     data_referencia: Yup.date().typeError().required().label('Data'),
-    taxa_juro: shapeNumber('Taxa de juros', 'Aprovado', '', 'situacao'),
-    prazo_amortizacao: shapeNumber('Prazo', 'Aprovado', '', 'situacao'),
-    montante: shapeNumber('Montante', 'Aprovado', 'Contratado', 'situacao'),
+    taxa_juro: shapeNumber('Taxa de juros', ['Aprovado'], 'situacao'),
+    prazo_amortizacao: shapeNumber('Prazo', ['Aprovado'], 'situacao'),
+    montante: shapeNumber('Montante', ['Aprovado', 'Contratado'], 'situacao'),
   });
 
   const defaultValues = useMemo(

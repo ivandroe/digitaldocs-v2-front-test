@@ -32,9 +32,19 @@ import GridItem from '@/components/GridItem';
 import { SemDados } from '@/components/Panel';
 import { DialogTitleAlt } from '@/components/CustomDialog';
 import { AddItem, DefaultAction, ButtonsStepper, DialogButons } from '@/components/Actions';
-import { shapeText, shapeNumber, shapeDate, shapeMixed } from '@/components/hook-form/yup-shape';
+import { shapeText, shapeNumberZero, shapeDate, shapeMixed } from '@/components/hook-form/yup-shape';
 
 const divida = { valor: '', valor_prestacao: '', saldo_divida: '' };
+const situacoesLaboral = [
+  'Quadro efetivo',
+  'Contratado',
+  'Trabalhador por conta própria',
+  'Reformado/Aposentado',
+  'Desempregado',
+  'Estagiário',
+  'Prorrogado',
+  'Suspenso',
+];
 
 // ---------------------------------------------------------------------------------------------------------------------
 
@@ -89,8 +99,8 @@ function Rendimento({ dados, onClose }) {
     local_trabalho_conjuge: shapeText('conjuge', [true], 'Local de trabalho'),
     renda_liquido_mensal: Yup.number().positive().label('Rendimento liquido'),
     data_nascimento_conjuge: shapeDate('conjuge', [true], 'Data de nascimento'),
-    renda_bruto_mensal_conjuge: shapeNumber('Rendimento bruto', true, '', 'conjuge'),
-    renda_liquido_mensal_conjuge: shapeNumber('Rendimento liquido', true, '', 'conjuge'),
+    renda_bruto_mensal_conjuge: shapeNumberZero('Rendimento bruto', [true], 'conjuge'),
+    renda_liquido_mensal_conjuge: shapeNumberZero('Rendimento liquido', [true], 'conjuge'),
   });
 
   const defaultValues = useMemo(
@@ -127,7 +137,7 @@ function Rendimento({ dados, onClose }) {
     <FormProvider methods={methods} onSubmit={handleSubmit(onSubmit)}>
       <Grid container spacing={3} justifyContent="center" sx={{ pt: 3 }}>
         <GridItem sm={6} md={3}>
-          <RHFAutocompleteSmp name="tipo_contrato" label="Situação laboral" options={['Quadro', 'Contratado']} />
+          <RHFAutocompleteSmp name="tipo_contrato" label="Situação laboral" options={situacoesLaboral} />
         </GridItem>
         <GridItem sm={6} md={3} children={<RHFTextField name="local_trabalho" label="Local de trabalho" />} />
         <GridItem sm={6} md={3}>
@@ -144,11 +154,7 @@ function Rendimento({ dados, onClose }) {
               <RHFDatePicker name="data_nascimento_conjuge" label="Data de nascimento" disableFuture />
             </GridItem>
             <GridItem sm={6} md={3}>
-              <RHFAutocompleteSmp
-                label="Situação laboral"
-                name="tipo_contrato_conjuge"
-                options={['Quadro', 'Contratado']}
-              />
+              <RHFAutocompleteSmp label="Situação laboral" name="tipo_contrato_conjuge" options={situacoesLaboral} />
             </GridItem>
             <GridItem sm={6} md={3}>
               <RHFTextField name="local_trabalho_conjuge" label="Local de trabalho" />

@@ -12,6 +12,8 @@ Font.register({
   ],
 });
 
+const BRAND = '#5aaa28';
+
 const styles = StyleSheet.create({
   page: {
     padding: '0',
@@ -25,18 +27,18 @@ const styles = StyleSheet.create({
 
   /// HEADER
   noheader: { height: '55mm' },
-  headerAlt: { color: '#5aaa28' },
+  headerAlt: { color: BRAND },
   headerTitle: { fontSize: 15, paddingTop: '12mm' },
   headerCaption: { fontSize: 8, paddingTop: '-2mm' },
   bodyHeader: { fontSize: 7, paddingTop: '10mm', paddingLeft: '30mm' },
   headerFicha: { fontSize: 7, padding: '2mm', paddingBottom: '0px', textAlign: 'center' },
-  headerLogo: { width: '51mm', height: '45mm', paddingTop: '30mm', backgroundColor: '#5aaa28' },
+  headerLogo: { width: '51mm', height: '45mm', paddingTop: '30mm', backgroundColor: BRAND },
   bodyHeaderInfo: { flexDirection: 'row', justifyContent: 'space-between', fontSize: 9, paddingTop: '3mm' },
-  header: { color: '#fff', height: '40mm', marginBottom: '10px', padding: '0 12mm 0 24mm', backgroundColor: '#5aaa28' },
+  header: { color: '#fff', height: '40mm', marginBottom: '10px', padding: '0 12mm 0 24mm', backgroundColor: BRAND },
 
   /// BODY
   bodyFicha: { flex: 1, paddingBottom: '5mm' },
-  body: { padding: '3mm 12mm 3mm 24mm', color: '#5aaa28', fontSize: 8 },
+  body: { padding: '3mm 12mm 3mm 24mm', color: BRAND, fontSize: 8 },
   bodyAlt: { padding: '0mm 24mm 0mm 30mm', textAlign: 'justify', color: '#333' },
   subFicha: { padding: 4, fontSize: 9, paddingTop: 6, lineHeight: 1.2, paddingBottom: 1 },
   viewSubFicha: { height: '100%', textAlign: 'right', display: 'flex', justifyContent: 'center' },
@@ -89,10 +91,10 @@ const styles = StyleSheet.create({
 
   /// COLORS
   textError: { color: '#FF4842' },
-  textSuccess: { color: '#5aaa28' },
+  textSuccess: { color: BRAND },
   bgCinza: { backgroundColor: '#808080' },
   borderCinza: { border: '1px solid #ddd' },
-  bgSuccess: { backgroundColor: '#5aaa28' },
+  bgSuccess: { backgroundColor: BRAND },
 
   /// ALIGN
   alignLeft: { textAlign: 'left' },

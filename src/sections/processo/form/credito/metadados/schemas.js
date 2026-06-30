@@ -32,12 +32,12 @@ export const getSchemaCondicoes = (dadosStepper) =>
   });
 
 export const schemaComissoes = Yup.object().shape({
-  comissao_avaliacao_prazo: shapeNumber('Prazo', true, '', 'comissao_avaliacao'),
-  comissao_avaliacao_valor: shapeNumber('Valor', true, '', 'comissao_avaliacao'),
+  comissao_avaliacao_prazo: shapeNumber('Prazo', [true], 'comissao_avaliacao'),
+  comissao_avaliacao_valor: shapeNumber('Valor', [true], 'comissao_avaliacao'),
   comissao_avaliacao_periodicidade: shapeMixed('comissao_avaliacao', [true], 'Periodicidade'),
   //
-  comissao_vistoria_prazo: shapeNumber('Prazo', true, '', 'comissao_vistoria'),
-  comissao_vistoria_valor: shapeNumber('Valor', true, '', 'comissao_vistoria'),
+  comissao_vistoria_prazo: shapeNumber('Prazo', [true], 'comissao_vistoria'),
+  comissao_vistoria_valor: shapeNumber('Valor', [true], 'comissao_vistoria'),
   comissao_vistoria_periodicidade: shapeMixed('comissao_vistoria', [true], 'Periodicidade'),
 });
 
