@@ -41,6 +41,8 @@ export default function FichaAnalise() {
     [credito?.garantias, fichaInformativa?.fiadores]
   );
 
+  // credito?.garantias?.flatMap((g) => g.metadados?.garantidores || [])
+
   useEffect(() => {
     dispatch(updateFicha({ fiadores }));
   }, [dispatch, fiadores]);
@@ -52,10 +54,10 @@ export default function FichaAnalise() {
       <Stack
         useFlexGap
         spacing={1}
-        sx={{ mb: 3 }}
         direction="row"
         flexWrap="wrap"
         alignItems="center"
+        sx={{ mb: 2, p: 1 }}
         justifyContent="space-between"
       >
         <Typography variant="subtitle1" sx={{ color: 'text.secondary' }}>

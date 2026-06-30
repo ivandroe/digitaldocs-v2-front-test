@@ -58,5 +58,7 @@ function mapObrigacoes(modelo) {
 
 export function extrairFiadores(garantias) {
   if (!garantias) return [];
-  return garantias.flatMap((g) => g.metadados?.fiadores || []).map((f) => ({ ...f, nome: f?.nome_entidade || '---' }));
+  return garantias
+    ?.flatMap((g) => g.metadados?.garantidores || [])
+    .map((f) => ({ ...f, nome: f?.nome_entidade || '---' }));
 }

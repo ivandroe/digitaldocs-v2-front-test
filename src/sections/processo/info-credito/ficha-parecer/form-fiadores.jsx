@@ -25,9 +25,8 @@ export default function FormFiadores({ onClose, dados, fiadores }) {
 
   useEffect(() => {
     const entidade = dados.numero_entidade;
-    if (!fichaFiador || fichaFiador?.entidade !== entidade)
-      dispatch(getFromIntranet('fichaFiador', { entidade, noLoading: true, reset: { dados: null } }));
-  }, [dispatch, fichaFiador, dados?.numero_entidade]);
+    if (entidade) dispatch(getFromIntranet('fichaFiador', { entidade, noLoading: true }));
+  }, [dispatch, dados?.numero_entidade]);
 
   const formSchema = Yup.object().shape({
     renda_bruto_mensal: Yup.number().positive().label('Rendimento bruto'),

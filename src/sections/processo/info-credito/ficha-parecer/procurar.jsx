@@ -48,7 +48,7 @@ export function SearchEntidade({ entidades, actionModal, credito }) {
 
 export function SearchFicha({ entidades = [], loading, onClose }) {
   const dispatch = useDispatch();
-  const [entidade, setEntidade] = useState(null);
+  const [entidade, setEntidade] = useState(entidades?.length === 1 ? entidades[0] : null);
 
   const onSearch = () => dispatch(getFromIntranet('fichaInformativa', { entidade, onClose }));
 

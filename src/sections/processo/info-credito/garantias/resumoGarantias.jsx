@@ -69,7 +69,7 @@ export function GarantiasResumo({ dados, parecer = false }) {
 
   return (
     <Box>
-      <Stack direction="row" justifyContent="space-between" sx={{ pb: 1 }}>
+      <Stack direction="row" justifyContent="space-between" sx={{ pt: 0.5, pb: 1.5 }}>
         <Typography variant="h6" sx={{ color: `${coberturaColor}.main`, lineHeight: 1 }}>
           {fPercent(coberturaRatio)}
         </Typography>

@@ -32,11 +32,10 @@ import { shapeMixed } from '@/components/hook-form/yup-shape';
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-export default function CreditoForm({ onClose }) {
+export default function CreditoForm({ onClose, versao }) {
   const dispatch = useDispatch();
   const { credito, tiposTitulares, isSaving } = useSelector((state) => state.gaji9);
   const titularesList = useMemo(() => listaTitrulares(tiposTitulares), [tiposTitulares]);
-  const { versao_schema: versao } = credito || {};
 
   const formSchema =
     versao === 2
@@ -106,8 +105,8 @@ export default function CreditoForm({ onClose }) {
       <DialogContent>
         <FormProvider methods={methods} onSubmit={handleSubmit(onSubmit)}>
           {versao === 2 ? (
-            <Stack spacing={3} sx={{ pt: 1 }}>
-              <RHFDatePicker name="data_vencimento_prestacao1" label="Vencimento 1ª prestação" />
+            <Stack direction="row" spacing={3} justifyContent="center" sx={{ pt: 1 }}>
+              <RHFDatePicker name="data_vencimento_prestacao1" label="Vencimento 1ª prestação" sx={{ maxWidth: 250 }} />
             </Stack>
           ) : (
             <Grid container spacing={3} sx={{ pt: 1 }}>
@@ -139,20 +138,20 @@ export default function CreditoForm({ onClose }) {
                 <RHFNumberField label="Meses de vencimento" name="meses_vencimento" tipo="meses" />
               </GridItem>
               <GridItem xs={6} md={4} children={<RHFNumberField label="TAEG" name="taxa_taeg" tipo="%" />} />
-              <GridItem xs={6} md={4} children={<RHFSwitch name="isento_comissao" label="Isento de comissão" mt />} />
-              <GridItem xs={6} md={3}>
+              <GridItem xs={6} md={4}>
                 <RHFNumberField label="Taxa de juros preçário" name="taxa_juro_precario" tipo="%" />
               </GridItem>
-              <GridItem xs={6} md={3}>
+              <GridItem xs={6} md={4} children={<RHFSwitch name="isento_comissao" label="Isento de comissão" mt />} />
+              <GridItem xs={6} md={4}>
                 <RHFNumberField label="Spread" name="taxa_juro_desconto" tipo="%" />
               </GridItem>
-              <GridItem xs={6} md={3}>
+              <GridItem xs={6} md={4}>
                 <RHFNumberField label="Taxa comissão de abertura" name="taxa_comissao_abertura" tipo="%" />
               </GridItem>
-              <GridItem xs={6} md={3}>
+              <GridItem xs={6} md={4}>
                 <RHFNumberField label="Taxa imposto de selo" name="taxa_imposto_selo" tipo="%" />
               </GridItem>
-              <GridItem children={<RHFTextField label="Finalidade" name="finalidade" multiline rows={3} />} />
+              <GridItem children={<RHFTextField label="Finalidade" name="finalidade" multiline rows={2} />} />
             </Grid>
           )}
           <DialogButons edit isSaving={isSaving} onClose={onClose} />

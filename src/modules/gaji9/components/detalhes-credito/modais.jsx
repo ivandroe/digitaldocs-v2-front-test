@@ -35,7 +35,7 @@ export default function ModaisCredito({ id, versao, dispatch, onClose }) {
         />
       )}
 
-      {modalGaji9 === 'form-credito' && <CreditoForm onClose={onClose} />}
+      {modalGaji9 === 'form-credito' && <CreditoForm onClose={onClose} versao={versao} />}
       {modalGaji9 === 'form-interveniente' && <IntervenienteForm id={id} onClose={onClose} versao={versao} />}
 
       {(modalGaji9 === 'preview-contrato' || modalGaji9 === 'gerar-contrato') && (

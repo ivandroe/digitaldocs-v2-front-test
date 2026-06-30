@@ -33,8 +33,8 @@ export default function AnaliseFiadoresPdf({ fiadores, financiamento, rendimento
             <View>
               <RowFicha title="Rendimento bruto" value={fCurrency(bruto)} options={{ ficha: true }} />
               <RowFicha
-                value={fCurrency(bruto)}
                 options={{ ficha: true }}
+                value={fCurrency(liquido)}
                 title="Rendimento líquido"
                 valueAlt={alertaRendimento ? alerta(true) : null}
               />
